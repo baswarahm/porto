@@ -68,21 +68,22 @@
   .gal-item img { width: 100%; display: block; object-fit: cover; }
 
   /* ══════════════════════════════════════
-     FIX FINAL BASWARA — INLINE STYLE WINS
-     Hapus semua overflow:hidden dari hero & name.
-     Gunakan font-size berbasis container width.
+     FIX FINAL BASWARA — RESPONSIVE FIX
+     overflow:hidden di hero mencegah horizontal scroll.
+     Teks nama pakai white-space:normal di mobile agar wrap, tidak overflow.
   ══════════════════════════════════════ */
   body  { overflow-x: hidden; }
-  #hero { overflow: visible; }   /* TIDAK hidden — itu yang memotong */
+  #hero { overflow: hidden; }   /* WAJIB hidden — mencegah orb bikin horizontal scroll */
 
-  .hero-body { max-width: min(960px, 90vw); }
+  .hero-body { max-width: min(960px, 92vw); }
 
-  .hero-name          { overflow: visible; width: 100%; }
-  .hero-name .l2      { overflow: visible; display: block; width: 100%; }
+  .hero-name          { width: 100%; }
+  .hero-name .l2      { display: block; width: 100%; }
 
   .name-fade {
     display: block;
-    white-space: nowrap;
+    white-space: normal;          /* wrap di HP, tidak overflow ke kanan */
+    word-break: break-word;
     font-size: clamp(1.5rem, 10.5vw, 8.5rem);
     line-height: 0.95;
     background: linear-gradient(120deg, var(--accent) 0%, var(--purple) 50%, var(--pink) 100%);
@@ -96,7 +97,6 @@
   }
 
   @media (max-width: 960px) {
-    /* padding hero turun ke 1.8rem, bisa pakai font lebih besar relatif */
     .name-fade { font-size: clamp(1.5rem, 10.5vw, 6rem); }
   }
   @media (max-width: 480px) {
@@ -452,14 +452,17 @@
         <span>Discord</span>
       </a>
     </div>
-    <a href="mailto:baswarahafizh@gmail.com" class="email-link">baswarahafizh@gmail.com</a>
+    <a href="mailto:baswarahafizh@email.com" class="email-link"><span class="__cf_email__" data-cfemail="9cfefdefebfdeefdf4fdfaf5e6f4dcfbf1fdf5f0b2fff3f1">baswarahafizh@gmail.com</span></a>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
   <div class="footer-copy">© 2026 <b>BASWARA HAFIZH MUTTAQIN</b></div>
-  <div class="footer-status"><div class="blink-dot"></div>Open for opportunities</div>
+  <div class="footer-status">
+    <div class="blink-dot"></div>
+    Open for opportunities
+  </div>
 </footer>
 
 <script src="script.js"></script>
