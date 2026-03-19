@@ -13,9 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   window.addEventListener('scroll', updateProgress, { passive: true });
 
-  /* ══ CUSTOM CURSOR ══
-     Uses event delegation on document so it works on ALL elements
-     including dynamically created particles ══ */
+  /* ══ CUSTOM CURSOR ══ */
   var dot  = document.getElementById('cur-dot');
   var ring = document.getElementById('cur-ring');
 
@@ -28,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function () {
       dot.style.top  = my + 'px';
     });
 
-    /* smooth ring follow */
     (function animRing() {
       rx += (mx - rx) * 0.13;
       ry += (my - ry) * 0.13;
@@ -37,17 +34,12 @@ document.addEventListener('DOMContentLoaded', function () {
       requestAnimationFrame(animRing);
     })();
 
-    /* use event delegation — covers every element, even future ones */
     var HOV_SELECTOR = 'a,button,.gal-item,.skill-card,.tag,.social-btn,.gal-btn,.btn,.nav-logo,.email-link';
     document.addEventListener('mouseover', function (e) {
-      if (e.target.closest(HOV_SELECTOR)) {
-        document.body.classList.add('hov');
-      }
+      if (e.target.closest(HOV_SELECTOR)) document.body.classList.add('hov');
     });
     document.addEventListener('mouseout', function (e) {
-      if (e.target.closest(HOV_SELECTOR)) {
-        document.body.classList.remove('hov');
-      }
+      if (e.target.closest(HOV_SELECTOR)) document.body.classList.remove('hov');
     });
   }
 
@@ -106,17 +98,16 @@ document.addEventListener('DOMContentLoaded', function () {
       entries.forEach(function (e) {
         if (e.isIntersecting) {
           e.target.classList.add('in');
-          obs.unobserve(e.target); /* stop watching once visible */
+          obs.unobserve(e.target);
         }
       });
     }, { threshold: 0.07 });
     revEls.forEach(function (el) { obs.observe(el); });
   } else {
-    /* fallback for old browsers */
     revEls.forEach(function (el) { el.classList.add('in'); });
   }
 
-  /* ══ GALLERY FILTER ══ */
+  /* ══ GALLERY FILTER (legacy, untuk .gal-btn jika masih dipakai) ══ */
   var galBtns  = document.querySelectorAll('.gal-btn');
   var galItems = document.querySelectorAll('.gal-item');
 
@@ -207,17 +198,141 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  /* ══ ACTIVE NAV ON SCROLL ══ */
+  /* ══ ACTIVE NAV ON SCROLL — FIX: Contact tidak aktif saat di Gallery ══
+     
+     Pendekatan baru: gunakan getBoundingClientRect() real-time agar lebih akurat
+     dibanding offsetTop yang bisa berubah karena layout dinamis.
+     
+     Logika: section dianggap "aktif" jika bagian atasnya sudah melewati 40%
+     tinggi viewport dari atas. Section paling bawah yang memenuhi syarat = aktif.
+     
+     Ini mencegah #contact aktif terlalu awal saat user masih di #gallery.
+  ══ */
   var sections = document.querySelectorAll('section[id]');
   var navLinks = document.querySelectorAll('.nav-links a');
-  window.addEventListener('scroll', function () {
-    var cur = '';
-    sections.forEach(function (s) {
-      if (window.scrollY >= s.offsetTop - 220) cur = s.id;
+
+  function updateActiveNav() {
+    /* Threshold: 40% dari tinggi viewport */
+    var threshold = window.innerHeight * 0.40;
+    var currentId = '';
+
+    sections.forEach(function (section) {
+      var rect = section.getBoundingClientRect();
+      /* Section ini aktif jika top-nya sudah di atas threshold */
+      if (rect.top <= threshold) {
+        currentId = section.id;
+      }
     });
+
     navLinks.forEach(function (a) {
-      a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+      a.classList.toggle('active', a.getAttribute('href') === '#' + currentId);
     });
-  }, { passive: true });
+  }
+
+  window.addEventListener('scroll', updateActiveNav, { passive: true });
+  /* Jalankan sekali saat load untuk state awal */
+  updateActiveNav();
+
+  /* ══ GALLERY TAB SWITCHER ══ */
+  var tabs   = document.querySelectorAll('.gal-tab');
+  var panels = document.querySelectorAll('.gal-panel');
+
+  function switchTab(tabEl) {
+    var target = tabEl.dataset.tab;
+
+    tabs.forEach(function (t) { t.classList.remove('active'); });
+    tabEl.classList.add('active');
+
+    panels.forEach(function (p) {
+      p.classList.remove('visible');
+      if (!p.classList.contains('active')) return;
+      setTimeout(function () {
+        p.classList.remove('active');
+        var next = document.querySelector('.gal-panel[data-panel="' + target + '"]');
+        if (next) {
+          next.classList.add('active');
+          buildLbList(next);
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              next.classList.add('visible');
+            });
+          });
+        }
+      }, 200);
+    });
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () { switchTab(tab); });
+  });
+
+  /* Fade in panel pertama saat load */
+  var firstPanel = document.querySelector('.gal-panel.active');
+  if (firstPanel) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        firstPanel.classList.add('visible');
+      });
+    });
+  }
+
+  /* ══ LIGHTBOX untuk Tab Gallery ══ */
+  var lbTab     = document.getElementById('lb');
+  var lbImgTab  = document.getElementById('lb-img');
+  var lbTitTab  = document.getElementById('lb-tit');
+  var lbMetaTab = document.getElementById('lb-meta');
+  var lbXTab    = document.getElementById('lb-x');
+  var lbPrevTab = document.getElementById('lb-prev');
+  var lbNextTab = document.getElementById('lb-next');
+
+  if (!lbTab || !lbImgTab) return;
+
+  var activeItems = [], lbTabIdx = 0;
+
+  function buildLbList(panel) {
+    activeItems = Array.from((panel || document.querySelector('.gal-panel.active') || document).querySelectorAll('.gal-item'));
+    activeItems.forEach(function (item, idx) {
+      item.onclick = function () { openLbTab(idx); };
+    });
+  }
+
+  function openLbTab(idx) {
+    lbTabIdx = idx;
+    showLbTab();
+    lbTab.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLbTab() {
+    lbTab.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function showLbTab() {
+    var item = activeItems[lbTabIdx]; if (!item) return;
+    var img = item.querySelector('img');
+    if (img) { lbImgTab.src = img.src; lbImgTab.style.display = 'block'; }
+    if (lbTitTab)  lbTitTab.textContent  = item.dataset.title || '';
+    if (lbMetaTab) lbMetaTab.textContent = item.dataset.meta  || '';
+  }
+
+  buildLbList(firstPanel);
+
+  if (lbXTab) lbXTab.addEventListener('click', closeLbTab);
+  lbTab.addEventListener('click', function (e) { if (e.target === lbTab) closeLbTab(); });
+  if (lbPrevTab) lbPrevTab.addEventListener('click', function (e) {
+    e.stopPropagation();
+    lbTabIdx = (lbTabIdx - 1 + activeItems.length) % activeItems.length;
+    showLbTab();
+  });
+  if (lbNextTab) lbNextTab.addEventListener('click', function (e) {
+    e.stopPropagation();
+    lbTabIdx = (lbTabIdx + 1) % activeItems.length;
+    showLbTab();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!lbTab.classList.contains('open')) return;
+    if (e.key === 'Escape')     closeLbTab();
+    if (e.key === 'ArrowLeft')  { lbTabIdx = (lbTabIdx - 1 + activeItems.length) % activeItems.length; showLbTab(); }
+    if (e.key === 'ArrowRight') { lbTabIdx = (lbTabIdx + 1) % activeItems.length; showLbTab(); }
+  });
 
 });
