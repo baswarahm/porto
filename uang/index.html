@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uang Ibaz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ══════════════ MAIN APP ══════════════ -->
+<div id="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+        <span class="brand-name-sm">Uang Ibaz</span>
+      </div>
+      <div class="sidebar-user" id="sidebar-user">Halo!</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group">
+        <span class="nav-group-label">Utama</span>
+        <a class="nav-link active" data-page="dashboard">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </span>
+          Dashboard
+        </a>
+        <a class="nav-link" data-page="transactions">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/></svg>
+          </span>
+          Transaksi
+        </a>
+        <a class="nav-link" data-page="add">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+          </span>
+          Catat Baru
+        </a>
+      </div>
+      <div class="nav-group">
+        <span class="nav-group-label">Kelola</span>
+        <a class="nav-link" data-page="budget">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          </span>
+          Anggaran
+        </a>
+        <a class="nav-link" data-page="goals">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </span>
+          Target Nabung
+        </a>
+        <a class="nav-link" data-page="report">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </span>
+          Laporan
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a class="nav-link" data-page="categories">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8m-8 6h16"/></svg>
+        </span>
+        Kategori
+      </a>
+    </div>
+  </aside>
+
+  <!-- Mobile header -->
+  <header class="mobile-header">
+    <button class="burger" id="burger" onclick="UI.toggleSidebar()">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="mobile-brand">💛 Dompetku</div>
+  </header>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="UI.closeSidebar()"></div>
+
+  <!-- Main content -->
+  <main class="main" id="main-content">
+    <!-- pages injected here by JS -->
+  </main>
+
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="js/db.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/pages/dashboard.js"></script>
+<script src="js/pages/transactions.js"></script>
+<script src="js/pages/add.js"></script>
+<script src="js/pages/budget.js"></script>
+<script src="js/pages/goals.js"></script>
+<script src="js/pages/report.js"></script>
+<script src="js/pages/categories.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
