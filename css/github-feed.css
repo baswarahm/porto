@@ -1,0 +1,45 @@
+/* ==========================================================================
+   GITHUB-FEED.CSS — Live GitHub Activity widget in the Building section.
+   Logic in js/github.js. Reuses the .panel/.bracket-frame language already
+   used by build-card and terminal-shell, so it reads as part of the same
+   HUD system rather than a bolted-on box.
+   ========================================================================== */
+
+.github-feed{
+  margin-top:var(--sp-m); padding:18px 20px;
+  display:flex; flex-direction:column; gap:12px;
+}
+.github-feed[hidden]{ display:none; }
+
+.github-feed-head{ display:flex; align-items:center; gap:10px; }
+.github-feed-dot{
+  width:7px; height:7px; border-radius:50%; background:var(--emerald);
+  box-shadow:0 0 8px rgba(var(--emerald-rgb),.85);
+  animation:blip 2.4s ease-in-out infinite;
+}
+.github-feed-title{
+  font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; color:var(--text-mute);
+  margin:0; flex:1;
+}
+.github-feed-link{
+  font-size:.72rem; color:var(--text-mute); text-decoration:none; transition:color .2s ease;
+}
+.github-feed-link:hover{ color:var(--accent); }
+
+.github-feed-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px; }
+.github-feed-item{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:6px;
+  font-size:.84rem; color:var(--text-dim);
+}
+.github-feed-item.is-loading{ color:var(--text-mute); font-family:var(--font-mono); font-size:.78rem; }
+.github-feed-verb{ color:var(--text-dim); }
+.github-feed-repo{
+  color:var(--accent); text-decoration:none; font-weight:600;
+  transition:color .4s ease;
+}
+.github-feed-repo:hover{ text-decoration:underline; }
+.github-feed-time{ margin-left:auto; font-size:.68rem; color:var(--text-mute); }
+
+@media (prefers-reduced-motion: reduce){
+  .github-feed-dot{ animation:none; }
+}

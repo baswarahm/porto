@@ -1,0 +1,73 @@
+/* ==========================================================================
+   ANIMATION.CSS — keyframes only. No selectors that apply them live here;
+   components opt in via `animation: <name> ...` in style.css so a single
+   keyframe can be reused across hero, badges, and skill bars alike.
+   ========================================================================== */
+
+@keyframes ring-spin{ to{ transform:rotate(360deg); } }
+
+@keyframes blip{ 0%,100%{ opacity:1; } 50%{ opacity:.25; } }
+
+@keyframes caret-blink{ 50%{ opacity:0; } }
+
+@keyframes xp-shine{
+  0%{ transform:translateX(-40px); }
+  100%{ transform:translateX(340px); }
+}
+
+
+@keyframes aurora-drift{
+  0%{ background-position:0% 0%, 0% 0%, 0% 0%; }
+  100%{ background-position:6% 4%, -4% 6%, 3% -3%; }
+}
+
+/* blur-reveal — used for the split-text hero headline in Step 2 */
+@keyframes blur-reveal{
+  from{ opacity:0; filter:blur(10px); transform:translateY(14px); }
+  to{ opacity:1; filter:blur(0); transform:translateY(0); }
+}
+
+/* clip reveal — used for section titles */
+@keyframes clip-reveal{
+  from{ clip-path:inset(0 100% 0 0); }
+  to{ clip-path:inset(0 0 0 0); }
+}
+
+/* soft float — ambient badge/particle drift */
+@keyframes float-y{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-8px); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .bg-aurora, .bg-grid, .bg-scanlines, .orb{ animation:none !important; }
+}
+
+/* grid-pan — slow diagonal drift for the HUD grid background */
+@keyframes grid-pan{
+  from{ background-position:0 0, 0 0; }
+  to{ background-position:56px 56px, 56px 56px; }
+}
+
+/* orb-drift-* — large soft blobs wandering behind content, each on its
+   own path/duration so they never look synchronized */
+@keyframes orb-drift-a{
+  0%,100%{ transform:translate(0,0) scale(1); }
+  33%{ transform:translate(4vw,-3vh) scale(1.08); }
+  66%{ transform:translate(-3vw,4vh) scale(.95); }
+}
+@keyframes orb-drift-b{
+  0%,100%{ transform:translate(0,0) scale(1); }
+  40%{ transform:translate(-5vw,3vh) scale(1.05); }
+  75%{ transform:translate(3vw,-4vh) scale(.92); }
+}
+@keyframes orb-drift-c{
+  0%,100%{ transform:translate(0,0) scale(1); }
+  50%{ transform:translate(3vw,5vh) scale(1.1); }
+}
+
+/* scan-move — faint scanline sweep for the CRT/HUD texture */
+@keyframes scan-move{
+  from{ background-position:0 0; }
+  to{ background-position:0 120px; }
+}

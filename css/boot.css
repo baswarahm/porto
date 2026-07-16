@@ -1,0 +1,127 @@
+/* ==========================================================================
+   BOOT.CSS — Launch Sequence
+   Logic lives in js/boot.js. This file is pure presentation for the four
+   phases (INITIALIZING / loading lines / WELCOME / reveal) plus the short
+   sub-second "Welcome Back" variant for returning visitors.
+   ========================================================================== */
+
+.boot-overlay{
+  position:fixed; inset:0; z-index:var(--z-boot);
+  background:#000;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden; cursor:pointer;
+}
+.boot-overlay[hidden]{ display:none; }
+
+.boot-overlay.is-leaving{
+  opacity:0; filter:blur(6px);
+  transition:opacity .7s var(--ease), filter .7s var(--ease);
+  pointer-events:none;
+}
+
+.boot-phase{
+  position:absolute; inset:0;
+  display:none; align-items:center; justify-content:center; flex-direction:column;
+  opacity:0; transition:opacity .4s ease;
+}
+.boot-phase.is-active{ display:flex; opacity:1; }
+
+/* ---- phase 1 : INITIALIZING ------------------------------------------- */
+.boot-init{
+  font-family:var(--font-mono); font-size:clamp(.9rem,2.2vw,1.15rem);
+  letter-spacing:.3em; color:var(--text-dim); text-transform:uppercase;
+}
+.boot-cursor{
+  display:inline-block; margin-left:6px; color:var(--accent);
+  animation:caret-blink 1s step-end infinite;
+}
+
+/* ---- phase 2 : loading lines -------------------------------------------- */
+.boot-loglines{
+  list-style:none; margin:0; padding:0;
+  display:flex; flex-direction:column; gap:11px;
+}
+.boot-loglines li{
+  font-family:var(--font-mono); font-size:clamp(.72rem,1.6vw,.86rem);
+  letter-spacing:.1em; text-transform:uppercase; color:var(--text-mute);
+  display:flex; align-items:center; gap:10px;
+  opacity:0; transform:translateY(6px);
+  transition:opacity .4s var(--ease), transform .4s var(--ease), color .4s ease;
+}
+.boot-loglines li::before{
+  content:''; width:6px; height:6px; border-radius:50%; flex-shrink:0;
+  background:var(--accent); box-shadow:0 0 8px rgba(var(--accent-rgb),.85);
+}
+.boot-loglines li.is-shown{ opacity:1; transform:translateY(0); color:var(--text-dim); }
+
+/* ---- phase 3 : WELCOME ------------------------------------------------- */
+.boot-glow{
+  position:absolute; width:60vmax; height:60vmax; border-radius:50%;
+  background:radial-gradient(circle, rgba(var(--accent-rgb),.35), transparent 65%);
+  opacity:0; transform:scale(.7); filter:blur(10px);
+  transition:opacity 1s ease, transform 1s ease, filter 1s ease;
+}
+.boot-phase-3.is-active .boot-glow{ opacity:1; transform:scale(1); }
+html[data-weather^="rain"] .boot-glow,
+html[data-weather^="thunder"] .boot-glow{ filter:blur(16px) saturate(.85); }
+html[data-weather^="snow"] .boot-glow{ filter:blur(10px) brightness(1.12); }
+html[data-weather="clear"] .boot-glow{ filter:blur(8px) brightness(1.15); }
+
+.boot-particles{ position:absolute; inset:0; }
+
+.boot-welcome{
+  position:relative; text-align:center;
+  font-family:var(--font-display); font-weight:700;
+  font-size:clamp(1.7rem,6vw,3.6rem); letter-spacing:.05em; text-transform:uppercase;
+  color:var(--text); text-shadow:0 0 34px rgba(var(--accent-rgb),.6);
+  opacity:0; transform:scale(.92);
+  transition:opacity .7s var(--ease-spring), transform .7s var(--ease-spring);
+}
+.boot-phase-3.is-active .boot-welcome{ opacity:1; transform:scale(1); }
+
+.boot-skip{
+  position:absolute; bottom:26px; left:50%; transform:translateX(-50%);
+  background:none; border:none; color:var(--text-mute);
+  font-family:var(--font-mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase;
+  opacity:.45; transition:opacity .3s ease; pointer-events:none;
+}
+.boot-overlay:hover .boot-skip{ opacity:.9; }
+
+/* ---- underlying page: blur+scale reveal (zero layout shift — transform
+   / filter only) ----------------------------------------------------------- */
+html.boot-preblur body > *:not(#bootSequence){
+  filter:blur(30px) scale(1.06); opacity:.6;
+}
+html.boot-revealing body > *:not(#bootSequence){
+  filter:blur(0) scale(1); opacity:1;
+  transition:filter .7s var(--ease), transform .7s var(--ease), opacity .7s var(--ease);
+}
+
+/* ---- Welcome Back short sequence (returning visitors, <1s) ------------- */
+.boot-overlay.mode-welcome-back{
+  background:rgba(5,7,11,.7);
+  backdrop-filter:blur(18px) saturate(150%);
+  -webkit-backdrop-filter:blur(18px) saturate(150%);
+  transition:opacity .3s ease;
+}
+.boot-welcome-back-text{
+  font-family:var(--font-display); font-weight:700;
+  font-size:clamp(1.3rem,5vw,2.1rem); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text); text-shadow:0 0 26px rgba(var(--accent-rgb),.65);
+  opacity:0; transform:translateY(10px) scale(.96);
+  transition:opacity .3s var(--ease-spring), transform .3s var(--ease-spring);
+}
+.boot-overlay.mode-welcome-back.is-shown .boot-welcome-back-text{
+  opacity:1; transform:translateY(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .boot-overlay,.boot-phase,.boot-loglines li,.boot-glow,.boot-welcome,.boot-welcome-back-text{
+    transition-duration:.001ms !important;
+  }
+  html.boot-preblur body > *:not(#bootSequence){ filter:none; opacity:1; }
+}
+
+@media (max-width:560px){
+  .boot-loglines{ padding-inline:32px; }
+}

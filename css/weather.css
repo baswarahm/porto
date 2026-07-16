@@ -1,0 +1,89 @@
+/* ==========================================================================
+   WEATHER.CSS — Living Weather Reactive Background.
+   Logic in js/weather.js writes a data-weather attribute on <html>
+   (clear / clear-night / cloudy(-night) / rain(-night) / thunder(-night) /
+   snow(-night) / fog(-night) / cyber-fallback). Everything here crossfades
+   on that attribute — never an instant switch.
+   ========================================================================== */
+
+.bg-weather{ transition:background 2.5s ease, opacity 2.5s ease; opacity:.95; }
+
+#weatherFx{ position:absolute; inset:0; overflow:hidden; }
+.wfx{ position:absolute; inset:0; opacity:0; transition:opacity 1.8s ease; pointer-events:none; }
+
+/* ---- CLEAR --------------------------------------------------------------- */
+html[data-weather="clear"] .bg-weather{
+  background:
+    radial-gradient(60% 45% at 50% -8%, rgba(255,214,140,.18), transparent 70%),
+    var(--void);
+}
+html[data-weather="clear-night"] .bg-weather{
+  background:
+    radial-gradient(50% 40% at 50% 0%, rgba(120,140,255,.12), transparent 70%),
+    var(--void);
+}
+
+/* ---- CLOUDY --------------------------------------------------------------- */
+html[data-weather^="cloudy"] .bg-weather{
+  background: radial-gradient(70% 50% at 50% 0%, rgba(180,190,210,.09), transparent 70%), var(--void);
+}
+
+/* ---- RAIN ------------------------------------------------------------------ */
+html[data-weather^="rain"] .bg-weather{
+  background: radial-gradient(70% 60% at 50% 0%, rgba(60,90,140,.17), transparent 70%), var(--void);
+}
+html[data-weather^="rain"] .wfx-rain,
+html[data-weather^="thunder"] .wfx-rain{ opacity:.5; }
+.wfx-rain span{
+  position:absolute; top:-10%; width:1px; height:60px;
+  background:linear-gradient(rgba(180,210,255,0), rgba(180,210,255,.55));
+  animation:rain-fall linear infinite;
+}
+@keyframes rain-fall{ from{ transform:translateY(-10vh); } to{ transform:translateY(110vh); } }
+
+/* ---- THUNDERSTORM ----------------------------------------------------------- */
+html[data-weather^="thunder"] .bg-weather{
+  background: radial-gradient(70% 60% at 50% 0%, rgba(40,50,80,.24), transparent 70%), var(--void);
+}
+.wfx-lightning{ background:#fff; opacity:0; }
+.wfx-lightning.flash{ opacity:.16; transition:opacity 70ms ease; }
+
+/* ---- SNOW -------------------------------------------------------------------- */
+html[data-weather^="snow"] .bg-weather{
+  background: radial-gradient(70% 60% at 50% 0%, rgba(150,190,230,.15), transparent 70%), var(--void);
+}
+html[data-weather^="snow"] .wfx-snow{ opacity:.7; }
+.wfx-snow span{
+  position:absolute; top:-5%; border-radius:50%; background:rgba(255,255,255,.85);
+  animation:snow-fall linear infinite;
+}
+@keyframes snow-fall{ from{ transform:translateY(-5vh) translateX(0); } to{ transform:translateY(105vh) translateX(22px); } }
+
+/* ---- FOG --------------------------------------------------------------------- */
+html[data-weather^="fog"] .bg-weather{
+  background: radial-gradient(80% 60% at 50% 30%, rgba(200,205,215,.11), transparent 75%), var(--void);
+}
+html[data-weather^="fog"] .wfx-fog{
+  opacity:.55; filter:blur(6px);
+  background:linear-gradient(180deg, transparent, rgba(200,210,225,.09) 40%, transparent 80%);
+  animation:fog-drift 18s ease-in-out infinite alternate;
+}
+@keyframes fog-drift{ from{ transform:translateX(-4%); } to{ transform:translateX(4%); } }
+
+/* ---- NIGHT stars / aurora ------------------------------------------------------ */
+html[data-weather$="-night"] .wfx-stars{ opacity:.85; }
+.wfx-stars span{
+  position:absolute; width:2px; height:2px; border-radius:50%; background:#fff;
+  animation:star-twinkle 3s ease-in-out infinite;
+}
+@keyframes star-twinkle{ 0%,100%{ opacity:.15; } 50%{ opacity:.9; } }
+
+/* ---- fallback: default animated cyber background (no weather data) ------------ */
+html[data-weather="cyber"] .bg-weather{
+  background: radial-gradient(50% 40% at 50% 0%, rgba(var(--accent-rgb),.11), transparent 70%), var(--void);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .wfx-rain span,.wfx-snow span,.wfx-fog,.wfx-stars span{ animation:none !important; opacity:0 !important; }
+  .bg-weather{ transition-duration:.001ms; }
+}

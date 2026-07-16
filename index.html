@@ -1,475 +1,633 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Baswara Hafizh Muttaqin — Portfolio</title>
+<title>Baswara Hafizh Muttaqin</title>
+<meta name="description" content="Baswara Hafizh Muttaqin — CS (Intelligent Computing) student at Universiti Sains Malaysia. An ordinary person from Solo who loves to code and learn.">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<style>
-  /* ── GALLERY PER-SECTION ── */
-  #gallery { background: var(--bg); position: relative; }
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-  .gal-section { margin-bottom: 4rem; }
-  .gal-section:last-child { margin-bottom: 0; }
-
-  .gal-section-head {
-    display: flex; align-items: center; gap: 1rem;
-    margin-bottom: 1.5rem; padding-bottom: .8rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .gal-section-icon { font-size: 1.4rem; flex-shrink: 0; }
-  .gal-section-label {
-    font-family: 'Space Mono', monospace; font-size: .65rem;
-    letter-spacing: 3px; text-transform: uppercase; color: var(--accent);
-  }
-  .gal-section-count {
-    margin-left: auto; font-family: 'Space Mono', monospace;
-    font-size: .55rem; color: var(--muted); letter-spacing: 1px; flex-shrink: 0;
-  }
-
-  /* ── GAL TABS ── */
-  .gal-tabs { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 2rem; }
-  .gal-tab {
-    display: flex; align-items: center; gap: .55rem;
-    padding: .6rem 1.2rem; border: 1px solid var(--border);
-    background: transparent; font-family: 'Space Mono', monospace;
-    font-size: .6rem; letter-spacing: 2px; text-transform: uppercase;
-    color: var(--muted); cursor: pointer; position: relative;
-    overflow: hidden; transition: color .3s, border-color .3s;
-  }
-  .gal-tab::before {
-    content: ''; position: absolute; inset: 0; background: var(--accent);
-    transform: scaleX(0); transform-origin: left; transition: transform .3s; z-index: 0;
-  }
-  .gal-tab > * { position: relative; z-index: 1; }
-  .gal-tab:hover { border-color: var(--accent); color: var(--accent); }
-  .gal-tab.active { border-color: var(--accent); color: var(--bg); }
-  .gal-tab.active::before { transform: scaleX(1); }
-  .gal-tab-icon { font-size: 1rem; }
-  .gal-tab-count {
-    background: rgba(0,245,255,.15); border-radius: 2px;
-    padding: .1rem .4rem; font-size: .55rem; color: inherit;
-  }
-  .gal-tab.active .gal-tab-count { background: rgba(0,0,0,.2); }
-
-  /* ── GAL PANELS ── */
-  .gal-panel { display: none; opacity: 0; transform: translateY(12px); transition: opacity .35s ease, transform .35s ease; }
-  .gal-panel.active { display: block; }
-  .gal-panel.visible { opacity: 1; transform: none; }
-  .gal-panel .masonry { columns: 3; column-gap: .9rem; }
-  @media (max-width: 960px) { .gal-panel .masonry { columns: 2; } }
-  @media (max-width: 520px) {
-    .gal-panel .masonry { columns: 1; }
-    .gal-tabs { gap: .4rem; }
-    .gal-tab { font-size: .52rem; padding: .5rem .7rem; }
-  }
-  .gal-item img { width: 100%; display: block; object-fit: cover; }
-
-  /* ══════════════════════════════════════
-     FIX FINAL BASWARA — RESPONSIVE FIX
-     overflow:hidden di hero mencegah horizontal scroll.
-     Teks nama pakai white-space:normal di mobile agar wrap, tidak overflow.
-  ══════════════════════════════════════ */
-  body  { overflow-x: hidden; }
-  #hero { overflow: hidden; }   /* WAJIB hidden — mencegah orb bikin horizontal scroll */
-
-  .hero-body { max-width: min(960px, 92vw); }
-
-  .hero-name          { width: 100%; }
-  .hero-name .l2      { display: block; width: 100%; }
-
-  .name-fade {
-    display: block;
-    white-space: normal;          /* wrap di HP, tidak overflow ke kanan */
-    word-break: break-word;
-    font-size: clamp(1.5rem, 10.5vw, 8.5rem);
-    line-height: 0.95;
-    background: linear-gradient(120deg, var(--accent) 0%, var(--purple) 50%, var(--pink) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 28px rgba(0,245,255,.28));
-    opacity: 0;
-    transform: translateX(-28px);
-    animation: kNameIn 1.4s cubic-bezier(.16,1,.3,1) .7s forwards;
-  }
-
-  @media (max-width: 960px) {
-    .name-fade { font-size: clamp(1.5rem, 10.5vw, 6rem); }
-  }
-  @media (max-width: 480px) {
-    .name-fade { font-size: clamp(1.2rem, 10vw, 3rem); }
-  }
-  @media (max-width: 360px) {
-    .name-fade { font-size: clamp(1rem, 9.5vw, 2.5rem); }
-  }
-</style>
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animation.css">
+<link rel="stylesheet" href="css/weather.css">
+<link rel="stylesheet" href="css/memory.css">
+<link rel="stylesheet" href="css/command-palette.css">
+<link rel="stylesheet" href="css/github-feed.css">
+<link rel="stylesheet" href="css/boot.css">
+<link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
 
-<div id="scroll-progress"></div>
-<div id="cur-dot"></div>
-<div id="cur-ring"></div>
-
-<div class="side-deco">
-  <span>PORTOFOLIO</span>
-  <div class="side-line"></div>
-  <span>IBAS</span>
+<div class="boot-overlay" id="bootSequence" hidden aria-hidden="true">
+  <div class="boot-phase boot-phase-1" data-phase="1">
+    <p class="boot-init mono">INITIALIZING<span class="boot-cursor">_</span></p>
+  </div>
+  <div class="boot-phase boot-phase-2" data-phase="2">
+    <ul class="boot-loglines" id="bootLoglines"></ul>
+  </div>
+  <div class="boot-phase boot-phase-3" data-phase="3">
+    <div class="boot-glow" aria-hidden="true"></div>
+    <canvas class="boot-particles" id="bootParticles" aria-hidden="true"></canvas>
+    <h2 class="boot-welcome" id="bootWelcome"></h2>
+  </div>
+  <p class="boot-skip">Click or press any key to skip</p>
 </div>
 
-<!-- NAV -->
-<nav id="nav">
-  <div class="nav-logo">BASWARA<em>.</em>HM</div>
-  <ul class="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#skills">Skills</a></li>
-    <li><a href="#experience">Experience</a></li>
-    <li><a href="#gallery">Gallery</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <button id="burger" class="burger" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="bg-layer bg-aurora" aria-hidden="true"></div>
+<div class="bg-layer bg-orbs" aria-hidden="true">
+  <span class="orb orb-a"></span>
+  <span class="orb orb-b"></span>
+  <span class="orb orb-c"></span>
+</div>
+<div class="bg-layer bg-grid" aria-hidden="true"></div>
+<div class="bg-layer bg-scanlines" aria-hidden="true"></div>
+<div class="bg-layer bg-weather" id="weatherLayer" aria-hidden="true"><div id="weatherFx"></div></div>
+<div class="bg-layer bg-spotlight" id="spotlight" aria-hidden="true"></div>
+<canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<div class="memory-card" id="memoryCard" role="dialog" aria-label="Welcome back" aria-hidden="true">
+  <button class="memory-card-close" id="memoryCardClose" aria-label="Dismiss">×</button>
+  <p class="memory-eyebrow mono">// System Memory</p>
+  <h3 class="memory-title">Welcome back.</h3>
+  <p class="memory-line" id="memoryLastVisit"></p>
+  <p class="memory-line" id="memoryVisitCount"></p>
+  <div id="memorySections"></div>
+  <div class="memory-achievement" id="memoryAchievement" hidden></div>
+  <button class="btn btn-primary memory-resume" id="memoryResumeBtn" type="button">Resume Journey</button>
+</div>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="#main" class="nav-brand">
+      <span class="dot" aria-hidden="true"></span>
+      IBAS.SYS
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#quest-log">Quest Log</a></li>
+      <li><a href="#building">Building</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button type="button" class="nav-cmdk-btn" id="cmdkBtn" aria-label="Open quick nav (Ctrl+K)" title="Quick nav">
+      <span aria-hidden="true">⌘K</span>
+    </button>
+    <a href="#contact" class="nav-cta">Get in touch</a>
+  </div>
 </nav>
 
-<div id="nav-drawer">
-  <a href="#about">About</a>
-  <a href="#skills">Skills</a>
-  <a href="#experience">Experience</a>
-  <a href="#gallery">Gallery</a>
-  <a href="#contact">Contact</a>
-</div>
-
-<!-- HERO -->
-<section id="hero">
-  <div class="hero-grid"></div>
-  <div class="particles-wrap" id="particles"></div>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-  <div class="hero-body">
-    <div class="hero-eyebrow">Student &amp; Tech Enthusiast</div>
-    <h1 class="hero-name">
-      <span class="l1">HEY, I'M</span>
-      <span class="l2"><span class="name-fade">IBAS</span></span>
-    </h1>
-    <p class="hero-sub">orang yang hobi <span class="typed" id="typed">code</span></p>
-    <div class="hero-cta">
-      <a href="#about" class="btn btn-solid">ABOUT ME →</a>
-      <a href="#contact" class="btn btn-ghost">CONTACT</a>
+<!-- ============================ COMMAND PALETTE ============================ -->
+<div class="cmdk-overlay" id="cmdkOverlay" hidden aria-hidden="true">
+  <div class="cmdk-panel" role="dialog" aria-modal="true" aria-label="Quick navigation">
+    <div class="cmdk-inputrow">
+      <span class="cmdk-prompt mono" aria-hidden="true">›</span>
+      <input type="text" id="cmdkInput" class="cmdk-input mono" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="Jump to a section or run a command…" aria-label="Quick nav search">
+      <kbd class="cmdk-esc">Esc</kbd>
     </div>
-  </div>
-  <div class="hero-scroll">
-    <span>SCROLL</span>
-    <div class="scroll-bar"></div>
-  </div>
-</section>
-
-<!-- MARQUEE -->
-<div class="marquee-strip">
-  <div class="marquee-inner" aria-hidden="true">
-    <span>STUDENT</span><span class="mdot">◆</span><span>TECH Enthusiast</span><span class="mdot">◆</span>
-    <span>Economics Enthusiast</span><span class="mdot">◆</span><span>MOBILE LEGENDS</span><span class="mdot">◆</span>
-    <span>Solo, Indonesia</span><span class="mdot">◆</span><span>ONE PIECE</span><span class="mdot">◆</span>
-    <span>NGOPI</span><span class="mdot">◆</span><span>AIRSOFT</span><span class="mdot">◆</span>
-    <span>STUDENT</span><span class="mdot">◆</span><span>TECH Enthusiast</span><span class="mdot">◆</span>
-    <span>Economics Enthusiast</span><span class="mdot">◆</span><span>MOBILE LEGENDS</span><span class="mdot">◆</span>
-    <span>Solo, Indonesia</span><span class="mdot">◆</span><span>ONE PIECE</span><span class="mdot">◆</span>
-    <span>NGOPI</span><span class="mdot">◆</span><span>AIRSOFT</span><span class="mdot">◆</span>
+    <ul class="cmdk-list" id="cmdkList" role="listbox"></ul>
   </div>
 </div>
 
-<!-- ABOUT -->
-<section id="about" class="section-pad">
-  <div class="about-frame reveal">
-    <div class="about-box">
-      <img src="image/dadas.jpeg" alt="Baswara" style="width:100%;height:100%;object-fit:cover;">
-    </div>
-    <div class="corner tl"></div><div class="corner tr"></div>
-    <div class="corner bl"></div><div class="corner br"></div>
-    <div class="about-badge"><strong>CompSci</strong>Student</div>
-  </div>
-  <div class="about-content reveal" style="transition-delay:.2s">
-    <div class="eyebrow">Who Am I</div>
-    <h2 class="section-title">Baswara <span>Hafizh</span><br>Muttaqin</h2>
-    <p class="about-text">
-      I am an undergraduate Computer Science (Intelligent Computing) student at Universiti Sains Malaysia (USM) from Solo, Indonesia. I have a strong interest in technology and economics, and I enjoy learning how both fields shape the future of our world.</p>
-    <p class="about-text">
-      I am an active and curious person who enjoys participating in competitions and being involved in organizational activities.
-      I am always eager to learn new things, face challenges, and grow both personally and academically. Welcome to my portfolio!</p>
-    <div class="tags">
-      <span class="tag">Problem Solver</span>
-      <span class="tag">Risk Taker</span>
-      <span class="tag">Economics enthusiast</span>
-      <span class="tag">Tech enthusiast</span>
-      <span class="tag">Adaptable person</span>
-      <span class="tag">Morning Person - Kopag</span>
-    </div>
-  </div>
-</section>
-
-<!-- SKILLS -->
-<section id="skills" class="section-pad">
-  <div class="skills-head reveal">
-    <div class="eyebrow">What I Know</div>
-    <h2 class="section-title">Tech <span>Stack</span></h2>
-  </div>
-  <div class="skills-grid">
-    <div class="skill-card reveal" style="transition-delay:.05s"><div class="sk-icon">🟨</div><div class="sk-name">JavaScript</div></div>
-    <div class="skill-card reveal" style="transition-delay:.10s"><div class="sk-icon">🐍</div><div class="sk-name">Python</div></div>
-    <div class="skill-card reveal" style="transition-delay:.15s"><div class="sk-icon">⚙️</div><div class="sk-name">C++</div></div>
-    <div class="skill-card reveal" style="transition-delay:.20s"><div class="sk-icon">🎨</div><div class="sk-name">CSS / Tailwind</div></div>
-    <div class="skill-card reveal" style="transition-delay:.25s"><div class="sk-icon">🐙</div><div class="sk-name">GitHub</div></div>
-    <div class="skill-card reveal" style="transition-delay:.30s"><div class="sk-icon">🐉</div><div class="sk-name">Kali Linux</div></div>
-    <div class="skill-card reveal" style="transition-delay:.35s"><div class="sk-icon">🐳</div><div class="sk-name">Docker</div></div>
-    <div class="skill-card reveal" style="transition-delay:.40s"><div class="sk-icon">🖼️</div><div class="sk-name">Canva</div></div>
-    <div class="skill-card reveal" style="transition-delay:.45s"><div class="sk-icon">🎯</div><div class="sk-name">Figma</div></div>
-  </div>
-</section>
-
-<!-- EXPERIENCE -->
-<section id="experience" class="section-pad">
-  <div class="reveal">
-    <div class="eyebrow">Journey</div>
-    <h2 class="section-title">Experience &amp; <span>Education</span></h2>
-  </div>
-  <div class="exp-grid">
-    <div class="reveal" style="transition-delay:.1s">
-      <div class="exp-col-label">Experience</div>
-      <div class="timeline">
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-date">2024 — 2025</div>
-          <div class="tl-title">MPK (Student Representative Council)</div>
-          <div class="tl-org">Chairman Of Commission 1</div>
-          <div class="tl-desc">Led the development and management of the student council's organizational timeline, ensuring smooth leadership transitions and the timely execution of programs from inauguration to the end of the term.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-date">2023 — 2024</div>
-          <div class="tl-title">MPK (Student Representative Council)</div>
-          <div class="tl-org">Member Of Commission 2</div>
-          <div class="tl-desc">Oversaw the planning, coordination, and execution of student council programs, ensuring all initiatives were implemented effectively, aligned with strategic objectives, and provided meaningful impact for the student body.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-date">2023 — 2025</div>
-          <div class="tl-title">Al Azhar Creativity Project Committee</div>
-          <div class="tl-org">Field Coordinator &amp; Competition Committee</div>
-          <div class="tl-desc">Served as Field Coordinator and Competition Committee member for ACP 4.0 and ACP 5.0. Responsible for coordinating event operations, supervising competition activities, managing participant flow, and ensuring that all event schedules were carried out smoothly and efficiently.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-date">2025</div>
-          <div class="tl-title">Science Castle Asia International Competition</div>
-          <div class="tl-org">Participant & Bronze Medal – Science Castle Asia</div>
-          <div class="tl-desc">Competed in the Science Castle Asia International Competition at Multimedia University (MMU), Malaysia. Presented a research-based science project, collaborated with participants from different countries, and earned a Bronze Medal.</div>
-        </div>
-      </div>
-    </div>
-    <div class="reveal" style="transition-delay:.2s">
-      <div class="exp-col-label">Education</div>
-      <div class="timeline">
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-date">Freshman</div>
-          <div class="tl-title">Universiti Sains Malaysia</div>
-          <div class="tl-org">Undergraduate Computer Science (Intelligent Computing) Student</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-date">2023 — 2026</div>
-          <div class="tl-title">SMA AL-Azhar Syifa Budi Solo</div>
-          <div class="tl-org">Senior High School Student</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-date">2020 — 2023</div>
-          <div class="tl-title">SMP AL-Azhar Syifa Budi Solo</div>
-          <div class="tl-org">Junior High School Student</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- GALLERY -->
-<section id="gallery" class="section-pad">
-  <div class="reveal">
-    <div class="eyebrow">Moments</div>
-    <h2 class="section-title"><span>Gallery</span></h2>
-  </div>
-
-  <div class="gal-tabs reveal" style="transition-delay:.1s">
-    <button class="gal-tab active" data-tab="tembak"><span class="gal-tab-label">Airsoft</span></button>
-    <button class="gal-tab" data-tab="esport"><span class="gal-tab-label">E-Sport</span></button>
-    <button class="gal-tab" data-tab="science"><span class="gal-tab-label">SCIENCE CASTLE</span></button>
-    <button class="gal-tab" data-tab="event"><span class="gal-tab-label">Organisasi</span></button>
-  </div>
-
-  <!-- E-SPORT PANEL -->
-  <div class="gal-panel" data-panel="esport">
-    <div class="masonry">
-      <div class="gal-item" data-cat="esport" data-title="Juara 1 Mobile Legends" data-meta="Mathside Mobile Legend Competition 2025">
-        <img src="image/gallery/mathside.jpg" alt="Juara 1 ML Mathside 2025" style="height:300px;object-position:center top;">
-        <div class="gal-badge">E-Sport</div>
-        <div class="gal-overlay"><div class="gal-ot">Juara 1 Mobile Legends</div><div class="gal-om">Mathside Competition · 2025</div></div>
-      </div>
-      <div class="gal-item" data-cat="esport" data-title="Juara 2 Mobile Legends" data-meta="PIMPEL &amp; PITCOMFEST · UMS">
-        <img src="image/gallery/pimpel.jpg" alt="Juara 2 ML PIMPEL PITCOMFEST" style="height:260px;object-position:center;">
-        <div class="gal-badge">E-Sport</div>
-        <div class="gal-overlay"><div class="gal-ot">Juara 2 Mobile Legends</div><div class="gal-om">PIMPEL &amp; PITCOMFEST · UMS</div></div>
-      </div>
-      <div class="gal-item" data-cat="esport" data-title="Juara 3 Lomba E-Sport" data-meta="Ursulin Cup 2024 · SMA Regina Pacis Surakarta">
-        <img src="image/gallery/ursu.jpg" alt="Juara 3 E-Sport Ursulin Cup 2024" style="height:300px;object-position:center 40%;">
-        <div class="gal-badge">E-Sport</div>
-        <div class="gal-overlay"><div class="gal-ot">Juara 3 E-Sport</div><div class="gal-om">Ursulin Cup 2024 · Surakarta</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TEMBAK PANEL -->
-  <div class="gal-panel active" data-panel="tembak">
-    <div class="masonry">
-      <div class="gal-item" data-cat="tembak">
-        <img src="image/gallery/foto1.jpg" alt="Action shot tembak Al Azhar" style="height:320px;object-position:center 30%;">
-        <div class="gal-badge">Airsoft</div>
-        <div class="gal-overlay"><div class="gal-ot">Random Pic</div><div class="gal-om">Airsoft</div></div>
-      </div>
-      <div class="gal-item" data-cat="tembak" data-title="IPSC Level 2" data-meta="Pertamina RU IV Shooting Championship 2023">
-        <img src="image/gallery/foto2.jpg" alt="Pertamina Level 2" style="height:280px;object-position:center 20%;">
-        <div class="gal-badge">Airsoft</div>
-        <div class="gal-overlay"><div class="gal-ot">IPSC Level 2</div><div class="gal-om">Pertamina RU IV · 2023</div></div>
-      </div>
-      <div class="gal-item" data-cat="tembak">
-        <img src="image/gallery/kawan.jpg" style="height:280px;object-position:center 20%;">
-        <div class="gal-badge">Airsoft</div>
-        <div class="gal-overlay"></div>
-      </div>
-      <div class="gal-item" data-cat="tembak" data-title="Juara 1 Standard Junior Non" data-meta="SAS AAIPSC Level 1 · Semarang 2023">
-        <img src="image/gallery/sas.jpg" alt="Juara 1 Standard Junior SAS 2023" style="height:250px;object-position:center 35%;">
-        <div class="gal-badge">Airsoft</div>
-        <div class="gal-overlay"><div class="gal-ot">Juara 1 Standard Junior Non</div><div class="gal-om">SAS AAIPSC Level 1 · Semarang 2023</div></div>
-      </div>
-      <div class="gal-item" data-cat="tembak" data-title="Juara 2 Pistol Non AA Super Junior" data-meta="New Year Match Championship 2023">
-        <img src="image/gallery/j2.jpg" alt="" style="height:260px;object-position:center top;">
-        <div class="gal-badge">Airsoft</div>
-        <div class="gal-overlay"><div class="gal-ot">Juara 2 Pistol Non AA Super Junior</div><div class="gal-om">New Year Match 2023 · Surakarta</div></div>
-      </div>
-      <div class="gal-item" data-cat="tembak" data-title="Juara 3 Pistol Non Super Junior Jawa Tengah" data-meta="AA-IPSC Level 2 Pertamina RU IV 2023">
-        <img src="image/gallery/pertamina.jpg" alt="Juara 3 Pertamina RU IV 2023" style="height:240px;object-position:center 20%;">
-        <div class="gal-badge">Airsoft</div>
-        <div class="gal-overlay"><div class="gal-ot">Juara 3 Pistol Non Super Junior</div><div class="gal-om">Pertamina RU IV · Jawa Tengah 2023</div></div>
-      </div>
-      <div class="gal-item" data-cat="tembak" data-title="Juara 3 Standard Junior Non — Baswara HM" data-meta="Piala Danbrigif-4 Dewa Ratna 2023 · Purbalingga">
-        <img src="image/gallery/purbalingga.jpg" alt="Juara 3 Standard Junior Danbrigif 2023" style="height:260px;object-position:center 25%;">
-        <div class="gal-badge">Tembak Reaksi</div>
-        <div class="gal-overlay"><div class="gal-ot">Juara 3 Standard Junior Non</div><div class="gal-om">Piala Danbrigif-4 · Purbalingga 2023</div></div>
-      </div>
-      <div class="gal-item" data-cat="tembak" data-title="New Year Match 2023" data-meta="Brimob Jawa Tengah · Solo Speed Shooter">
-        <img src="image/gallery/sss.jpg" alt="SSS &amp; SSA" style="height:210px;object-position:center 40%;">
-        <div class="gal-badge">Airsoft</div>
-        <div class="gal-overlay"><div class="gal-ot">New Year Match 2023</div><div class="gal-om">Tim SSS &amp; SSA</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SCIENCE PANEL -->
-  <div class="gal-panel" data-panel="science">
-    <div class="masonry">
-      <div class="gal-item" data-cat="science" data-title="Science Castle Asia 2025" data-meta="Multimedia University · Malaysia">
-        <img src="image/gallery/malay1.jpg" alt="Science Castle Asia 2025" style="height:280px;object-position:center 30%;">
-        <div class="gal-badge">Science Castle</div>
-        <div class="gal-overlay"><div class="gal-ot">Science Castle Asia 2025</div><div class="gal-om">MMU Malaysia · International</div></div>
-      </div>
-      <div class="gal-item" data-cat="science" data-title="Science Castle Asia" data-meta="MMU Malaysia 2025">
-        <img src="image/gallery/malay2.jpg" alt="Science Castle booth presentation" style="height:320px;object-position:center 15%;">
-        <div class="gal-badge">Science Castle</div>
-        <div class="gal-overlay"><div class="gal-ot">Booth Presentation</div><div class="gal-om">Science Castle Asia</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EVENT PANEL -->
-  <div class="gal-panel" data-panel="event">
-    <div class="masonry">
-      <div class="gal-item" data-cat="event" data-title="SAMARA" data-meta="2025">
-        <img src="image/gallery/samara.JPG" style="height:220px;object-position:center 45%;">
-        <div class="gal-badge">Event &amp; Organisasi</div>
-        <div class="gal-overlay"><div class="gal-ot">Kegiatan Berbagi Takjil Bersama SMAN 4 Surakarta</div><div class="gal-om"> - 2025</div></div>
-      </div>
-      <div class="gal-item" data-cat="event" data-title="Al Azhar Creativity Project (ACP)" data-meta="Panitia · ACP 5.0">
-        <img src="image/gallery/acp50.jpg" alt="ACP event panggung" style="height:240px;object-position:center 35%;">
-        <div class="gal-badge">Event &amp; Organisasi</div>
-        <div class="gal-overlay"><div class="gal-ot">Al Azhar Creativity Project</div><div class="gal-om">ACP · 5.0 &amp; Panitia</div></div>
-      </div>
-      <div class="gal-item" data-cat="event" data-title="Studi Banding MPK" data-meta="Dengan SMA AL ISLAM SURAKARTA">
-        <img src="image/gallery/sensationmpk.JPG" alt="Foto grup MPK" style="height:260px;object-position:center 10%;">
-        <div class="gal-badge">Event &amp; Organisasi</div>
-        <div class="gal-overlay"><div class="gal-ot">MPK — Studi Banding</div><div class="gal-om">Sensation</div></div>
-      </div>
-      <div class="gal-item" data-cat="event" data-title="Sensation" data-meta="Studi Banding · 4 Sekolah">
-        <img src="image/gallery/sensasi.JPG" alt="Foto delegasi sekolah" style="height:210px;object-position:center 30%;">
-        <div class="gal-badge">Event &amp; Organisasi</div>
-        <div class="gal-overlay"><div class="gal-ot">Sensation</div><div class="gal-om">Studi Banding 4 Sekolah</div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- LIGHTBOX -->
-<div id="lb">
-  <div class="lb-inner">
-    <button class="lb-x" id="lb-x">✕</button>
-    <button class="lb-arr" id="lb-prev">‹</button>
-    <button class="lb-arr" id="lb-next">›</button>
-    <img id="lb-img" src="" alt="">
-    <div class="lb-info">
-      <div class="lb-title" id="lb-tit"></div>
-      <div class="lb-meta" id="lb-meta"></div>
-    </div>
-  </div>
+<div class="mini-map" id="miniMap" aria-hidden="true">
+  <a href="#hero" data-map="hero" aria-label="Hero"></a>
+  <a href="#about" data-map="about" aria-label="About"></a>
+  <a href="#skills" data-map="skills" aria-label="Skills"></a>
+  <a href="#quest-log" data-map="quest-log" aria-label="Quest Log"></a>
+  <a href="#building" data-map="building" aria-label="Currently Building"></a>
+  <a href="#contact" data-map="contact" aria-label="Contact"></a>
 </div>
 
-<!-- CONTACT -->
-<section id="contact" class="section-pad">
-  <div class="c-orb c-orb-3"></div>
-  <div class="reveal contact-inner">
-    <div class="eyebrow contact-eyebrow">Let's Connect</div>
-    <h2 class="contact-big">
-      <span class="l1">GET IN</span>
-      <span class="l2">TOUCH</span>
-    </h2>
-    <p class="contact-sub">I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.</p>
-    <div class="social-row">
-      <a href="https://www.linkedin.com/in/baswara-hafizh-muttaqin-68a7b4329/" class="social-btn linkedin" target="_blank" rel="noopener">
-        <span class="s-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></span>
-        <span>LinkedIn</span>
-      </a>
-      <a href="https://instagram.com/baswara.hm" class="social-btn instagram" target="_blank" rel="noopener">
-        <span class="s-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></span>
-        <span>Instagram</span>
-      </a>
-      <a href="https://discord.gg/53y7EKCfwP" class="social-btn discord" target="_blank" rel="noopener">
-        <span class="s-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></span>
-        <span>Discord</span>
-      </a>
-    </div>
-    <a href="mailto:baswarahafizh@email.com" class="email-link"><span class="__cf_email__" data-cfemail="9cfefdefebfdeefdf4fdfaf5e6f4dcfbf1fdf5f0b2fff3f1">baswarahafizh@gmail.com</span></a>
-  </div>
-</section>
+<main id="main">
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-copy">© 2026 <b>BASWARA HAFIZH MUTTAQIN</b></div>
-  <div class="footer-status">
-    <div class="blink-dot"></div>
-    Open for opportunities
+  <!-- ============================ HERO ============================ -->
+  <section class="section hero container" id="hero" aria-labelledby="hero-heading">
+    <div class="hero-avatar-wrap" data-parallax>
+      <div class="hero-avatar-ring" aria-hidden="true"></div>
+      <div class="hero-avatar">
+        <img src="image/dadas.jpeg" alt="Baswara Hafizh Muttaqin">
+      </div>
+      <div class="hero-level mono">LV. 01 · FRESHMAN</div>
+
+      <div class="hero-badge hero-badge-1" aria-hidden="true" title="Airsoft podiums"><span class="mono">AS</span></div>
+      <div class="hero-badge hero-badge-2" aria-hidden="true" title="Mobile Legends placements"><span class="mono">ML</span></div>
+      <div class="hero-badge hero-badge-3" aria-hidden="true" title="Science Castle Asia — Bronze"><span class="mono">SC</span></div>
+    </div>
+    <div class="hero-body">
+      <p class="eyebrow"><span class="blip" aria-hidden="true"></span> Character online · Solo, Indonesia</p>
+      <h1 class="hero-title" id="hero-heading">Baswara Hafizh <span class="highlight">Muttaqin</span></h1>
+      <p class="hero-tagline mono" id="decryptTagline" aria-live="polite"></p>
+      <p class="hero-line-id">“rakyat biasa dari Solo” — an ordinary person who loves to learn. CS (Intelligent Computing) student at Universiti Sains Malaysia.</p>
+
+      <div class="hero-stats" role="list" aria-label="Quick stats">
+        <div class="hero-stat" role="listitem">
+          <span class="hero-stat-num mono" data-count-to="10">0</span>
+          <span class="hero-stat-label">Competition results</span>
+        </div>
+        <div class="hero-stat" role="listitem">
+          <span class="hero-stat-num mono" data-count-to="4">0</span>
+          <span class="hero-stat-label">Arenas competed in</span>
+        </div>
+        <div class="hero-stat" role="listitem">
+          <span class="hero-stat-num mono" data-count-to="2">0</span>
+          <span class="hero-stat-label">Years in student leadership</span>
+        </div>
+      </div>
+
+      <div class="hero-xp">
+        <div class="hero-xp-label">
+          <span>Freshman Year Progress</span>
+          <span id="xpPercentLabel">0%</span>
+        </div>
+        <div class="hero-xp-track" role="img" aria-label="Freshman year progress bar">
+          <div class="hero-xp-fill" id="xpFill"></div>
+        </div>
+      </div>
+
+      <div class="hero-ctas">
+        <a href="#quest-log" class="btn btn-primary" data-magnetic>View Quest Log</a>
+        <a href="#contact" class="btn btn-ghost" data-magnetic>Start a Collab</a>
+      </div>
+    </div>
+
+    <button class="scroll-indicator" id="scrollIndicator" aria-label="Scroll to About section">
+      <span class="scroll-indicator-mouse" aria-hidden="true"><span class="scroll-indicator-wheel"></span></span>
+      <span class="scroll-indicator-label mono">Scroll</span>
+    </button>
+  </section>
+
+  <!-- ============================ ABOUT ============================ -->
+  <section class="section container" id="about" aria-labelledby="about-heading">
+    <div class="section-head reveal">
+      <p class="section-eyebrow">// Character Sheet</p>
+      <h2 class="section-title" id="about-heading">About</h2>
+    </div>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>Undergraduate CS (Intelligent Computing) student at Universiti Sains Malaysia, originally from Solo, Indonesia. Drawn to the ways technology and economics shape the world around us.</p>
+        <p>Still early in the technical journey, but learns fast and never shies away from the unfamiliar.</p>
+        <ul class="trait-list">
+          <li class="trait-chip">Problem Solver</li>
+          <li class="trait-chip">Risk Taker</li>
+          <li class="trait-chip">Economics Enthusiast</li>
+          <li class="trait-chip">Tech Enthusiast</li>
+          <li class="trait-chip">Adaptable</li>
+          <li class="trait-chip">Morning Person</li>
+        </ul>
+      </div>
+      <div class="about-hud panel bracket-frame reveal">
+        <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
+        <div class="hud-row"><span class="k">Local Time (WIB)</span><span class="v mono" id="hudClock">--:--:--</span></div>
+        <div class="hud-row"><span class="k">Origin</span><span class="v mono">Solo, Indonesia</span></div>
+        <div class="hud-row"><span class="k">Faction</span><span class="v mono">USM · Intelligent Computing</span></div>
+        <div class="hud-row"><span class="k">Status</span><span class="v mono">Seeking first project opportunity</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ SKILLS ============================ -->
+  <section class="section container" id="skills" aria-labelledby="skills-heading">
+    <div class="section-head reveal">
+      <p class="section-eyebrow">// Tech Stack</p>
+      <h2 class="section-title" id="skills-heading">Skills</h2>
+      <p class="section-desc">Honest numbers for a freshman — this is where the grind is right now, not a finished build.</p>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-card panel bracket-frame reveal" data-tilt>
+        <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
+        <p class="skill-group-title">Languages</p>
+        <div class="skill-item" data-pct="60">
+          <div class="skill-item-head"><span class="skill-name">Python</span><span class="skill-status active">Active</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill"></div></div>
+          <span class="skill-pct mono">60%</span>
+        </div>
+        <div class="skill-item" data-pct="50">
+          <div class="skill-item-head"><span class="skill-name">JavaScript</span><span class="skill-status active">Active</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill"></div></div>
+          <span class="skill-pct mono">50%</span>
+        </div>
+        <div class="skill-item" data-pct="40">
+          <div class="skill-item-head"><span class="skill-name">C++</span><span class="skill-status active">Active</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill"></div></div>
+          <span class="skill-pct mono">40%</span>
+        </div>
+      </div>
+
+      <div class="skill-card panel bracket-frame reveal" data-tilt>
+        <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
+        <p class="skill-group-title">Tools</p>
+        <div class="skill-item" data-pct="55">
+          <div class="skill-item-head"><span class="skill-name">GitHub</span><span class="skill-status active">Active</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill"></div></div>
+          <span class="skill-pct mono">55%</span>
+        </div>
+        <div class="skill-item" data-pct="35">
+          <div class="skill-item-head"><span class="skill-name">Docker</span><span class="skill-status learning">Learning</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill"></div></div>
+          <span class="skill-pct mono">35%</span>
+        </div>
+        <div class="skill-item" data-pct="35">
+          <div class="skill-item-head"><span class="skill-name">Kali Linux</span><span class="skill-status learning">Learning</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill"></div></div>
+          <span class="skill-pct mono">35%</span>
+        </div>
+      </div>
+
+      <div class="skill-card panel bracket-frame reveal" data-tilt>
+        <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
+        <p class="skill-group-title">Design</p>
+        <div class="skill-item" data-pct="45">
+          <div class="skill-item-head"><span class="skill-name">CSS / Tailwind</span><span class="skill-status active">Active</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill"></div></div>
+          <span class="skill-pct mono">45%</span>
+        </div>
+        <div class="skill-item" data-pct="50">
+          <div class="skill-item-head"><span class="skill-name">Figma</span><span class="skill-status active">Active</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill"></div></div>
+          <span class="skill-pct mono">50%</span>
+        </div>
+        <div class="skill-item" data-pct="65">
+          <div class="skill-item-head"><span class="skill-name">Canva</span><span class="skill-status active">Active</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill"></div></div>
+          <span class="skill-pct mono">65%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ QUEST LOG ============================ -->
+  <section class="section container" id="quest-log" aria-labelledby="quest-heading">
+    <div class="section-head reveal">
+      <p class="section-eyebrow">// Quest Log</p>
+      <h2 class="section-title" id="quest-heading">Experience &amp; Education</h2>
+      <p class="section-desc">Every quest here has been turned in — completed roles, closed competitions, and one degree currently in progress.</p>
+    </div>
+
+    <div class="quest-tabs" role="tablist" aria-label="Quest log category">
+      <button class="quest-tab" role="tab" id="tab-exp" aria-selected="true" aria-controls="panel-exp">Experience</button>
+      <button class="quest-tab" role="tab" id="tab-edu" aria-selected="false" aria-controls="panel-edu" tabindex="-1">Education</button>
+    </div>
+
+    <div class="quest-panel" id="panel-exp" role="tabpanel" aria-labelledby="tab-exp">
+      <div class="quest-list quest-timeline">
+
+        <div class="quest-entry panel reveal">
+          <div class="quest-dot" aria-hidden="true"></div>
+          <button class="quest-entry-btn" aria-expanded="false" aria-controls="q1">
+            <span class="quest-entry-main">
+              <span class="quest-date mono">2024–2025</span>
+              <span class="quest-title-wrap">
+                <span class="quest-title">Chairman, Commission 1</span>
+                <span class="quest-org">MPK Student Representative Council</span>
+              </span>
+            </span>
+            <span class="quest-status completed">Completed</span>
+            <svg class="quest-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="quest-body-outer"><div class="quest-body-inner">
+            <p class="quest-body" id="q1">Led the organizational timeline for Commission 1, keeping leadership transitions and ongoing programs on schedule for the term.</p>
+            <div class="quest-progress"><div class="quest-progress-fill" style="width:100%"></div></div>
+          </div></div>
+        </div>
+
+        <div class="quest-entry panel reveal">
+          <div class="quest-dot" aria-hidden="true"></div>
+          <button class="quest-entry-btn" aria-expanded="false" aria-controls="q2">
+            <span class="quest-entry-main">
+              <span class="quest-date mono">2023–2024</span>
+              <span class="quest-title-wrap">
+                <span class="quest-title">Member, Commission 2</span>
+                <span class="quest-org">MPK Student Representative Council</span>
+              </span>
+            </span>
+            <span class="quest-status completed">Completed</span>
+            <svg class="quest-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="quest-body-outer"><div class="quest-body-inner">
+            <p class="quest-body" id="q2">Coordinated council programs and kept initiatives aligned with the council's strategic goals.</p>
+            <div class="quest-progress"><div class="quest-progress-fill" style="width:100%"></div></div>
+          </div></div>
+        </div>
+
+        <div class="quest-entry panel reveal">
+          <div class="quest-dot" aria-hidden="true"></div>
+          <button class="quest-entry-btn" aria-expanded="false" aria-controls="q3">
+            <span class="quest-entry-main">
+              <span class="quest-date mono">2023–2025</span>
+              <span class="quest-title-wrap">
+                <span class="quest-title">Field Coordinator &amp; Competition Committee</span>
+                <span class="quest-org">Al Azhar Creativity Project (ACP 4.0 &amp; 5.0)</span>
+              </span>
+            </span>
+            <span class="quest-status completed">Completed</span>
+            <svg class="quest-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="quest-body-outer"><div class="quest-body-inner">
+            <p class="quest-body" id="q3">Ran event operations and supervised competitions across two consecutive editions of ACP.</p>
+            <div class="quest-progress"><div class="quest-progress-fill" style="width:100%"></div></div>
+          </div></div>
+        </div>
+
+        <div class="quest-entry panel reveal">
+          <div class="quest-dot" aria-hidden="true"></div>
+          <button class="quest-entry-btn" aria-expanded="false" aria-controls="q4">
+            <span class="quest-entry-main">
+              <span class="quest-date mono">2025</span>
+              <span class="quest-title-wrap">
+                <span class="quest-title">Bronze Medal — Science Castle Asia</span>
+                <span class="quest-org">Multimedia University (MMU), Malaysia</span>
+              </span>
+            </span>
+            <span class="quest-status completed">Completed</span>
+            <svg class="quest-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="quest-body-outer"><div class="quest-body-inner">
+            <p class="quest-body" id="q4">Presented a research-based science project at an international competition and placed third overall.</p>
+            <div class="quest-progress"><div class="quest-progress-fill" style="width:100%"></div></div>
+          </div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="quest-panel" id="panel-edu" role="tabpanel" aria-labelledby="tab-edu" hidden>
+      <div class="quest-list quest-timeline">
+
+        <div class="quest-entry panel reveal">
+          <div class="quest-dot" aria-hidden="true"></div>
+          <button class="quest-entry-btn" aria-expanded="false" aria-controls="e1">
+            <span class="quest-entry-main">
+              <span class="quest-date mono">2026–Present</span>
+              <span class="quest-title-wrap">
+                <span class="quest-title">Undergraduate, CS (Intelligent Computing)</span>
+                <span class="quest-org">Universiti Sains Malaysia</span>
+              </span>
+            </span>
+            <span class="quest-status inprogress">In Progress</span>
+            <svg class="quest-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="quest-body-outer"><div class="quest-body-inner">
+            <p class="quest-body" id="e1">First year of a Computer Science degree with a concentration in Intelligent Computing.</p>
+            <div class="quest-progress"><div class="quest-progress-fill" style="width:15%"></div></div>
+            <span class="quest-progress-label mono">15% through freshman year</span>
+          </div></div>
+        </div>
+
+        <div class="quest-entry panel reveal">
+          <div class="quest-dot" aria-hidden="true"></div>
+          <button class="quest-entry-btn" aria-expanded="false" aria-controls="e2">
+            <span class="quest-entry-main">
+              <span class="quest-date mono">2023–2026</span>
+              <span class="quest-title-wrap">
+                <span class="quest-title">Senior High School</span>
+                <span class="quest-org">SMA Al-Azhar Syifa Budi Solo</span>
+              </span>
+            </span>
+            <span class="quest-status completed">Completed</span>
+            <svg class="quest-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="quest-body-outer"><div class="quest-body-inner">
+            <p class="quest-body" id="e2">Completed senior high school in Solo, alongside organizational work and competition seasons.</p>
+            <div class="quest-progress"><div class="quest-progress-fill" style="width:100%"></div></div>
+          </div></div>
+        </div>
+
+        <div class="quest-entry panel reveal">
+          <div class="quest-dot" aria-hidden="true"></div>
+          <button class="quest-entry-btn" aria-expanded="false" aria-controls="e3">
+            <span class="quest-entry-main">
+              <span class="quest-date mono">2020–2023</span>
+              <span class="quest-title-wrap">
+                <span class="quest-title">Junior High School</span>
+                <span class="quest-org">SMP Al-Azhar Syifa Budi Solo</span>
+              </span>
+            </span>
+            <span class="quest-status completed">Completed</span>
+            <svg class="quest-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="quest-body-outer"><div class="quest-body-inner">
+            <p class="quest-body" id="e3">Completed junior high school in Solo.</p>
+            <div class="quest-progress"><div class="quest-progress-fill" style="width:100%"></div></div>
+          </div></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ CURRENTLY BUILDING ============================ -->
+  <section class="section container" id="building" aria-labelledby="building-heading">
+    <div class="section-head reveal">
+      <p class="section-eyebrow">// In Progress</p>
+      <h2 class="section-title" id="building-heading">Currently Building</h2>
+      <p class="section-desc">No shipped projects yet — here's what's on the workbench, honestly labeled by stage.</p>
+    </div>
+    <!--<div class="build-grid">
+      <div class="build-card panel bracket-frame reveal" data-tilt>
+        <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
+        <span class="build-status mono">Idea Stage</span>
+        <h3 class="build-title">Mobile Legends Match Tracker</h3>
+        <p class="build-desc">A small tool to log ranked matches and see win-rate trends by hero and role over time.</p>
+        <div class="build-tags"><span class="build-tag">Python</span><span class="build-tag">Data</span></div>
+      </div>
+      <div class="build-card panel bracket-frame reveal" data-tilt>
+        <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
+        <span class="build-status mono">Planning</span>
+        <h3 class="build-title">Airsoft Scoring Companion</h3>
+        <p class="build-desc">A lightweight scorekeeping app for practice sessions, aimed at IPSC-style precision drills.</p>
+        <div class="build-tags"><span class="build-tag">JavaScript</span><span class="build-tag">Figma</span></div>
+      </div>
+      <div class="build-card panel bracket-frame reveal" data-tilt>
+        <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
+        <span class="build-status mono">Exploring</span>
+        <h3 class="build-title">Tech × Economics Reading Log</h3>
+        <p class="build-desc">A personal notebook site for tracking articles and ideas at the intersection of technology and economics.</p>
+        <div class="build-tags"><span class="build-tag">CSS</span><span class="build-tag">Writing</span></div>
+      </div>
+    </div> -->
+    <div class="github-feed panel bracket-frame reveal" id="githubFeed" aria-live="polite">
+      <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
+      <div class="github-feed-head">
+        <span class="github-feed-dot" aria-hidden="true"></span>
+        <h3 class="github-feed-title mono">Live from GitHub</h3>
+        <a class="github-feed-link mono" id="githubProfileLink" href="https://github.com/" target="_blank" rel="noopener noreferrer">view profile →</a>
+      </div>
+      <ul class="github-feed-list" id="githubFeedList">
+        <li class="github-feed-item is-loading">Syncing recent activity…</li>
+      </ul>
+    </div>
+
+    <div class="build-cta-row reveal">
+      <p>Nothing's shipped yet — which is exactly why it's a good time to build something together.</p>
+      <a href="#contact" class="btn btn-primary" data-magnetic>Let's Collaborate</a>
+    </div>
+  </section>
+
+  <!-- ============================ CONTACT — TERMINAL ============================ -->
+  <section class="section container" id="contact" aria-labelledby="contact-heading">
+    <div class="section-head reveal" style="text-align:center;max-width:none;">
+      <p class="section-eyebrow" style="justify-content:center;display:flex;">// Open a Channel</p>
+      <h2 class="section-title" id="contact-heading">Let's build something</h2>
+      <p class="section-desc" style="margin-inline:auto;">Type <span class="mono">help</span> below, or tap a command — this terminal is the fastest way to reach me.</p>
+    </div>
+
+    <div class="terminal-shell panel bracket-frame reveal">
+      <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
+
+      <div class="terminal-titlebar">
+        <span class="terminal-dot dot-red" aria-hidden="true"></span>
+        <span class="terminal-dot dot-yellow" aria-hidden="true"></span>
+        <span class="terminal-dot dot-green" aria-hidden="true"></span>
+        <span class="terminal-titletext mono">guest@ibas.sys — contact</span>
+      </div>
+
+      <div class="terminal-body mono" id="terminalBody" role="log" aria-live="polite" aria-label="Terminal output">
+        <p class="term-line">IBAS.SYS terminal — type <span class="term-cmd">help</span> to see available commands.</p>
+      </div>
+
+      <form class="terminal-inputrow" id="terminalForm">
+        <span class="terminal-prompt mono" aria-hidden="true">guest@ibas:~$</span>
+        <input type="text" id="terminalInput" class="terminal-input mono" autocomplete="off" spellcheck="false" autocapitalize="off" aria-label="Terminal command input" placeholder="type a command…">
+      </form>
+
+      <div class="terminal-quickrow" role="group" aria-label="Quick commands">
+        <button type="button" class="quick-cmd" data-cmd="help">help</button>
+        <button type="button" class="quick-cmd" data-cmd="about">about</button>
+        <button type="button" class="quick-cmd" data-cmd="skills">skills</button>
+        <button type="button" class="quick-cmd" data-cmd="projects">projects</button>
+        <button type="button" class="quick-cmd" data-cmd="contact">contact</button>
+        <button type="button" class="quick-cmd quick-cmd-vcard vcard-trigger" id="vcardBtn">📇 save contact</button>
+      </div>
+    </div>
+
+    <div class="contact-links reveal" role="group" aria-label="Direct contact links">
+      <a class="contact-link" href="mailto:baswarahafizh@gmail.com" data-magnetic>
+        <span class="contact-link-icon" aria-hidden="true">✉</span> Email me
+      </a>
+      <a class="contact-link" href="https://www.linkedin.com/in/baswara-hafizh-muttaqin-68a7b4329/" target="_blank" rel="noopener noreferrer" data-magnetic>
+        <span class="contact-link-icon" aria-hidden="true">in</span> LinkedIn
+      </a>
+      <a class="contact-link" href="https://instagram.com/baswara.hm" target="_blank" rel="noopener noreferrer" data-magnetic>
+        <span class="contact-link-icon" aria-hidden="true">◎</span> Instagram
+      </a>
+      <a class="contact-link" href="https://discord.gg/53y7EKCfwP" target="_blank" rel="noopener noreferrer" data-magnetic>
+        <span class="contact-link-icon" aria-hidden="true">◆</span> Discord
+      </a>
+      <button type="button" class="contact-link contact-link-accent vcard-trigger" id="vcardBtnMain">
+        <span class="contact-link-icon" aria-hidden="true">📇</span> Save contact card
+      </button>
+    </div>
+
+    <noscript>
+      <p style="text-align:center;color:var(--text-dim);margin-top:16px;">
+        Email: baswarahafizh@gmail.com ·
+        <a href="https://www.linkedin.com/in/baswara-hafizh-muttaqin-68a7b4329/">LinkedIn</a> ·
+        <a href="https://instagram.com/baswara.hm">Instagram</a> ·
+        <a href="https://discord.gg/53y7EKCfwP">Discord</a>
+      </p>
+    </noscript>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p><span class="footer-name">Baswara Hafizh Muttaqin</span> · Solo, Indonesia → Penang, Malaysia</p>
+    <button class="to-top-btn" id="toTopBtn" aria-label="Scroll to top">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 19V5M5 12l7-7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
   </div>
 </footer>
 
-<script src="script.js"></script>
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span class="check">✓</span> <span id="toastMsg">Email copied to clipboard</span>
+</div>
+
+<div class="matrix-overlay" id="matrixOverlay" aria-hidden="true">
+  <canvas id="matrixCanvas"></canvas>
+  <p class="matrix-hint mono">MATRIX MODE — press <kbd>Esc</kbd> to exit</p>
+</div>
+
+<script>
+  // Safety net: .reveal elements start at opacity:0 until main.js's
+  // IntersectionObserver adds .is-visible. If the module scripts below
+  // fail to load for any reason (e.g. opening this file directly via
+  // file:// — browsers block type="module" imports under CORS there —
+  // or a slow connection), force everything visible instead of leaving
+  // the page blank. This is a plain classic script, so it still runs
+  // even when the module scripts are blocked.
+  setTimeout(function(){
+    document.querySelectorAll('.reveal:not(.is-visible)').forEach(function(el){
+      el.classList.add('is-visible');
+    });
+  }, 1500);
+</script>
+<script type="module">
+  import { onScroll } from './js/main.js';
+  import { restoreSavedPalette, initColorWalk } from './js/theme.js';
+  import { initWeatherBackground } from './js/weather.js';
+  import { initMemory, trackSection, showWelcomeCard } from './js/memory.js';
+  import { runBootSequence } from './js/boot.js';
+  import { initCursorFx, initRipples, initCopyEmail, initToTop, initVCard } from './js/interaction.js';
+  import { initDecryptTagline, initXpBar, initLiveClock, initHeroParallax, initHeroStats, initScrollIndicator } from './js/hero.js';
+  import { initQuestTabs, initQuestExpand, initSkillBars } from './js/timeline.js';
+  import { initKonamiCode } from './js/easter-egg.js';
+  import { initTerminal } from './js/terminal.js';
+  import { initCommandPalette } from './js/command-palette.js';
+  import { initGithubFeed } from './js/github.js';
+
+  // ---- system bring-up order matters here ----
+  // 1) palette + weather restore synchronously (before anything else reads
+  //    --accent / data-weather), so the very first frame is already correct.
+  restoreSavedPalette();
+  initWeatherBackground();
+
+  // 2) AI Memory — figure out if this browser has been here before, and
+  //    bump the visit counters, ahead of deciding which boot to play.
+  const { isReturning, previous } = initMemory();
+  onScroll(({ currentId }) => trackSection(currentId));
+
+  // 3) everything else initializes immediately underneath the boot overlay
+  //    (it's opaque / highest z-index, so there's no visible race).
+  initColorWalk();
+  initCursorFx();
+  initRipples();
+  initCopyEmail();
+  initToTop();
+  initVCard();
+  initDecryptTagline();
+  initXpBar();
+  initLiveClock();
+  initHeroParallax();
+  initHeroStats();
+  initScrollIndicator();
+  initQuestTabs();
+  initQuestExpand();
+  initSkillBars();
+  initKonamiCode();
+  initTerminal();
+  initCommandPalette();
+  initGithubFeed();
+
+  // 4) Launch Sequence — full boot for first-ever visits, a sub-second
+  //    "Welcome Back" beat for returning ones, skipped entirely on refresh
+  //    within the same browser session.
+  runBootSequence({
+    isReturning,
+    onComplete(){
+      if(isReturning) showWelcomeCard(previous);
+    }
+  });
+</script>
 </body>
 </html>

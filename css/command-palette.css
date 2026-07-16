@@ -1,0 +1,66 @@
+/* ==========================================================================
+   COMMAND-PALETTE.CSS — Ctrl/Cmd+K quick nav.
+   Logic in js/command-palette.js. A centered glass panel over a dimmed
+   backdrop, consistent with the theme-panel/memory-card glass language
+   already used elsewhere on the site.
+   ========================================================================== */
+
+.cmdk-overlay{
+  position:fixed; inset:0; z-index:var(--z-forge);
+  background:rgba(5,7,11,.6); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  display:flex; align-items:flex-start; justify-content:center;
+  padding:12vh 16px 0;
+  opacity:0; transition:opacity .18s ease;
+}
+.cmdk-overlay[hidden]{ display:none; }
+.cmdk-overlay.is-open{ opacity:1; }
+
+.cmdk-panel{
+  width:100%; max-width:560px; max-height:min(60vh, 480px);
+  background:rgba(17,22,31,.92); border:1px solid rgba(var(--accent-rgb),.28);
+  border-radius:var(--radius-l); box-shadow:var(--shadow-l), 0 0 44px rgba(var(--accent-rgb),.14);
+  display:flex; flex-direction:column; overflow:hidden;
+  transform:translateY(-10px) scale(.98); transition:transform .18s var(--ease-spring);
+}
+.cmdk-overlay.is-open .cmdk-panel{ transform:translateY(0) scale(1); }
+
+.cmdk-inputrow{
+  display:flex; align-items:center; gap:10px; padding:14px 18px;
+  border-bottom:1px solid var(--border-soft); flex-shrink:0;
+}
+.cmdk-prompt{ color:var(--accent); font-size:1.1rem; }
+.cmdk-input{
+  flex:1; background:none; border:none; color:var(--text);
+  font-size:.95rem; outline:none; min-height:24px;
+}
+.cmdk-input::placeholder{ color:var(--text-mute); }
+.cmdk-esc{
+  font-family:var(--font-mono); font-size:.66rem; color:var(--text-mute);
+  border:1px solid var(--border); border-radius:4px; padding:2px 6px;
+}
+
+.cmdk-list{ list-style:none; margin:0; padding:8px; overflow-y:auto; }
+.cmdk-group{
+  font-family:var(--font-mono); font-size:.64rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-mute); padding:10px 10px 4px;
+}
+.cmdk-item{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:10px 12px; border-radius:var(--radius-s); cursor:pointer;
+  font-size:.88rem; color:var(--text-dim); transition:background .15s ease, color .15s ease;
+}
+.cmdk-item-label{ color:inherit; }
+.cmdk-item-hint{ font-family:var(--font-mono); font-size:.7rem; color:var(--text-mute); }
+.cmdk-item.is-active{
+  background:rgba(var(--accent-rgb),.14); color:var(--text);
+}
+.cmdk-item.is-active .cmdk-item-hint{ color:var(--text-dim); }
+.cmdk-empty{ padding:24px 12px; text-align:center; color:var(--text-mute); font-size:.85rem; }
+
+@media (max-width:600px){
+  .cmdk-overlay{ padding-top:8vh; }
+  .cmdk-panel{ max-height:70vh; }
+}
+@media (prefers-reduced-motion: reduce){
+  .cmdk-overlay, .cmdk-panel{ transition-duration:.001ms; }
+}
