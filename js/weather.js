@@ -8,7 +8,7 @@
 
 import { reducedMotion } from './main.js';
 
-const CACHE_KEY = 'ibas_weather_cache';
+const CACHE_KEY = 'baswara_weather_cache';
 const REFRESH_MS = 30 * 60 * 1000;
 const root = document.documentElement;
 

@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="css/memory.css">
 <link rel="stylesheet" href="css/command-palette.css">
 <link rel="stylesheet" href="css/github-feed.css">
+<link rel="stylesheet" href="css/skills-viz.css">
 <link rel="stylesheet" href="css/boot.css">
 <link rel="stylesheet" href="css/responsive.css">
 </head>
@@ -71,7 +72,7 @@
   <div class="nav-inner">
     <a href="#main" class="nav-brand">
       <span class="dot" aria-hidden="true"></span>
-      IBAS.SYS
+      BASWARA.HM
     </a>
     <ul class="nav-links" id="navLinks">
       <li><a href="#about">About</a></li>
@@ -124,7 +125,7 @@
       <div class="hero-badge hero-badge-3" aria-hidden="true" title="Science Castle Asia — Bronze"><span class="mono">SC</span></div>
     </div>
     <div class="hero-body">
-      <p class="eyebrow"><span class="blip" aria-hidden="true"></span> Character online · Solo, Indonesia</p>
+      <p class="eyebrow"><span class="blip" aria-hidden="true"></span> SUrakarta, Indonesia</p>
       <h1 class="hero-title" id="hero-heading">Baswara Hafizh <span class="highlight">Muttaqin</span></h1>
       <p class="hero-tagline mono" id="decryptTagline" aria-live="polite"></p>
       <p class="hero-line-id">“rakyat biasa dari Solo” — an ordinary person who loves to learn. CS (Intelligent Computing) student at Universiti Sains Malaysia.</p>
@@ -197,13 +198,28 @@
 
   <!-- ============================ SKILLS ============================ -->
   <section class="section container" id="skills" aria-labelledby="skills-heading">
-    <div class="section-head reveal">
+    <div class="section-head reveal" style="margin-bottom:0;">
       <p class="section-eyebrow">// Tech Stack</p>
       <h2 class="section-title" id="skills-heading">Skills</h2>
       <p class="section-desc">Honest numbers for a freshman — this is where the grind is right now, not a finished build.</p>
     </div>
-    <div class="skills-grid">
-      <div class="skill-card panel bracket-frame reveal" data-tilt>
+
+    <div class="skills-toolbar reveal">
+      <div class="skills-viewswitch" role="tablist" aria-label="Skill view">
+        <button type="button" class="skills-view-btn is-active" data-view="bars" role="tab" aria-selected="true">Bars</button>
+        <button type="button" class="skills-view-btn" data-view="radar" role="tab" aria-selected="false">Radar</button>
+        <button type="button" class="skills-view-btn" data-view="constellation" role="tab" aria-selected="false">Constellation</button>
+      </div>
+      <div class="skills-filters" id="skillsFilters" role="group" aria-label="Filter by category">
+        <button type="button" class="skills-filter-chip is-active" data-cat="all">All</button>
+        <button type="button" class="skills-filter-chip" data-cat="Languages">Languages</button>
+        <button type="button" class="skills-filter-chip" data-cat="Tools">Tools</button>
+        <button type="button" class="skills-filter-chip" data-cat="Design">Design</button>
+      </div>
+    </div>
+
+    <div class="skills-grid" id="skillsBarsView" data-skills-view="bars">
+      <div class="skill-card panel bracket-frame reveal" data-tilt data-cat="Languages">
         <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
         <p class="skill-group-title">Languages</p>
         <div class="skill-item" data-pct="60">
@@ -223,7 +239,7 @@
         </div>
       </div>
 
-      <div class="skill-card panel bracket-frame reveal" data-tilt>
+      <div class="skill-card panel bracket-frame reveal" data-tilt data-cat="Tools">
         <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
         <p class="skill-group-title">Tools</p>
         <div class="skill-item" data-pct="55">
@@ -243,7 +259,7 @@
         </div>
       </div>
 
-      <div class="skill-card panel bracket-frame reveal" data-tilt>
+      <div class="skill-card panel bracket-frame reveal" data-tilt data-cat="Design">
         <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
         <p class="skill-group-title">Design</p>
         <div class="skill-item" data-pct="45">
@@ -262,6 +278,19 @@
           <span class="skill-pct mono">65%</span>
         </div>
       </div>
+    </div>
+
+    <div class="skills-radar-view panel bracket-frame reveal" id="skillsRadarView" data-skills-view="radar" hidden>
+      <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
+      <div class="skills-radar-chart" id="skillsRadarChart" aria-hidden="true"></div>
+      <div class="skills-radar-detail" id="skillsRadarDetail">
+        <p class="skills-radar-hint mono">Hover or tap an axis to see the detail here.</p>
+      </div>
+    </div>
+
+    <div class="skills-constellation-view panel bracket-frame reveal" id="skillsConstellationView" data-skills-view="constellation" hidden>
+      <span class="bk-tr" aria-hidden="true"></span><span class="bk-bl" aria-hidden="true"></span>
+      <div class="skills-constellation" id="skillsConstellation" aria-hidden="true"></div>
     </div>
   </section>
 
@@ -430,7 +459,7 @@
     <div class="section-head reveal">
       <p class="section-eyebrow">// In Progress</p>
       <h2 class="section-title" id="building-heading">Currently Building</h2>
-      <p class="section-desc">No shipped projects yet — here's what's on the workbench, honestly labeled by stage.</p>
+      <p class="section-desc">No shipped projects yet —</p>
     </div>
     <!--<div class="build-grid">
       <div class="build-card panel bracket-frame reveal" data-tilt>
@@ -462,9 +491,31 @@
         <h3 class="github-feed-title mono">Live from GitHub</h3>
         <a class="github-feed-link mono" id="githubProfileLink" href="https://github.com/" target="_blank" rel="noopener noreferrer">view profile →</a>
       </div>
-      <ul class="github-feed-list" id="githubFeedList">
-        <li class="github-feed-item is-loading">Syncing recent activity…</li>
-      </ul>
+
+      <div class="gh-skeleton" data-gh="skeleton">
+        <div class="gh-skel-row"></div>
+        <div class="gh-skel-stats"><span></span><span></span><span></span></div>
+        <div class="gh-skel-grid"><span></span><span></span><span></span></div>
+      </div>
+
+      <div data-gh="live" hidden>
+        <div class="gh-stats-row">
+          <div class="gh-stat"><span class="gh-stat-num mono" data-gh-stat="repos">0</span><span class="gh-stat-label">Public repos</span></div>
+          <div class="gh-stat"><span class="gh-stat-num mono" data-gh-stat="stars">0</span><span class="gh-stat-label">Stars earned</span></div>
+          <div class="gh-stat"><span class="gh-stat-num mono" data-gh-stat="followers">0</span><span class="gh-stat-label">Followers</span></div>
+        </div>
+
+        <div class="gh-contrib-graph" data-gh="contrib-graph" hidden></div>
+
+        <div class="gh-lang-block">
+          <div class="gh-lang-bar" data-gh="lang-bar"></div>
+          <div class="gh-lang-legend" data-gh="lang-legend"></div>
+        </div>
+
+        <ul class="github-feed-list" id="githubFeedList"></ul>
+
+        <div class="gh-repo-grid" data-gh="repo-grid"></div>
+      </div>
     </div>
 
     <div class="build-cta-row reveal">
@@ -488,15 +539,15 @@
         <span class="terminal-dot dot-red" aria-hidden="true"></span>
         <span class="terminal-dot dot-yellow" aria-hidden="true"></span>
         <span class="terminal-dot dot-green" aria-hidden="true"></span>
-        <span class="terminal-titletext mono">guest@ibas.sys — contact</span>
+        <span class="terminal-titletext mono">guest@baswara.hm — contact</span>
       </div>
 
       <div class="terminal-body mono" id="terminalBody" role="log" aria-live="polite" aria-label="Terminal output">
-        <p class="term-line">IBAS.SYS terminal — type <span class="term-cmd">help</span> to see available commands.</p>
+        <p class="term-line">BASWARA.HM terminal — type <span class="term-cmd">help</span> to see available commands.</p>
       </div>
 
       <form class="terminal-inputrow" id="terminalForm">
-        <span class="terminal-prompt mono" aria-hidden="true">guest@ibas:~$</span>
+        <span class="terminal-prompt mono" aria-hidden="true">guest@baswara:~$</span>
         <input type="text" id="terminalInput" class="terminal-input mono" autocomplete="off" spellcheck="false" autocapitalize="off" aria-label="Terminal command input" placeholder="type a command…">
       </form>
 
@@ -506,6 +557,8 @@
         <button type="button" class="quick-cmd" data-cmd="skills">skills</button>
         <button type="button" class="quick-cmd" data-cmd="projects">projects</button>
         <button type="button" class="quick-cmd" data-cmd="contact">contact</button>
+        <button type="button" class="quick-cmd" data-cmd="neofetch">neofetch</button>
+        <button type="button" class="quick-cmd" data-cmd="github">github</button>
         <button type="button" class="quick-cmd quick-cmd-vcard vcard-trigger" id="vcardBtn">📇 save contact</button>
       </div>
     </div>
@@ -520,7 +573,7 @@
       <a class="contact-link" href="https://instagram.com/baswara.hm" target="_blank" rel="noopener noreferrer" data-magnetic>
         <span class="contact-link-icon" aria-hidden="true">◎</span> Instagram
       </a>
-      <a class="contact-link" href="https://discord.gg/53y7EKCfwP" target="_blank" rel="noopener noreferrer" data-magnetic>
+      <a class="contact-link" href="https://discord.gg/3PHBSJscNe" target="_blank" rel="noopener noreferrer" data-magnetic>
         <span class="contact-link-icon" aria-hidden="true">◆</span> Discord
       </a>
       <button type="button" class="contact-link contact-link-accent vcard-trigger" id="vcardBtnMain">
@@ -585,6 +638,7 @@
   import { initTerminal } from './js/terminal.js';
   import { initCommandPalette } from './js/command-palette.js';
   import { initGithubFeed } from './js/github.js';
+  import { initSkillsViz } from './js/skills-viz.js';
 
   // ---- system bring-up order matters here ----
   // 1) palette + weather restore synchronously (before anything else reads
@@ -618,6 +672,7 @@
   initTerminal();
   initCommandPalette();
   initGithubFeed();
+  initSkillsViz();
 
   // 4) Launch Sequence — full boot for first-ever visits, a sub-second
   //    "Welcome Back" beat for returning ones, skipped entirely on refresh

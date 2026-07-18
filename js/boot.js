@@ -9,7 +9,7 @@
 
 import { reducedMotion } from './main.js';
 
-const SESSION_KEY = 'ibas_boot_played';
+const SESSION_KEY = 'baswara_boot_played';
 const WELCOME_LINES = ['WELCOME TO MY PORTFOLIO!', 'MISSION READY.'];
 const LOG_LINES = [
   'Loading Assets…', 'Initializing Interface…', 'Rendering Experience…',

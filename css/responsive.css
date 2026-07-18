@@ -42,6 +42,41 @@ button, a, input, [role="button"], [role="tab"]{
   .quest-entry-btn{ padding:16px 16px 16px 52px; gap:10px; }
 }
 
+/* ---- ≤600 : the "table-like" rows (about HUD, skill heads, quest meta)
+   were laid out with justify-content:space-between + nowrap, which reads
+   fine on desktop but forces two columns to fight for space on a phone —
+   long values truncate or the row squeezes its font down. Stack them
+   instead so nothing competes for width. ------------------------------ */
+@media (max-width:600px){
+  .about-hud{ padding:18px 16px; }
+  .hud-row{
+    flex-direction:column; align-items:flex-start; gap:4px;
+    padding:10px 0; font-size:.86rem;
+  }
+  .hud-row .k{ font-size:.7rem; }
+  .hud-row .v{ font-size:.86rem; }
+
+  .skill-item-head{ flex-wrap:wrap; row-gap:4px; }
+  .skill-name{ font-size:.88rem; }
+
+  .quest-entry-main{ flex-wrap:wrap; row-gap:6px; }
+  .quest-date{ min-width:0; }
+  .quest-status{ font-size:.62rem; padding:3px 8px; }
+
+  /* terminal readability on small phones — desktop-sized mono type in a
+     narrow column is what made it feel "too big" */
+  .terminal-body{ font-size:.78rem; line-height:1.55; }
+  .terminal-input{ font-size:.86rem; }
+  .terminal-titletext{ font-size:.66rem; }
+}
+
+@media (max-width:380px){
+  .hero-title{ font-size:clamp(2.1rem, 1.3rem + 7vw, 2.6rem); }
+  .terminal-body{ font-size:.74rem; }
+  .quest-title{ font-size:.94rem; }
+  .quest-org{ font-size:.8rem; }
+}
+
 /* ---- ≤320 : smallest supported phone — collapse container gutters ----- */
 @media (max-width:320px){
   .container{ padding-inline: var(--sp-2xs); }

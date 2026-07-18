@@ -471,9 +471,37 @@ main{ position:relative; z-index:var(--z-content); }
 .terminal-body a{ color:var(--teal); }
 
 .terminal-inputrow{
+  position:relative;
   display:flex; align-items:center; gap:10px; padding:12px 18px;
   border-top:1px solid var(--border-soft); background:var(--panel-2);
 }
+
+/* ---- terminal autocomplete dropdown ---- */
+.term-suggest{
+  position:absolute; left:18px; right:18px; bottom:calc(100% + 4px);
+  display:flex; flex-wrap:wrap; gap:6px;
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--radius-s); padding:8px; box-shadow:var(--shadow-m);
+  z-index:5;
+}
+.term-suggest[hidden]{ display:none; }
+.term-suggest-item{
+  font-family:var(--font-mono); font-size:.76rem; color:var(--text-dim);
+  background:var(--panel-2); border:1px solid var(--border-soft);
+  border-radius:6px; padding:4px 9px; cursor:pointer; transition:all .15s ease;
+}
+.term-suggest-item:hover{ color:var(--accent); border-color:var(--accent); }
+
+/* ---- terminal JSON viewer ---- */
+.term-json{
+  margin:0 0 10px; padding:12px 14px; background:var(--panel);
+  border:1px solid var(--border-soft); border-radius:var(--radius-s);
+  font-family:var(--font-mono); font-size:.82rem; line-height:1.6;
+  overflow-x:auto; white-space:pre;
+}
+.term-json-key{ color:var(--accent-2); }
+.term-json-str{ color:var(--gold); }
+.term-json-num{ color:var(--emerald); }
 .terminal-prompt{ color:var(--accent-2); font-size:.84rem; flex-shrink:0; }
 .terminal-input{
   flex:1; background:none; border:none; color:var(--text); font-size:.9rem;

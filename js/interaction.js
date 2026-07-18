@@ -157,7 +157,7 @@ export function downloadVCard(){
     'TITLE:CS (Intelligent Computing) Student — USM',
     `EMAIL;TYPE=INTERNET:${VCARD_EMAIL}`,
     'URL:https://www.linkedin.com/in/baswara-hafizh-muttaqin-68a7b4329/',
-    'NOTE:Found via IBAS.SYS portfolio.',
+    'NOTE:Found via BASWARA.HM portfolio.',
     'END:VCARD'
   ];
   const blob = new Blob([lines.join('\r\n')], { type:'text/vcard;charset=utf-8' });

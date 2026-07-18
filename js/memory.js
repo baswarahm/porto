@@ -5,7 +5,7 @@
    hidden achievements — then greets returning visitors with a glass card.
    ========================================================================== */
 
-const KEY = 'ibas_memory';
+const KEY = 'baswara_memory';
 const SECTION_LABELS = {
   hero: 'Hero', about: 'About', skills: 'Skills',
   'quest-log': 'Quest Log', building: 'Building', contact: 'Contact'
