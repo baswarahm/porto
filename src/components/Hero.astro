@@ -1,0 +1,51 @@
+---
+import { profile, heroBadges, heroStats } from '../data/profile';
+---
+<section class="section hero container" id="hero" aria-labelledby="hero-heading">
+  <div class="hero-avatar-wrap" data-parallax>
+    <div class="hero-avatar-ring" aria-hidden="true"></div>
+    <div class="hero-avatar">
+      <img src={profile.avatar} alt={profile.name}>
+    </div>
+    <div class="hero-level mono">{profile.level}</div>
+
+    {heroBadges.map((b, i) => (
+      <div class={`hero-badge hero-badge-${i + 1}`} aria-hidden="true" title={b.title}><span class="mono">{b.short}</span></div>
+    ))}
+  </div>
+  <div class="hero-body">
+    <p class="eyebrow"><span class="blip" aria-hidden="true"></span> {profile.location}</p>
+    <h1 class="hero-title" id="hero-heading">{profile.firstName} <span class="highlight">{profile.lastName}</span></h1>
+    <p class="hero-tagline mono" id="decryptTagline" data-text={profile.tagline} aria-live="polite"></p>
+    <p class="hero-line-id">{profile.intro}</p>
+
+    <div class="hero-stats" role="list" aria-label="Quick stats">
+      {heroStats.map(s => (
+        <div class="hero-stat" role="listitem">
+          <span class="hero-stat-num mono" data-count-to={s.value}>0</span>
+          <span class="hero-stat-label">{s.label}</span>
+        </div>
+      ))}
+    </div>
+
+    <div class="hero-xp">
+      <div class="hero-xp-label">
+        <span>Freshman Year Progress</span>
+        <span id="xpPercentLabel">0%</span>
+      </div>
+      <div class="hero-xp-track" role="img" aria-label="Freshman year progress bar">
+        <div class="hero-xp-fill" id="xpFill"></div>
+      </div>
+    </div>
+
+    <div class="hero-ctas">
+      <a href="#projects" class="btn btn-primary" data-magnetic>See Projects</a>
+      <a href="#contact" class="btn btn-ghost" data-magnetic>Start a Collab</a>
+    </div>
+  </div>
+
+  <button class="scroll-indicator" id="scrollIndicator" aria-label="Scroll to About section">
+    <span class="scroll-indicator-mouse" aria-hidden="true"><span class="scroll-indicator-wheel"></span></span>
+    <span class="scroll-indicator-label mono">Scroll</span>
+  </button>
+</section>

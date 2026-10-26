@@ -1,0 +1,28 @@
+---
+import SectionHead from './SectionHead.astro';
+import Brackets from './Brackets.astro';
+import { skillGroups } from '../data/skills';
+---
+<section class="section container" id="skills" aria-labelledby="skills-heading">
+  <SectionHead eyebrow="// Tech Stack" title="Skills" id="skills-heading"
+    desc="Honest numbers for a freshman — this is where the grind is right now, not a finished build." />
+
+  <div class="skills-grid">
+    {skillGroups.map(g => (
+      <div class="skill-card panel bracket-frame reveal" data-tilt>
+        <Brackets />
+        <p class="skill-group-title">{g.category}</p>
+        {g.skills.map(s => (
+          <div class="skill-item" data-pct={s.pct}>
+            <div class="skill-item-head">
+              <span class="skill-name">{s.name}</span>
+              <span class={`skill-status ${s.status}`}>{s.status === 'active' ? 'Active' : 'Learning'}</span>
+            </div>
+            <div class="skill-bar-track"><div class="skill-bar-fill"></div></div>
+            <span class="skill-pct mono">{s.pct}%</span>
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
+</section>

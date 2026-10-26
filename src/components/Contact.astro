@@ -1,0 +1,23 @@
+---
+import SectionHead from './SectionHead.astro';
+import { socials } from '../data/profile';
+---
+<section class="section container" id="contact" aria-labelledby="contact-heading">
+  <SectionHead eyebrow="// Open a Channel" title="Let's build something" id="contact-heading" center
+    desc="Pick a channel — email is the fastest way to reach me." />
+
+  <div class="contact-links reveal" role="group" aria-label="Direct contact links">
+    {socials.map(s => {
+      const external = s.href.startsWith('http');
+      return (
+        <a class="contact-link" href={s.href} target={external ? '_blank' : undefined}
+          rel={external ? 'noopener noreferrer' : undefined} data-magnetic>
+          <span class="contact-link-icon" aria-hidden="true">{s.icon}</span> {s.label}
+        </a>
+      );
+    })}
+    <button type="button" class="contact-link contact-link-accent vcard-trigger">
+      <span class="contact-link-icon" aria-hidden="true">📇</span> Save contact card
+    </button>
+  </div>
+</section>

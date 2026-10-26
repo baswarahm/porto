@@ -1,0 +1,21 @@
+---
+import SectionHead from './SectionHead.astro';
+import Brackets from './Brackets.astro';
+import { about } from '../data/profile';
+---
+<section class="section container" id="about" aria-labelledby="about-heading">
+  <SectionHead eyebrow="// Character Sheet" title="About" id="about-heading" />
+  <div class="about-grid">
+    <div class="about-text reveal">
+      {about.paragraphs.map(p => <p>{p}</p>)}
+      <ul class="trait-list">
+        {about.traits.map(t => <li class="trait-chip">{t}</li>)}
+      </ul>
+    </div>
+    <div class="about-hud panel bracket-frame reveal">
+      <Brackets />
+      <div class="hud-row"><span class="k">Local Time (WIB)</span><span class="v mono" id="hudClock">--:--:--</span></div>
+      {about.hud.map(r => <div class="hud-row"><span class="k">{r.k}</span><span class="v mono">{r.v}</span></div>)}
+    </div>
+  </div>
+</section>
