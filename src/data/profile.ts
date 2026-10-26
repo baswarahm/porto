@@ -12,11 +12,11 @@ export const profile = {
 };
 
 export const socials = [
-  { label: 'github', href: 'https://github.com/baswarahm' },
-  { label: 'linkedin', href: 'https://www.linkedin.com/in/baswara-hafizh-muttaqin-68a7b4329/' },
-  { label: 'instagram', href: 'https://instagram.com/baswara.hm' },
-  { label: 'discord', href: 'https://discord.gg/3PHBSJscNe' },
-];
+  { label: 'github', handle: '@baswarahm', icon: 'github', href: 'https://github.com/baswarahm' },
+  { label: 'linkedin', handle: 'Baswara Hafizh Muttaqin', icon: 'linkedin', href: 'https://www.linkedin.com/in/baswara-hafizh-muttaqin-68a7b4329/' },
+  { label: 'instagram', handle: '@baswara.hm', icon: 'instagram', href: 'https://instagram.com/baswara.hm' },
+  { label: 'discord', handle: 'join my server', icon: 'discord', href: 'https://discord.gg/3PHBSJscNe' },
+] as const;
 
 /** Page sections in order. Drives the top nav, vim j/k navigation and `:<id>` commands. */
 export const sections = [
@@ -25,5 +25,6 @@ export const sections = [
   { id: 'now', label: 'now' },
   { id: 'targets', label: 'targets' },
   { id: 'projects', label: 'projects' },
+  { id: 'journey', label: 'journey' },
   { id: 'contact', label: 'contact' },
 ] as const;

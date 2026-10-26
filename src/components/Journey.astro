@@ -1,0 +1,41 @@
+---
+import SectionHead from './SectionHead.astro';
+import { experience, education, type TimelineItem } from '../data/experience';
+import { degreeProgress } from '../lib/degree';
+
+const { pct } = degreeProgress();
+const columns: { id: string; title: string; items: TimelineItem[] }[] = [
+  { id: 'exp', title: 'experience', items: experience },
+  { id: 'edu', title: 'education', items: education },
+];
+---
+<section id="journey" aria-labelledby="journey-h">
+  <div class="wrap">
+    <SectionHead n="05" title="Experience & education" note="the road so far · click an entry" id="journey-h" />
+    <div class="journey">
+      {columns.map(col => (
+        <div class="tl reveal" data-tl={col.id}>
+          <h3 class="tl-head"><span>{col.title}</span><span>{col.items.length}</span></h3>
+          <div class="tl-line" aria-hidden="true"><span></span></div>
+          {col.items.map((it, i) => (
+            <details class="tl-item" style={`--i:${i}`} data-pill>
+              <summary>
+                <span class="tl-dot" aria-hidden="true"></span>
+                <span class="tl-date">{it.date}</span>
+                <span class="tl-title">{it.title}</span>
+                <span class="tl-org">{it.org}</span>
+                <span class="tl-tag">{it.tag}</span>
+              </summary>
+              <div class="tl-body">
+                <p>{it.body}</p>
+                {it.ongoing && (
+                  <p class="tl-live"><span class="bar"><span data-degree-fill style={`width:${(pct * 100).toFixed(1)}%`}></span></span><span data-degree-pct-short>{(pct * 100).toFixed(1)}%</span> of the degree done</p>
+                )}
+              </div>
+            </details>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

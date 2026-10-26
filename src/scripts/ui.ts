@@ -22,12 +22,114 @@ export function copyEmail(){
 }
 
 export function initReveal(){
-  const items = document.querySelectorAll('.reveal');
-  if (reducedMotion || !('IntersectionObserver' in window)){ items.forEach(el => el.classList.add('in')); return; }
-  const obs = new IntersectionObserver(entries => entries.forEach(e => {
-    if (e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); }
-  }), { threshold: .15 });
-  items.forEach(el => obs.observe(el));
+  let pending = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
+  if (reducedMotion){ pending.forEach(el => el.classList.add('in')); return; }
+  // a plain position check rather than IntersectionObserver: a fast jump can
+  // skip an element between two observer frames, but anything whose top has
+  // passed 88% of the viewport (including everything above it) gets revealed
+  let ticking = false;
+  const check = () => {
+    ticking = false;
+    const line = innerHeight * .88;
+    pending = pending.filter(el => {
+      if (el.getBoundingClientRect().top > line) return true;
+      el.classList.add('in');
+      return false;
+    });
+    if (!pending.length) removeEventListener('scroll', onScroll);
+  };
+  const onScroll = () => { if (!ticking){ ticking = true; requestAnimationFrame(check); } };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  check();
+}
+
+/* ---- sections: rule draws in, heading decrypts, watermark drifts --------- */
+const GLYPHS = 'abcdefghijklmnopqrstuvwxyz<>/{}#';
+function decrypt(el: HTMLElement){
+  const final = el.textContent ?? '';
+  if (reducedMotion || !final) return;
+  const start = performance.now(), dur = 700;
+  const frame = (now: number) => {
+    const t = Math.min(1, (now - start) / dur), keep = Math.floor(t * final.length);
+    el.textContent = final.slice(0, keep) + [...final.slice(keep)].map(ch => ch === ' ' ? ' ' : GLYPHS[(Math.random() * GLYPHS.length) | 0]).join('');
+    if (t < 1) requestAnimationFrame(frame); else el.textContent = final;
+  };
+  requestAnimationFrame(frame);
+}
+
+export function initSections(){
+  let unseen = Array.from(document.querySelectorAll<HTMLElement>('section'));
+  const markSeen = () => {
+    unseen = unseen.filter(s => {
+      if (s.getBoundingClientRect().top > innerHeight * .9) return true;
+      s.classList.add('seen');
+      return false;
+    });
+  };
+  addEventListener('scroll', () => requestAnimationFrame(markSeen), { passive: true });
+  markSeen();
+
+  const heads = new IntersectionObserver(entries => entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    decrypt(e.target as HTMLElement);
+    heads.unobserve(e.target);
+  }), { threshold: 1 });
+  document.querySelectorAll<HTMLElement>('.sec-head h2 .txt').forEach(h => heads.observe(h));
+
+  if (reducedMotion) return;
+  const marks = Array.from(document.querySelectorAll<HTMLElement>('.wm'));
+  const lines = Array.from(document.querySelectorAll<HTMLElement>('.tl'));
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    for (const m of marks){
+      const r = m.parentElement!.getBoundingClientRect();
+      m.style.setProperty('--py', `${(r.top - innerHeight / 2) * -.12}px`);
+    }
+    // timeline lines fill as the timeline passes through the viewport
+    for (const tl of lines){
+      const r = tl.getBoundingClientRect();
+      const p = Math.max(0, Math.min(1, (innerHeight * .8 - r.top) / r.height));
+      tl.querySelector<HTMLElement>('.tl-line')?.style.setProperty('--p', p.toFixed(3));
+    }
+  };
+  addEventListener('scroll', () => { if (!ticking){ ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  update();
+}
+
+/* ---- keyboard cheat sheet ------------------------------------------------- */
+export function initCheatSheet(rows: [string, string][]){
+  const sheet = $('#sheet'), list = $('#sheetList');
+  if (!sheet || !list) return { toggle: () => {} };
+  for (const [k, d] of rows){
+    const dt = document.createElement('dt'), dd = document.createElement('dd');
+    k.split(' ').forEach((part, i) => { if (i) dt.append(' '); const kb = document.createElement('kbd'); kb.textContent = part; dt.append(kb); });
+    dd.textContent = d;
+    list.append(dt, dd);
+  }
+  let last: Element | null = null;
+  const close = () => { sheet.classList.remove('open'); (last as HTMLElement | null)?.focus?.(); };
+  const toggle = () => {
+    if (sheet.classList.contains('open')) return close();
+    last = document.activeElement;
+    sheet.classList.add('open');
+    $('#sheetClose')?.focus();
+  };
+  $('#sheetClose')?.addEventListener('click', close);
+  sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && sheet.classList.contains('open')) close(); });
+  return { toggle };
+}
+
+/* ---- typing "sudo" anywhere ----------------------------------------------- */
+export function initSudo(){
+  let buf = '';
+  addEventListener('keydown', e => {
+    if ((e.target as HTMLElement).matches?.('input, textarea') || e.key.length !== 1) return;
+    buf = (buf + e.key.toLowerCase()).slice(-4);
+    if (buf === 'sudo'){ toast('nice try — baswara is not in the sudoers file. this incident will be reported.'); buf = ''; }
+  });
 }
 
 /** lights the top-nav link for the section in view */

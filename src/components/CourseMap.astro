@@ -1,0 +1,48 @@
+---
+import SectionHead from './SectionHead.astro';
+import { curriculum, tracks, type Track } from '../data/courses';
+import { degreeProgress } from '../lib/degree';
+
+const { current, semesters } = degreeProgress();
+const credits = (from: number, to: number) => curriculum.slice(from, to).flat().reduce((n, c) => n + c.credits, 0);
+const total = credits(0, curriculum.length);
+const done = credits(0, current);
+const now = credits(current, current + 1);
+const trackKeys = Object.keys(tracks) as Track[];
+---
+<div class="cmap-wrap">
+  <SectionHead n="map" title="Four-year course map" note="the real USM study plan, CS courses only · click any course" small />
+
+  <div class="cmap-stats reveal" id="cmapStats" data-total={total}>
+    <div><b data-count={done}>{done}</b><span>credits done</span></div>
+    <div><b data-count={now}>{now}</b><span>in progress</span></div>
+    <div><b data-count={total - done - now}>{total - done - now}</b><span>to go</span></div>
+    <div class="cmap-meter" role="img" aria-label={`${done + now} of ${total} CS credits started`}>
+      <span class="m-done" style={`width:${(done / total) * 100}%`}></span><span class="m-now" style={`width:${(now / total) * 100}%`}></span>
+    </div>
+  </div>
+
+  <div class="cmap-tools">
+    <div class="chips" role="group" aria-label="Filter by track">
+      <button class="chip" type="button" aria-pressed="true" data-track="all">all</button>
+      {trackKeys.map(t => <button class="chip" type="button" aria-pressed="false" data-track={t}><i class={`tk tk-${t}`}></i>{tracks[t].label}</button>)}
+    </div>
+    <label class="cmap-search"><span aria-hidden="true">/</span><input type="search" id="cmapSearch" placeholder="search courses, e.g. learning" autocomplete="off" spellcheck="false" aria-label="Search courses"></label>
+  </div>
+
+  <div class="cmap reveal wipe" id="cmap">
+    {curriculum.map((list, i) => (
+      <div class={`cmap-col ${semesters[i].state}`} data-sem={i}>
+        <p class="cmap-head"><span>{semesters[i].label}</span><span>{list.reduce((n, c) => n + c.credits, 0)} cr</span></p>
+        {list.map((c, k) => (
+          <button type="button" class={`tile tk-${c.track} ${semesters[i].state}`} style={`--k:${i * 3 + k}`}
+            data-code={c.code} data-name={c.name} data-credits={c.credits} data-track={c.track} data-sem={i}>
+            <span class="code">{c.code}</span>
+            <span class="name">{c.name}</span>
+          </button>
+        ))}
+      </div>
+    ))}
+  </div>
+  <p class="cmap-detail" id="cmapDetail" aria-live="polite"><span class="mono">tip:</span> press <kbd>/</kbd> to search the map.</p>
+</div>

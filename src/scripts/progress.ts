@@ -4,19 +4,29 @@
    ========================================================================== */
 import { $, reducedMotion } from './env';
 import { degreeProgress, textBar } from '../lib/degree';
+import { curriculum } from '../data/courses';
 
 /* ---- degree track: live values + clickable semesters ---------------------- */
-export function initProgress(){
+export function initProgress(map: { open: (code: string) => void; focusSem: (i: number) => void }){
   const p = degreeProgress();
   const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('#semTrack .sem'));
   const detail = $('#semDetail');
 
+  // a semester shows its courses; each one jumps to its tile on the course map
   const select = (btn: HTMLButtonElement) => {
     buttons.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
-    const s = p.semesters[+btn.dataset.sem!];
+    const i = +btn.dataset.sem!, s = p.semesters[i];
     const state = s.state === 'done' ? 'done' : s.state === 'now' ? `in progress · ${Math.round(s.fill * 100)}%` : 'planned';
-    if (detail) detail.innerHTML = `<b>${s.label} · ${state}</b><span></span>`;
-    detail?.querySelector('span')?.append(btn.dataset.plan ?? '');
+    if (!detail) return;
+    detail.innerHTML = `<b>${s.label} · ${state}</b><span></span>`;
+    const list = detail.querySelector('span')!;
+    for (const c of curriculum[i]){
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip-link'; b.textContent = c.code; b.title = c.name;
+      b.addEventListener('click', () => map.open(c.code));
+      list.append(b);
+    }
+    map.focusSem(i);
   };
 
   buttons.forEach((el, i) => {
@@ -36,6 +46,8 @@ export function initProgress(){
   if (fact) fact.textContent = `${pct} done`;
   const sem = $('[data-sem-label]');
   if (sem) sem.textContent = `year ${p.year}, semester ${p.sem}`;
+  document.querySelectorAll<HTMLElement>('[data-degree-fill]').forEach(el => { el.style.width = pct; });
+  document.querySelectorAll<HTMLElement>('[data-degree-pct-short]').forEach(el => { el.textContent = pct; });
 }
 
 /* ---- git log -------------------------------------------------------------- */

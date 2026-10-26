@@ -11,7 +11,7 @@ const labels = [...new Set(Object.values(targets).flat().map(t => t.label))];
       <button class="chip" type="button" aria-pressed="true" data-l="all">all</button>
       {labels.map(l => <button class="chip" type="button" aria-pressed="false" data-l={l}>{l}</button>)}
     </div>
-    <div class="targets reveal">
+    <div class="targets reveal wipe">
       {targetColumns.map(col => (
         <div class={`col ${col.key}`}>
           <h3>{col.title}<span>{targets[col.key].length}</span></h3>

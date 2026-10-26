@@ -1,8 +1,10 @@
 ---
 interface Props { n: string; title: string; note?: string; small?: boolean; id?: string }
 const { n, title, note, small = false, id } = Astro.props;
+const numbered = /^\d+$/.test(n);
 ---
 <div class="sec-head">
-  <h2 id={id} class:list={{ small }}><span class="n">{n}</span>{title}</h2>
+  {numbered && <span class="wm" aria-hidden="true">{n}</span>}
+  <h2 id={id} class:list={{ small }}><span class="n">{n}</span><span class="txt">{title}</span></h2>
   {note && <p set:html={note} />}
 </div>

@@ -24,7 +24,7 @@ export const targets: Record<'doing' | 'next' | 'done', Target[]> = {
     { title: 'Build an ML project for Intelligent Computing', label: 'ai', due: '2027', steps: [
       { text: 'Finish an intro ML course', done: false }, { text: 'Pick a real dataset', done: false }, { text: 'Train, evaluate, write it up', done: false },
     ] },
-    { title: 'Land a software engineering internship', label: 'career', due: '2028', steps: [
+    { title: 'Land a strong industrial training placement (CFC453)', label: 'career', due: '2030', steps: [
       { text: 'CV and portfolio ready', done: true }, { text: '3 solid projects', done: false }, { text: 'Apply to 20 places', done: false },
     ] },
   ],
@@ -32,8 +32,8 @@ export const targets: Record<'doing' | 'next' | 'done', Target[]> = {
     { title: 'Get into a CS degree', label: 'uni', due: '2026', steps: [
       { text: 'Finish SMA', done: true }, { text: 'Get accepted at USM', done: true },
     ] },
-    { title: 'Bronze medal at Science Castle Asia', label: 'research', due: '2025', steps: [
-      { text: 'Research project', done: true }, { text: 'Present in Malaysia', done: true },
+    { title: 'Rebuild my portfolio from scratch', label: 'build', due: 'oct 2026', steps: [
+      { text: 'Astro + TypeScript', done: true }, { text: 'Real curriculum and progress', done: true }, { text: 'Interactive everything', done: true },
     ] },
   ],
 };
