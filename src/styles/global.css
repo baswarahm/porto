@@ -164,6 +164,10 @@ section.flash{ animation:flash .6s; }
 @media (max-width:860px){
   .hero{ grid-template-columns:1fr; padding-top:24px; }
   .hero .photo{ order:-1; width:100%; }
+  /* phones: a wide banner crop (upper body + the sea of clouds) instead of
+     a full portrait that fills the whole first screen */
+  .hero .photo canvas, .hero .photo img{ aspect-ratio:16/10; object-fit:cover; object-position:50% 66%; }
+  .hero .photo img{ bottom:auto; height:auto; }
   .facts{ grid-template-columns:repeat(2,auto); }
   .sem-track{ grid-template-columns:repeat(4,1fr); }
   .sem:nth-child(4){ border-right:0; }
