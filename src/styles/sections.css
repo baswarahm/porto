@@ -155,30 +155,21 @@ kbd{ font:11px var(--mono); border:1px solid var(--rule); padding:0 5px; }
   #heroName .ch{ transition:none; }
 }
 
-/* ---- skills: logo ticker + logo grid ------------------------------------ */
-.ticker{ overflow:hidden; border-top:1px solid var(--ink); border-bottom:1px solid var(--ink); background:var(--paper); margin-bottom:22px; -webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
-.ticker-track{ display:flex; width:max-content; animation:ticker 38s linear infinite; }
+/* ---- "my skills" band: caption + moving logo strip ---------------------- */
+.sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.skills-band{ display:grid; grid-template-columns:auto 1fr; align-items:stretch; border:1px solid var(--ink); background:var(--paper); margin-bottom:8px; }
+.skills-cap{ display:flex; align-items:center; gap:10px; padding:0 22px; background:var(--ink); color:var(--paper); font:500 13px var(--mono); letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
+.skills-cap::before{ content:""; width:8px; height:8px; background:var(--signal); animation:pulse 1.6s ease-in-out infinite; }
+.ticker{ overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+.ticker-track{ display:flex; width:max-content; animation:ticker 40s linear infinite; }
 .ticker:hover .ticker-track{ animation-play-state:paused; }
-.ticker-item{ display:inline-flex; align-items:center; gap:10px; padding:12px 26px; border-right:1px solid var(--rule); font:13px var(--mono); color:var(--ink-2); transition:color .2s; }
+.ticker-item{ display:inline-flex; align-items:center; gap:10px; padding:16px 26px; border-right:1px solid var(--rule); font:13px var(--mono); color:var(--ink-2); transition:color .2s, transform .2s; }
 .ticker-item b{ font-weight:400; }
-.ticker-item:hover{ color:var(--brand); }
+.ticker-item:hover{ color:var(--brand); transform:translateY(-2px); }
 @keyframes ticker{ to{ transform:translateX(-50%); } }
-.sk-tools{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
-.sk-tools .chip span{ color:var(--ink-3); }
-.skills{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); border-left:1px solid var(--ink); border-top:1px solid var(--ink); background:var(--paper); }
-.skill{ position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:150px; padding:22px 12px 30px; background:var(--paper); color:var(--ink); border:0; border-right:1px solid var(--ink); border-bottom:1px solid var(--ink); cursor:pointer; font:inherit; transition:background .25s, opacity .35s, transform .35s; }
-.skill-logo{ display:grid; place-items:center; color:var(--ink); transition:color .25s, transform .35s cubic-bezier(.2,1.4,.3,1); transform:translate(var(--mx,0px), var(--my,0px)); }
-.skill-name{ font:500 14px var(--sans); transition:transform .3s; }
-.skill-tag{ position:absolute; top:8px; right:8px; font:10px var(--mono); color:var(--warn); border:1px solid currentColor; padding:0 5px; }
-.skill-used{ position:absolute; left:0; right:0; bottom:0; padding:7px 8px; font:11px/1.3 var(--mono); color:var(--paper); background:var(--ink); transform:translateY(101%); transition:transform .3s cubic-bezier(.2,.8,.2,1); }
-.skill:hover, .skill:focus-visible{ background:var(--paper-2); }
-.skill:hover .skill-logo, .skill:focus-visible .skill-logo, .skill[aria-pressed="true"] .skill-logo{ color:var(--brand); transform:translate(var(--mx,0px), var(--my,0px)) scale(1.18); }
-.skill:hover .skill-name, .skill[aria-pressed="true"] .skill-name{ transform:translateY(-8px); }
-.skill:hover .skill-used, .skill:focus-visible .skill-used, .skill[aria-pressed="true"] .skill-used{ transform:none; }
-.skill[aria-pressed="true"]{ box-shadow:inset 0 0 0 2px var(--brand); }
-.skill.off{ opacity:.12; transform:scale(.94); pointer-events:none; }
-.skills .skill{ opacity:0; transform:translateY(10px); }
-.in.skills .skill{ opacity:1; transform:none; transition:background .25s, opacity .4s calc(var(--i) * 35ms), transform .4s calc(var(--i) * 35ms); }
-.in.skills .skill.off{ opacity:.12; transform:scale(.94); }
-@media (max-width:520px){ .skills{ grid-template-columns:repeat(3,1fr); } .skill{ min-height:118px; padding:16px 6px 26px; } .skill-name{ font-size:12px; } }
-@media (prefers-reduced-motion:reduce){ .ticker-track{ animation:none; } .skills .skill{ opacity:1; transform:none; } }
+@media (max-width:520px){
+  .skills-band{ grid-template-columns:1fr; }
+  .skills-cap{ padding:8px 14px; }
+  .ticker-item{ padding:12px 18px; }
+}
+@media (prefers-reduced-motion:reduce){ .ticker{ overflow-x:auto; } .ticker-track{ animation:none; } }

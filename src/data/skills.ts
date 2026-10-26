@@ -1,4 +1,4 @@
-/* Skills shown as logos only — no percentages.
+/* Skills for the "my skills" logo strip and the :skills command.
    `logo` is a simple-icons slug, or 'vscode' (drawn from Tabler, since
    simple-icons no longer ships the VS Code mark). */
 export type SkillGroup = 'languages' | 'web & design' | 'frameworks & tools' | 'systems & deploy';
@@ -7,7 +7,7 @@ export interface Skill {
   name: string;
   logo: string;
   group: SkillGroup;
-  /** where I've used it — shown when the skill is opened */
+  /** where I've used it — listed by the :skills command */
   usedIn: string;
   learning?: boolean;
 }
@@ -35,5 +35,3 @@ export const skills: Skill[] = [
   { name: 'Kali Linux', logo: 'kalilinux', group: 'systems & deploy', usedIn: 'security basics, still learning', learning: true },
   { name: 'Vercel', logo: 'vercel', group: 'systems & deploy', usedIn: 'deploying Split Bill' },
 ];
-
-export const skillGroups: SkillGroup[] = ['languages', 'web & design', 'frameworks & tools', 'systems & deploy'];

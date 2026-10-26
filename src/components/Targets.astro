@@ -6,7 +6,7 @@ const labels = [...new Set(Object.values(targets).flat().map(t => t.label))];
 ---
 <section id="targets" aria-labelledby="targets-h">
   <div class="wrap">
-    <SectionHead n="04" title="Targets" note="tracked like issues · click one to see the checklist" id="targets-h" />
+    <SectionHead n="03" title="Targets" note="tracked like issues · click one to see the checklist" id="targets-h" />
     <div class="t-tools" id="tTools" role="group" aria-label="Filter by label">
       <button class="chip" type="button" aria-pressed="true" data-l="all">all</button>
       {labels.map(l => <button class="chip" type="button" aria-pressed="false" data-l={l}>{l}</button>)}

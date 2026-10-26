@@ -12,7 +12,7 @@ import { initDither } from './dither';
 import { initCodeBackground } from './codebg';
 import { initVim, command, key, keyHelp, setMode, goTo } from './vim';
 import { initXray } from './xray';
-import { initReveal, initPill, initTargets, initContact, initSections, initCheatSheet, initSudo, initSkills, copyEmail, toast } from './ui';
+import { initReveal, initPill, initTargets, initContact, initSections, initCheatSheet, initSudo, copyEmail, toast } from './ui';
 import { courses } from '../data/courses';
 import { skills } from '../data/skills';
 
@@ -23,7 +23,6 @@ initProgress(map);
 const git = initGitLog();
 initCourses(git);
 initTargets();
-initSkills();
 initContact();
 initPill();
 initVim();

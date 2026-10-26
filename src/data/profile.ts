@@ -23,7 +23,6 @@ export const sections = [
   { id: 'top', label: 'top' },
   { id: 'progress', label: 'progress' },
   { id: 'now', label: 'now' },
-  { id: 'skills', label: 'skills' },
   { id: 'targets', label: 'targets' },
   { id: 'projects', label: 'projects' },
   { id: 'journey', label: 'journey' },

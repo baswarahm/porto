@@ -1,33 +1,17 @@
 ---
-import SectionHead from './SectionHead.astro';
-import { skills, skillGroups } from '../data/skills';
+/* "my skills": a caption and a moving strip of brand logos, sitting
+   between the hero and the first section. */
+import { skills } from '../data/skills';
 import { logoSvg, brandColor } from '../lib/brand';
 ---
-<section id="skills" aria-labelledby="skills-h">
-  <div class="wrap">
-    <SectionHead n="03" title="Skills" note="what I build with · hover for colour, click for where I've used it" id="skills-h" />
-
-    <div class="ticker reveal" aria-hidden="true">
+<div class="wrap">
+  <div class="skills-band reveal" role="region" aria-label="My skills">
+    <p class="skills-cap">my skills</p>
+    <ul class="sr-only">{skills.map(s => <li>{s.name}</li>)}</ul>
+    <div class="ticker" aria-hidden="true">
       <div class="ticker-track">
         {[0, 1].map(() => skills.map(s => <span class="ticker-item" style={`--brand:${brandColor(s.logo)}`} set:html={logoSvg(s.logo, 22) + `<b>${s.name}</b>`} />))}
       </div>
     </div>
-
-    <div class="sk-tools" id="skTools" role="group" aria-label="Filter skills">
-      <button class="chip" type="button" aria-pressed="true" data-g="all">all <span>{skills.length}</span></button>
-      {skillGroups.map(g => <button class="chip" type="button" aria-pressed="false" data-g={g}>{g} <span>{skills.filter(s => s.group === g).length}</span></button>)}
-    </div>
-
-    <div class="skills reveal wipe" id="skillGrid">
-      {skills.map((s, i) => (
-        <button type="button" class="skill" data-g={s.group} data-name={s.name} data-used={s.usedIn}
-          style={`--brand:${brandColor(s.logo)}; --i:${i}`} aria-label={`${s.name}, used in ${s.usedIn}`}>
-          <span class="skill-logo" set:html={logoSvg(s.logo, 34)} />
-          <span class="skill-name">{s.name}</span>
-          {s.learning && <span class="skill-tag">learning</span>}
-          <span class="skill-used">{s.usedIn}</span>
-        </button>
-      ))}
-    </div>
   </div>
-</section>
+</div>
