@@ -98,6 +98,36 @@ export function initSections(){
   update();
 }
 
+/* ---- skills: filter by group, pin a skill, logo leans toward the cursor --- */
+export function initSkills(){
+  const grid = $('#skillGrid'), tools = $('#skTools');
+  if (!grid || !tools) return;
+  const tiles = Array.from(grid.querySelectorAll<HTMLButtonElement>('.skill'));
+
+  tools.addEventListener('click', e => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.chip');
+    if (!btn) return;
+    tools.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c === btn)));
+    const g = btn.dataset.g!;
+    tiles.forEach(t => t.classList.toggle('off', g !== 'all' && t.dataset.g !== g));
+  });
+
+  tiles.forEach(t => {
+    t.setAttribute('aria-pressed', 'false');
+    t.addEventListener('click', () => {
+      const on = t.getAttribute('aria-pressed') !== 'true';
+      tiles.forEach(x => x.setAttribute('aria-pressed', String(on && x === t)));
+    });
+    if (reducedMotion) return;
+    t.addEventListener('pointermove', e => {
+      const r = t.getBoundingClientRect();
+      t.style.setProperty('--mx', `${((e.clientX - r.left) / r.width - .5) * 14}px`);
+      t.style.setProperty('--my', `${((e.clientY - r.top) / r.height - .5) * 14}px`);
+    });
+    t.addEventListener('pointerleave', () => { t.style.removeProperty('--mx'); t.style.removeProperty('--my'); });
+  });
+}
+
 /* ---- keyboard cheat sheet ------------------------------------------------- */
 export function initCheatSheet(rows: [string, string][]){
   const sheet = $('#sheet'), list = $('#sheetList');

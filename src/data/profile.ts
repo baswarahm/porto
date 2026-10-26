@@ -8,12 +8,12 @@ export const profile = {
   whoami: { role: 'first-year cs student', where: 'universiti sains malaysia' },
   photo: '/images/dadas.jpeg',
   photoAlt: 'Baswara standing above a sea of clouds at sunrise',
-  email: 'baswarahafizh@gmail.com',
+  email: 'baswara@student.usm.my',
 };
 
 export const socials = [
   { label: 'github', handle: '@baswarahm', icon: 'github', href: 'https://github.com/baswarahm' },
-  { label: 'linkedin', handle: 'Baswara Hafizh Muttaqin', icon: 'linkedin', href: 'https://www.linkedin.com/in/baswara-hafizh-muttaqin-68a7b4329/' },
+  { label: 'linkedin', handle: 'in/baswarahafizh', icon: 'linkedin', href: 'https://www.linkedin.com/in/baswarahafizh/' },
   { label: 'instagram', handle: '@baswara.hm', icon: 'instagram', href: 'https://instagram.com/baswara.hm' },
   { label: 'discord', handle: 'join my server', icon: 'discord', href: 'https://discord.gg/3PHBSJscNe' },
 ] as const;
@@ -23,6 +23,7 @@ export const sections = [
   { id: 'top', label: 'top' },
   { id: 'progress', label: 'progress' },
   { id: 'now', label: 'now' },
+  { id: 'skills', label: 'skills' },
   { id: 'targets', label: 'targets' },
   { id: 'projects', label: 'projects' },
   { id: 'journey', label: 'journey' },

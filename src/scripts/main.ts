@@ -12,8 +12,9 @@ import { initDither } from './dither';
 import { initCodeBackground } from './codebg';
 import { initVim, command, key, keyHelp, setMode, goTo } from './vim';
 import { initXray } from './xray';
-import { initReveal, initPill, initTargets, initContact, initSections, initCheatSheet, initSudo, copyEmail, toast } from './ui';
+import { initReveal, initPill, initTargets, initContact, initSections, initCheatSheet, initSudo, initSkills, copyEmail, toast } from './ui';
 import { courses } from '../data/courses';
+import { skills } from '../data/skills';
 
 initOpening();
 initTheme();
@@ -22,6 +23,7 @@ initProgress(map);
 const git = initGitLog();
 initCourses(git);
 initTargets();
+initSkills();
 initContact();
 initPill();
 initVim();
@@ -77,6 +79,7 @@ key('?', sheet.toggle);
 
 /* commands */
 command('courses', "list what I'm taking", () => courses.map(c => `${c.code.padEnd(8)}${c.name}`).join('\n'));
+command('skills', 'list what I build with', () => skills.map(s => `${s.name.padEnd(14)}${s.usedIn}`).join('\n'));
 command('email', 'copy my email', () => { copyEmail(); return 'copied to clipboard'; });
 command('theme', 'toggle light / dark', () => `theme: ${toggleTheme()}`);
 command('xray', 'inspect the page', () => `x-ray ${xray.toggle() ? 'on — hover anything' : 'off'}`);

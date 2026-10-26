@@ -15,15 +15,15 @@ export const experience: TimelineItem[] = [
   },
   {
     date: '2024–2025', tag: 'leadership', title: 'Chairman, Commission 1', org: 'MPK Student Representative Council',
-    body: 'Led the organizational timeline for Commission 1, keeping leadership transitions and ongoing programs on schedule for the term.',
+    body: "Drafted the council's regulations and kept them up to date as the student body's needs changed.",
   },
   {
     date: '2023–2025', tag: 'events', title: 'Field Coordinator & Competition Committee', org: 'Al Azhar Creativity Project (ACP 4.0 & 5.0)',
-    body: 'Ran event operations and supervised competitions across two consecutive editions of ACP.',
+    body: 'Coordinated field operations on event days and served on the competition committee across two consecutive editions of ACP.',
   },
   {
     date: '2023–2024', tag: 'leadership', title: 'Member, Commission 2', org: 'MPK Student Representative Council',
-    body: "Coordinated council programs and kept initiatives aligned with the council's strategic goals.",
+    body: 'Oversaw and monitored the student council (OSIS), and wrote reports on its activities to evaluate how well it was performing.',
   },
 ];
 
