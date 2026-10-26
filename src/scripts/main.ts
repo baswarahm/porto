@@ -1,55 +1,56 @@
 /* ==========================================================================
-   MAIN.TS — system bring-up. Order matters here.
+   MAIN.TS — wires every feature together and registers its keys and
+   `:commands` with the vim layer.
    ========================================================================== */
-import { initScrollController, initReveal, initParticleField, onScroll } from './core';
-import { restoreSavedPalette, initColorWalk } from './theme';
-import { initWeatherBackground } from './weather';
-import { initMemory, trackSection, showWelcomeCard } from './memory';
-import { runBootSequence } from './boot';
-import { initCursorFx, initRipples, initToTop, initVCard } from './interaction';
-import { initDecryptTagline, initXpBar, initLiveClock, initHeroParallax, initHeroStats, initScrollIndicator } from './hero';
-import { initQuestTabs, initQuestExpand, initSkillBars } from './timeline';
-import { initKonamiCode } from './easter-egg';
-import { initCommandPalette } from './command-palette';
+import { $ } from './env';
+import { initTheme, toggleTheme } from './theme';
+import { initProgress, initGitFilter } from './progress';
+import { initDither } from './dither';
+import { initCodeBackground } from './codebg';
+import { initRace } from './race';
+import { initVim, command, key, keyHelp, setMode, goTo } from './vim';
+import { initXray } from './xray';
+import { profile, sections } from '../data/profile';
+import { courses } from '../data/courses';
 
-// 1) palette + weather restore first (before anything else reads
-//    --accent / data-weather), so the very first frame is already correct.
-restoreSavedPalette();
-initWeatherBackground();
+initTheme();
+initProgress();
+initGitFilter();
+initVim();
+const photo = initDither();
+const bg = initCodeBackground();
+const race = initRace();
+const xray = initXray();
 
-// 2) AI Memory — figure out if this browser has been here before, and bump
-//    the visit counters, ahead of deciding which boot to play.
-const { isReturning, previous } = initMemory();
-onScroll(({ currentId }) => trackSection(currentId));
+const toggleBg = () => {
+  const on = bg.toggle();
+  $('#bgBtn')!.setAttribute('aria-pressed', String(on));
+  return on;
+};
+$('#bgBtn')!.addEventListener('click', toggleBg);
+const runRace = () => { goTo(sections.findIndex(s => s.id === 'lab')); race.run(); };
 
-// 3) everything else initializes underneath the boot overlay (it's opaque /
-//    highest z-index, so there's no visible race).
-initScrollController();
-initReveal();
-initParticleField();
-initColorWalk();
-initCursorFx();
-initRipples();
-initToTop();
-initVCard();
-initDecryptTagline();
-initXpBar();
-initLiveClock();
-initHeroParallax();
-initHeroStats();
-initScrollIndicator();
-initQuestTabs();
-initQuestExpand();
-initSkillBars();
-initKonamiCode();
-initCommandPalette();
+/* keys */
+key('p', () => { photo.develop(true); setMode('VISUAL'); }, () => { photo.develop(false); setMode('NORMAL'); });
+key('x', () => { xray.toggle(); });
+key('b', () => { toggleBg(); });
+key('r', runRace);
+Object.assign(keyHelp, { p: 'hold to develop the photo', x: 'x-ray: inspect any element', b: 'toggle the code background', r: 'run the sorting race' });
 
-// 4) Launch Sequence — full boot for first-ever visits, a sub-second
-//    "Welcome Back" beat for returning ones, skipped on refresh within the
-//    same browser session.
-runBootSequence({
-  isReturning,
-  onComplete(){
-    if(isReturning) showWelcomeCard(previous);
-  }
+/* commands */
+command('courses', "list what I'm taking", () => courses.map(c => `${c.code.padEnd(8)}${c.name}`).join('\n'));
+command('email', 'copy my email', () => {
+  navigator.clipboard?.writeText(profile.email).catch(() => {});
+  return `copied ${profile.email}`;
 });
+command('theme', 'toggle light / dark', () => `theme: ${toggleTheme()}`);
+command('race', 'run the sorting race', () => { runRace(); });
+command('xray', 'inspect the page', () => `x-ray ${xray.toggle() ? 'on — hover anything' : 'off'}`);
+command('src', 'toggle the code background', () => `code background ${toggleBg() ? 'on' : 'off'}`);
+
+/* perf readout, once everything has loaded */
+addEventListener('load', () => setTimeout(() => {
+  const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  const ms = Math.round(nav ? nav.domContentLoadedEventEnd : performance.now());
+  $('#vPerf')!.textContent = `${document.getElementsByTagName('*').length} nodes · ${ms}ms`;
+}));

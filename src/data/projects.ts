@@ -1,21 +1,18 @@
 export interface Project {
   title: string;
-  status: string;
+  year: string;
   description: string;
-  tags: string[];
-  repo?: string;
-  live?: string;
+  stack: string;
+  /** live demo or repo; the row links here when set */
+  href?: string;
 }
 
 export const projects: Project[] = [
   {
     title: 'Split Bill',
-    status: 'Shipped',
-    description:
-      'Scan a receipt with Gemini, fix anything the scan got wrong, tap who ate what, and share a per-person breakdown — tax and service charge split fairly — as an image for the group chat.',
-    tags: ['React', 'TypeScript', 'Tailwind', 'Gemini API', 'Vercel'],
-    // TODO: fill in once split-bill's own repo / deploy URL is confirmed
-    repo: undefined,
-    live: undefined,
+    year: '2026',
+    description: 'Scan a receipt, tap who ate what, share a fair per-person split.',
+    stack: 'react · ts · gemini',
+    href: undefined, // TODO: add the live or repo URL
   },
 ];

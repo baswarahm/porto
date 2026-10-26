@@ -1,51 +1,36 @@
 ---
-import { profile, heroBadges, heroStats } from '../data/profile';
+import { profile, sections } from '../data/profile';
+import { courses, commits } from '../data/courses';
+import { degreeProgress } from '../lib/degree';
+
+const { pct } = degreeProgress();
+const nav = sections.filter(s => s.id !== 'top');
 ---
-<section class="section hero container" id="hero" aria-labelledby="hero-heading">
-  <div class="hero-avatar-wrap" data-parallax>
-    <div class="hero-avatar-ring" aria-hidden="true"></div>
-    <div class="hero-avatar">
-      <img src={profile.avatar} alt={profile.name}>
-    </div>
-    <div class="hero-level mono">{profile.level}</div>
+<div class="wrap" id="top">
+  <header class="top">
+    <span>~/{profile.handle}</span>
+    <nav aria-label="Sections">
+      {nav.map((s, i) => <a href={`#${s.id}`}><span>{String(i + 1).padStart(2, '0')}</span> {s.label}</a>)}
+    </nav>
+    <button class="chip" id="themeBtn" type="button">theme</button>
+  </header>
 
-    {heroBadges.map((b, i) => (
-      <div class={`hero-badge hero-badge-${i + 1}`} aria-hidden="true" title={b.title}><span class="mono">{b.short}</span></div>
-    ))}
+  <div class="hero">
+    <div>
+      <p class="whoami">$ whoami → <b>{profile.whoami.role}</b>, {profile.whoami.where}</p>
+      <h1>{profile.nameLines.map((l, i) => <>{l}{i < profile.nameLines.length - 1 && <br />}</>)}<span class="cursor" aria-hidden="true"></span></h1>
+      <p class="intro">From Solo, now in Penang. <strong>Studying Intelligent Computing</strong> and writing down everything I learn on the way — progress, courses, and the goals I'm chasing.</p>
+      <dl class="facts">
+        <div><dt>degree</dt><dd data-degree-pct>{(pct * 100).toFixed(1)}% done</dd></div>
+        <div><dt>courses now</dt><dd>{courses.length}</dd></div>
+        <div><dt>commits logged</dt><dd>{commits.length}</dd></div>
+      </dl>
+    </div>
+
+    <figure class="photo" id="photo">
+      <canvas id="dither" width="600" height="800" aria-hidden="true"></canvas>
+      <img src={profile.photo} alt={profile.photoAlt} width="960" height="1280" decoding="async">
+      <figcaption class="photo-bar"><span>1-bit dither</span><span>hold or <kbd>p</kbd> to develop</span></figcaption>
+    </figure>
   </div>
-  <div class="hero-body">
-    <p class="eyebrow"><span class="blip" aria-hidden="true"></span> {profile.location}</p>
-    <h1 class="hero-title" id="hero-heading">{profile.firstName} <span class="highlight">{profile.lastName}</span></h1>
-    <p class="hero-tagline mono" id="decryptTagline" data-text={profile.tagline} aria-live="polite"></p>
-    <p class="hero-line-id">{profile.intro}</p>
-
-    <div class="hero-stats" role="list" aria-label="Quick stats">
-      {heroStats.map(s => (
-        <div class="hero-stat" role="listitem">
-          <span class="hero-stat-num mono" data-count-to={s.value}>0</span>
-          <span class="hero-stat-label">{s.label}</span>
-        </div>
-      ))}
-    </div>
-
-    <div class="hero-xp">
-      <div class="hero-xp-label">
-        <span>Freshman Year Progress</span>
-        <span id="xpPercentLabel">0%</span>
-      </div>
-      <div class="hero-xp-track" role="img" aria-label="Freshman year progress bar">
-        <div class="hero-xp-fill" id="xpFill"></div>
-      </div>
-    </div>
-
-    <div class="hero-ctas">
-      <a href="#projects" class="btn btn-primary" data-magnetic>See Projects</a>
-      <a href="#contact" class="btn btn-ghost" data-magnetic>Start a Collab</a>
-    </div>
-  </div>
-
-  <button class="scroll-indicator" id="scrollIndicator" aria-label="Scroll to About section">
-    <span class="scroll-indicator-mouse" aria-hidden="true"><span class="scroll-indicator-wheel"></span></span>
-    <span class="scroll-indicator-label mono">Scroll</span>
-  </button>
-</section>
+</div>

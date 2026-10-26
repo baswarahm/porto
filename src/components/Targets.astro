@@ -1,0 +1,22 @@
+---
+import SectionHead from './SectionHead.astro';
+import { targets, targetColumns } from '../data/targets';
+---
+<section id="targets" aria-labelledby="targets-h">
+  <div class="wrap">
+    <SectionHead n="03" title="Targets" note="tracked like issues, closed when done" id="targets-h" />
+    <div class="targets">
+      {targetColumns.map(col => (
+        <div class={`col ${col.key}`}>
+          <h3>{col.title}<span>{targets[col.key].length}</span></h3>
+          {targets[col.key].map(t => (
+            <div class="issue">
+              <p>{t.title}</p>
+              <p class="meta"><span class="lab">{t.label}</span><span>{t.due}</span>{t.progress && <span>{t.progress}</span>}</p>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

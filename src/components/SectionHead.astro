@@ -1,9 +1,8 @@
 ---
-interface Props { eyebrow: string; title: string; id: string; desc?: string; center?: boolean }
-const { eyebrow, title, id, desc, center = false } = Astro.props;
+interface Props { n: string; title: string; note?: string; small?: boolean; id?: string }
+const { n, title, note, small = false, id } = Astro.props;
 ---
-<div class:list={['section-head', 'reveal', { 'section-head-center': center }]}>
-  <p class="section-eyebrow">{eyebrow}</p>
-  <h2 class="section-title" id={id}>{title}</h2>
-  {desc && <p class="section-desc">{desc}</p>}
+<div class="sec-head">
+  <h2 id={id} class:list={{ small }}><span class="n">{n}</span>{title}</h2>
+  {note && <p set:html={note} />}
 </div>

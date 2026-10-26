@@ -1,0 +1,29 @@
+---
+import SectionHead from './SectionHead.astro';
+
+const algos = [
+  { id: 'bubble', name: 'bubble sort', big: 'O(n²)' },
+  { id: 'insertion', name: 'insertion sort', big: 'O(n²)' },
+  { id: 'merge', name: 'merge sort', big: 'O(n log n)' },
+];
+---
+<section id="lab" aria-labelledby="lab-h">
+  <div class="wrap">
+    <SectionHead n="05" title="Lab: sorting race" note="what I'm learning in DSA, running live" id="lab-h" />
+    <div class="race-ctl">
+      <button class="chip" type="button" id="raceGo">▶ race</button>
+      <button class="chip" type="button" id="raceShuffle">shuffle</button>
+      <label>n = <input type="range" id="raceN" min="16" max="120" step="8" value="48"> <span id="raceNOut">48</span></label>
+      <label>speed <input type="range" id="raceSpeed" min="1" max="12" step="1" value="4"></label>
+    </div>
+    <div class="race" id="race">
+      {algos.map(a => (
+        <div class="race-lane" data-algo={a.id}>
+          <header><b>{a.name}</b><span>{a.big}</span></header>
+          <canvas aria-label={`${a.name} bars`} role="img"></canvas>
+          <footer><span class="cmp">0 comparisons</span><span class="st" aria-live="polite">ready</span></footer>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

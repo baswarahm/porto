@@ -1,0 +1,29 @@
+---
+import SectionHead from './SectionHead.astro';
+import { courses } from '../data/courses';
+import { degreeProgress } from '../lib/degree';
+
+const { year, sem } = degreeProgress();
+---
+<section id="now" aria-labelledby="now-h">
+  <div class="wrap">
+    <SectionHead n="02" title="Taking now" note={`<span data-sem-label>year ${year}, semester ${sem}</span>`} id="now-h" />
+    <div class="courses">
+      {courses.map(c => {
+        const pct = c.week && c.weeks ? Math.round((c.week / c.weeks) * 100) : null;
+        return (
+          <article class="course">
+            <div class="code"><span class={`c${c.lane}`}>{c.code}</span><span class="wk">{pct !== null ? `week ${c.week}/${c.weeks}` : 'ongoing'}</span></div>
+            <h3>{c.name}</h3>
+            {pct !== null && <div class="bar" role="img" aria-label={`${pct}% through the semester`}><span style={`width:${pct}%`}></span></div>}
+            <ul>
+              {c.learned.map(l => <li>{l}</li>)}
+              {c.doing.map(l => <li class="doing">{l}</li>)}
+            </ul>
+            <p class="stuck">stuck on: {c.stuck}</p>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</section>
