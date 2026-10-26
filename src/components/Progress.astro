@@ -1,0 +1,65 @@
+---
+import SectionHead from './SectionHead.astro';
+import CourseMap from './CourseMap.astro';
+import { degree, commits, courses, curriculum } from '../data/courses';
+import { degreeProgress, textBar } from '../lib/degree';
+import { buildGraph } from '../lib/gitgraph';
+
+const { pct, semesters, current } = degreeProgress();
+const rows = buildGraph(commits);
+const laneClass = (l: number | null) => (l ? `c${l}` : undefined);
+---
+<section id="progress" aria-labelledby="progress-h">
+  <div class="wrap">
+    <SectionHead n="01" title="Degree progress" note="computed live from today's date · click a semester" id="progress-h" />
+    <div class="degree reveal wipe">
+      <div class="sem-track" id="semTrack" role="group" aria-label="Semesters">
+        {semesters.map(s => (
+          <button type="button" class={`sem ${s.state}`} data-sem={s.index} aria-pressed={s.index === current ? 'true' : 'false'}>
+            <span class="lbl">{s.state === 'now' ? '● now' : `sem ${s.index + 1}`}</span>
+            <span class="yr">{s.label}</span>
+            <span class="fill" style={`width:${(s.fill * 100).toFixed(1)}%`}></span>
+          </button>
+        ))}
+      </div>
+      <p class="sem-detail" id="semDetail" aria-live="polite"><b>{semesters[current].label}</b><span>{curriculum[current].map(c => c.code).join(' · ')}</span></p>
+      <div class="degree-foot">
+        <span>{degree.name} · {degree.school} · {degree.start.slice(0, 4)} → {degree.end.slice(0, 4)}</span>
+        <span data-degree-bar><span class="mono">{textBar(pct)}</span> <b>{(pct * 100).toFixed(1)}%</b></span>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+    <CourseMap />
+
+    <div class="spacer"></div>
+    <SectionHead n="git log" title="What I've learned" note="every course is a branch · click a commit to see the diff" small />
+    <div class="gl-tools" id="glTools" role="group" aria-label="Filter by course">
+      <button class="chip" type="button" aria-pressed="true" data-f="all">all</button>
+      {courses.map(c => <button class="chip" type="button" aria-pressed="false" data-f={c.lane}><i class={`c${c.lane}`}>●</i> {c.code === 'SELF' ? 'self-study' : c.code}</button>)}
+    </div>
+    <div class="gitlog typing" id="gitlog" role="list">
+      {rows.map(r => {
+        const graph = <span class="g">{r.cells.map((c, i) => <>{i > 0 && ' '}<span class={laneClass(c.lane)}>{c.ch}</span></>)}</span>;
+        if (!r.commit) return <div class="gl-row" aria-hidden="true" data-b={r.lane}>{graph}</div>;
+        const notes = r.commit.notes ?? [r.commit.msg];
+        return (
+          <>
+            <button type="button" class="gl-row" role="listitem" data-b={r.lane} aria-expanded="false" aria-controls={`diff-${r.commit.hash}`}>
+              {graph}
+              <span class="h">{r.commit.hash}</span>
+              <span class="m">{r.commit.msg}</span>
+              {r.commit.ref && <span class="ref">({r.commit.ref})</span>}
+              <span class="d">{r.commit.date}</span>
+            </button>
+            <div class="gl-diff" id={`diff-${r.commit.hash}`} data-b={r.lane}>
+              {notes.map(n => n.startsWith('- ')
+                ? <div class="del">- {n.slice(2)}</div>
+                : <div class="add">+ {n}</div>)}
+            </div>
+          </>
+        );
+      })}
+    </div>
+  </div>
+</section>

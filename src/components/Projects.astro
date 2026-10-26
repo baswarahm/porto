@@ -1,0 +1,29 @@
+---
+import SectionHead from './SectionHead.astro';
+import { projects } from '../data/projects';
+---
+<section id="projects" aria-labelledby="projects-h">
+  <div class="wrap">
+    <SectionHead n="04" title="Projects" note="things I've built and shipped · click to open" id="projects-h" />
+    <div class="list reveal">
+      {projects.map((p, i) => (
+        <details class="item project" data-pill>
+          <summary>
+            <span class="y">{String(i + 1).padStart(2, '0')} · {p.year}</span>
+            <span><span class="t">{p.title}</span><p class="d">{p.description}</p></span>
+            <span class="s">{p.stack}</span>
+          </summary>
+          <div class="more">
+            <ul>{p.details.map(d => <li>{d}</li>)}</ul>
+            {p.href && <a class="btn" href={p.href} target="_blank" rel="noopener noreferrer">open {p.title.toLowerCase()} ↗</a>}
+          </div>
+        </details>
+      ))}
+      <div class="item next-slot">
+        <span class="y">{String(projects.length + 1).padStart(2, '0')} · next</span>
+        <span><span class="t">Next project loading<span class="dots"><i>.</i><i>.</i><i>.</i></span></span><p class="d">Probably something with data structures. Ideas welcome — say hi below.</p></span>
+        <span class="s">tbd</span>
+      </div>
+    </div>
+  </div>
+</section>

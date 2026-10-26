@@ -1,0 +1,141 @@
+/* ==========================================================================
+   INTERACTIONS.CSS — opening screen and every interactive state on top of
+   the base paper-and-ink layout in global.css.
+   ========================================================================== */
+
+/* ---- opening: a fake compile run before the page appears --------------- */
+.opening{ position:fixed; inset:0; z-index:100; background:#121210; color:#ece8dc; display:flex; flex-direction:column; justify-content:center; padding:0 clamp(20px,8vw,120px); font:clamp(13px,1.6vw,16px)/1.8 var(--mono); transition:transform .8s cubic-bezier(.7,0,.2,1); }
+.no-opening .opening{ display:none; }
+.opening pre{ font:inherit; white-space:pre-wrap; min-height:11em; }
+.opening .ok{ color:#4cc38a; }
+.opening .pc{ color:#e0a83a; }
+.opening .prompt{ color:#ff6a3d; }
+.opening .caret{ display:inline-block; width:.6em; height:1.1em; background:#ece8dc; vertical-align:-.2em; animation:blink 1s steps(1) infinite; }
+.opening .op-name{ font:600 clamp(2.6rem,9vw,7rem)/1 var(--sans); letter-spacing:-.04em; margin-top:.3em; opacity:0; transform:translateY(12px); transition:all .5s cubic-bezier(.2,.8,.2,1); }
+.opening .op-name.show{ opacity:1; transform:none; }
+.opening .op-name span{ color:#ff6a3d; }
+.opening .op-skip{ position:absolute; bottom:24px; left:0; right:0; text-align:center; font-size:12px; opacity:.45; }
+.opening .op-bar{ height:2px; background:#2b2a25; margin-top:1.2em; max-width:520px; }
+.opening .op-bar span{ display:block; height:100%; width:0; background:#ff6a3d; }
+.opening.leave{ transform:translateY(-100%); }
+html.opening-on{ overflow:hidden; }
+
+/* ---- sticky top bar with the active section lit ------------------------ */
+.top-wrap{ position:sticky; top:0; z-index:20; background:var(--paper); }
+.top nav a[aria-current="true"], .top nav a[aria-current="true"] span{ color:var(--signal); }
+
+/* ---- reveal on scroll ---------------------------------------------------- */
+.reveal{ opacity:0; transform:translateY(18px); transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1); }
+.reveal.in{ opacity:1; transform:none; }
+
+/* ---- hero: scrambling name, photo lens ----------------------------------- */
+.hero h1 .ch{ display:inline-block; transition:color .2s; }
+.hero h1 .ch.hot{ color:var(--signal); }
+.photo.lens img{ opacity:1; transition:none; -webkit-mask-image:radial-gradient(circle 90px at var(--x,50%) var(--y,50%), #000 96%, transparent 100%); mask-image:radial-gradient(circle 90px at var(--x,50%) var(--y,50%), #000 96%, transparent 100%); }
+.photo.dev img{ opacity:1; -webkit-mask-image:none; mask-image:none; }
+.facts dd{ font-variant-numeric:tabular-nums; }
+
+/* ---- semesters as buttons + a detail line -------------------------------- */
+button.sem{ cursor:pointer; text-align:left; color:inherit; background:none; border:0; border-right:1px solid var(--rule); transition:background .2s; }
+button.sem .lbl, button.sem .yr{ display:block; }
+button.sem:hover{ background:var(--paper-2); }
+button.sem[aria-pressed="true"]{ box-shadow:inset 0 0 0 2px var(--ink); }
+.sem-detail{ border-top:1px solid var(--rule); padding:12px; font:14px/1.5 var(--sans); display:flex; gap:12px; align-items:baseline; min-height:46px; }
+.sem-detail b{ font:500 12px var(--mono); color:var(--signal); white-space:nowrap; }
+
+/* ---- git log: typed in, clickable commits that open a diff --------------- */
+.gitlog.typing .gl-row{ opacity:0; }
+.gitlog.typing .gl-row.shown{ opacity:1; transition:opacity .12s; }
+button.gl-row{ font:inherit; color:inherit; background:none; border:0; text-align:left; cursor:pointer; width:100%; }
+button.gl-row:hover .m{ color:var(--signal); }
+button.gl-row .m::after{ content:" +"; color:var(--ink-3); }
+button.gl-row[aria-expanded="true"] .m::after{ content:" \2212"; }
+.gl-diff{ display:none; margin:2px 0 8px; padding:6px 12px; border-left:2px solid var(--ok); background:var(--paper-2); white-space:pre-wrap; font-size:13px; }
+.gl-diff.open{ display:block; animation:drop .25s ease-out; }
+.gl-diff .add{ color:var(--ok); }
+.gl-diff .del{ color:var(--signal); }
+@keyframes drop{ from{ opacity:0; transform:translateY(-4px); } }
+.gitlog.focus .gl-row:not(.lit){ opacity:.22; }
+
+/* ---- course cards: week strip, hover links to the git log ---------------- */
+.course{ transition:background .2s; }
+.course:hover{ background:var(--paper-2); }
+.weeks{ display:grid; grid-template-columns:repeat(var(--n,14),1fr); gap:3px; }
+.weeks i{ height:10px; border:1px solid var(--ink); }
+.weeks i.on{ background:var(--ink); transform:scaleY(0); transform-origin:bottom; }
+.in .weeks i.on{ transform:none; transition:transform .3s calc(var(--i) * 45ms) cubic-bezier(.2,.8,.2,1); }
+.weeks i.cur{ background:var(--signal); border-color:var(--signal); animation:pulse 1.6s ease-in-out infinite; }
+@keyframes pulse{ 50%{ opacity:.35 } }
+.course .go{ align-self:flex-start; font:12px var(--mono); color:var(--ink-2); background:none; border:0; border-bottom:1px solid var(--rule); padding:0; cursor:pointer; }
+.course .go:hover{ color:var(--signal); border-color:var(--signal); }
+
+/* ---- targets: label filter + expandable issues --------------------------- */
+.t-tools{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+details.issue{ padding:0; }
+details.issue summary{ list-style:none; cursor:pointer; padding:14px; display:block; transition:background .2s; }
+details.issue summary::-webkit-details-marker{ display:none; }
+details.issue summary:hover{ background:var(--paper-2); }
+.issue .ttl{ display:flex; justify-content:space-between; gap:10px; }
+.issue .ttl::after{ content:"+"; font-family:var(--mono); color:var(--ink-3); }
+.issue[open] .ttl::after{ content:"\2212"; }
+.issue .mini{ height:3px; background:var(--rule); margin-top:10px; }
+.issue .mini span{ display:block; height:100%; background:var(--signal); width:0; transition:width .9s cubic-bezier(.2,.8,.2,1); }
+.in .issue .mini span{ width:var(--w); }
+.issue ul{ list-style:none; padding:0 14px 14px; font:13px/1.8 var(--mono); color:var(--ink-2); animation:drop .25s ease-out; }
+.issue li::before{ content:"[ ] "; color:var(--ink-3); }
+.issue li.d::before{ content:"[x] "; color:var(--ok); }
+.issue li.d{ text-decoration:line-through; text-decoration-color:var(--ink-3); }
+.issue.hide{ display:none; }
+.done .issue .ttl{ text-decoration:line-through; text-decoration-color:var(--ink-3); color:var(--ink-2); }
+.done .issue > p:first-child{ text-decoration:none; }
+
+/* ---- projects: expandable rows + a pill that follows the cursor ---------- */
+details.item{ display:block; padding:0; }
+details.item summary{ list-style:none; cursor:pointer; display:grid; grid-template-columns:120px 1fr auto; gap:20px; padding:18px 0; align-items:baseline; }
+details.item summary::-webkit-details-marker{ display:none; }
+details.item summary:hover .t{ color:var(--signal); }
+details.item .more{ padding:0 0 20px 140px; display:grid; gap:12px; animation:drop .25s ease-out; }
+details.item .more ul{ list-style:none; display:grid; gap:4px; color:var(--ink-2); font-size:15px; }
+details.item .more li::before{ content:"\2192  "; color:var(--signal); font-family:var(--mono); }
+.pill{ position:fixed; left:0; top:0; z-index:40; pointer-events:none; font:12px var(--mono); background:var(--ink); color:var(--paper); padding:4px 10px; opacity:0; transition:opacity .15s; }
+.pill.show{ opacity:1; }
+
+/* ---- contact ------------------------------------------------------------- */
+.contact-card{ display:grid; grid-template-columns:1.3fr 1fr; border:1px solid var(--ink); background:var(--paper); }
+.contact-main{ padding:28px; border-right:1px solid var(--ink); display:grid; gap:18px; align-content:start; }
+.avail{ font:13px var(--mono); display:flex; align-items:center; gap:10px; color:var(--ink-2); }
+.avail i{ width:9px; height:9px; border-radius:50%; background:var(--ok); animation:ring 2s infinite; }
+.avail.away i{ background:var(--warn); animation:none; }
+@keyframes ring{ 0%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); } 70%,100%{ box-shadow:0 0 0 9px transparent; } }
+.email{ font:600 clamp(1.2rem,2.6vw,2rem)/1.2 var(--sans); letter-spacing:-.02em; text-decoration:none; word-break:break-all; }
+.email:hover{ color:var(--signal); }
+.contact-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.btn{ font:13px var(--mono); border:1px solid var(--ink); background:var(--paper); color:var(--ink); padding:9px 14px; cursor:pointer; text-decoration:none; transition:background .15s, color .15s, transform .15s; }
+.btn:hover{ background:var(--ink); color:var(--paper); }
+.btn:active{ transform:translateY(1px); }
+.btn.primary{ background:var(--ink); color:var(--paper); }
+.btn.primary:hover{ background:var(--signal); border-color:var(--signal); color:#fff; }
+.socials{ display:grid; align-content:start; }
+.socials a{ display:flex; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--rule); text-decoration:none; font:15px var(--mono); transition:padding .2s, background .2s, color .2s; }
+.socials a:last-child{ border-bottom:0; }
+.socials a::after{ content:"\2197"; transition:transform .2s; }
+.socials a:hover{ background:var(--paper-2); padding-left:28px; color:var(--signal); }
+.socials a:hover::after{ transform:translate(3px,-3px); }
+
+/* ---- toast --------------------------------------------------------------- */
+.toast{ position:fixed; left:50%; bottom:44px; z-index:80; transform:translate(-50%,10px); opacity:0; pointer-events:none; font:13px var(--mono); background:var(--ink); color:var(--paper); padding:9px 14px; transition:opacity .25s, transform .25s; }
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+
+@media (max-width:860px){
+  .contact-card{ grid-template-columns:1fr; }
+  .contact-main{ border-right:0; border-bottom:1px solid var(--ink); }
+  details.item summary{ grid-template-columns:1fr; gap:2px; }
+  details.item .more{ padding-left:0; }
+  .sem-track button.sem:nth-child(4){ border-right:0; }
+}
+@media (prefers-reduced-motion:reduce){
+  .reveal{ opacity:1; transform:none; }
+  .weeks i.on{ transform:none; }
+  .opening{ display:none; }
+  .gitlog.typing .gl-row{ opacity:1; }
+}

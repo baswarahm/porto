@@ -1,0 +1,24 @@
+---
+/* Inline Tabler outline icons (MIT), inlined at build time so they inherit
+   currentColor and cost no extra requests. */
+import mail from '@tabler/icons/outline/mail.svg?raw';
+import github from '@tabler/icons/outline/brand-github.svg?raw';
+import linkedin from '@tabler/icons/outline/brand-linkedin.svg?raw';
+import instagram from '@tabler/icons/outline/brand-instagram.svg?raw';
+import discord from '@tabler/icons/outline/brand-discord.svg?raw';
+import copy from '@tabler/icons/outline/copy.svg?raw';
+import contact from '@tabler/icons/outline/address-book.svg?raw';
+import refresh from '@tabler/icons/outline/refresh.svg?raw';
+import arrow from '@tabler/icons/outline/arrow-up-right.svg?raw';
+
+const icons = { mail, github, linkedin, instagram, discord, copy, contact, refresh, arrow };
+export type IconName = keyof typeof icons;
+
+interface Props { name: IconName; size?: number }
+const { name, size = 20 } = Astro.props;
+const svg = icons[name]
+  .replace(/width="24"/, `width="${size}"`)
+  .replace(/height="24"/, `height="${size}"`)
+  .replace('<svg', '<svg aria-hidden="true" focusable="false"');
+---
+<span class="icon" set:html={svg} />
