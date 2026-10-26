@@ -16,7 +16,7 @@
 .opening .op-name span{ color:#ff6a3d; }
 .opening .op-skip{ position:absolute; bottom:24px; left:0; right:0; text-align:center; font-size:12px; opacity:.45; }
 .opening .op-bar{ height:2px; background:#2b2a25; margin-top:1.2em; max-width:520px; }
-.opening .op-bar span{ display:block; height:100%; width:0; background:#ff6a3d; transition:width .2s linear; }
+.opening .op-bar span{ display:block; height:100%; width:0; background:#ff6a3d; }
 .opening.leave{ transform:translateY(-100%); }
 html.opening-on{ overflow:hidden; }
 
