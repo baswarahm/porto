@@ -1,7 +1,7 @@
 /* ==========================================================================
    COURSES.TS — degree timeline, what I'm taking, and what I've learned.
-   PLACEHOLDERS: course codes/names, weeks, learned items and commits below
-   are examples. Replace them with the real ones.
+   PLACEHOLDERS: course codes/names, weeks, learned items, commits and the
+   semester plan below are examples. Replace them with the real ones.
    ========================================================================== */
 
 export const degree = {
@@ -9,6 +9,17 @@ export const degree = {
   start: '2026-10-05', // TODO: confirm USM semester dates
   end: '2030-07-31',
   semesters: 8,
+  /** one line per semester, shown when a semester is clicked */
+  plan: [
+    'Programming fundamentals, discrete maths, computer organisation',
+    'Data structures, OOP, linear algebra',
+    'Algorithms, databases, operating systems',
+    'Intro to AI, probability and statistics',
+    'Machine learning, software engineering',
+    'Industrial training (internship)',
+    'Deep learning, final year project I',
+    'Final year project II, graduate',
+  ],
 };
 
 /** Branch colour slot 1–4 (see .c1–.c4 in global.css). Main is 0. */
@@ -47,7 +58,7 @@ export const courses: Course[] = [
   },
   {
     code: 'SELF', name: 'Self-study: Git + web', lane: 4,
-    learned: ['Rebuilt this site in Astro + TypeScript', 'Shipped Split Bill on Vercel'],
+    learned: ['Rebuilt this site in Astro + TypeScript', 'Git branching without fear'],
     doing: ['Data structures in C++'],
     stuck: "reading other people's code fast",
   },
@@ -59,17 +70,24 @@ export interface Commit {
   msg: string;
   date: string;
   ref?: string;
+  /** shown as a "diff" when the commit is opened */
+  notes?: string[];
 }
 
 /** Newest first, like `git log`. */
 export const commits: Commit[] = [
-  { lane: 4, hash: 'a91c2e', msg: 'rebuild portfolio in astro + typescript', date: 'oct 2026' },
-  { lane: 1, hash: '7f3d10', msg: 'pointers vs references (wip)', date: 'oct 2026' },
-  { lane: 2, hash: 'c4e8a2', msg: 'proof by induction, finally', date: 'oct 2026' },
-  { lane: 3, hash: '19be44', msg: "two's complement by hand", date: 'oct 2026' },
+  { lane: 4, hash: 'a91c2e', msg: 'rebuild portfolio in astro + typescript', date: 'oct 2026',
+    notes: ['components render from typed data files', 'the git graph you are reading is built at compile time'] },
+  { lane: 1, hash: '7f3d10', msg: 'pointers vs references (wip)', date: 'oct 2026',
+    notes: ['a reference is an alias, a pointer is an address', '- still mixing up *p and &x under pressure'] },
+  { lane: 2, hash: 'c4e8a2', msg: 'proof by induction, finally', date: 'oct 2026',
+    notes: ['base case, then assume n, prove n + 1', 'it is recursion, but for proofs'] },
+  { lane: 3, hash: '19be44', msg: "two's complement by hand", date: 'oct 2026',
+    notes: ['flip the bits, add one', 'why -128 fits in a byte but +128 does not'] },
   { lane: 1, hash: 'e02f9b', msg: 'loops, functions and scope', date: 'oct 2026' },
   { lane: 2, hash: '5d71c0', msg: 'truth tables + logical equivalence', date: 'oct 2026' },
-  { lane: 4, hash: 'b8a3f1', msg: 'ship split-bill on vercel', date: 'oct 2026' },
+  { lane: 4, hash: 'b8a3f1', msg: 'learn git branching properly', date: 'oct 2026',
+    notes: ['branch, commit, merge, rebase', 'this log is shaped like what I learned'] },
   { lane: 1, hash: '0c9e7d', msg: 'hello, world (compiled first try)', date: 'oct 2026' },
   { lane: 0, hash: '3f2a0b', msg: 'enrol: b.cs intelligent computing @ USM', date: 'oct 2026', ref: 'tag: year-1' },
   { lane: 0, hash: '91d4c6', msg: 'graduate SMA Al-Azhar Syifa Budi Solo', date: '2026', ref: 'tag: sma' },

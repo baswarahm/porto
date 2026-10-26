@@ -4,6 +4,7 @@
    ========================================================================== */
 import { $, reducedMotion } from './env';
 import { sections } from '../data/profile';
+import { setActiveNav } from './ui';
 
 type Cmd = () => string | void;
 const commands = new Map<string, { run: Cmd; help: string }>();
@@ -16,8 +17,11 @@ export const setMode = (m: string) => { $('#vMode')!.textContent = m; };
 const secEls = () => sections.map(s => document.getElementById(s.id)).filter((el): el is HTMLElement => !!el);
 
 function currentIndex(){
+  const els = secEls();
+  // the last section is often too short to reach the trigger line
+  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) return els.length - 1;
   let i = 0;
-  secEls().forEach((s, k) => { if (s.getBoundingClientRect().top < innerHeight * .4) i = k; });
+  els.forEach((s, k) => { if (s.getBoundingClientRect().top < innerHeight * .4) i = k; });
   return i;
 }
 
@@ -35,7 +39,9 @@ export function initVim(){
   const update = () => {
     const max = document.documentElement.scrollHeight - innerHeight || 1, p = scrollY / max;
     $('#vPct')!.textContent = p < .01 ? 'Top' : p > .99 ? 'Bot' : Math.round(p * 100) + '%';
-    $('#vFile')!.textContent = `~/baswara/${sections[currentIndex()].id}.md`;
+    const id = sections[currentIndex()].id;
+    $('#vFile')!.textContent = `~/baswara/${id}.md`;
+    setActiveNav(id);
   };
   let ticking = false;
   addEventListener('scroll', () => { if (!ticking){ ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } }, { passive: true });

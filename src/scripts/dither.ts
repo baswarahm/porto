@@ -28,7 +28,8 @@ function atkinson(img: HTMLImageElement){
   return lum;
 }
 
-export function initDither(){
+/** @param startWhen printing waits for this, so it starts once the page is revealed */
+export function initDither(startWhen: Promise<void> = Promise.resolve()){
   const fig = $('#photo'), canvas = $<HTMLCanvasElement>('#dither'), img = fig?.querySelector('img');
   if (!fig || !canvas || !img) return { develop: (_on: boolean) => {} };
   const ctx = canvas.getContext('2d')!;
@@ -51,12 +52,22 @@ export function initDither(){
     requestAnimationFrame(frame);
   }
 
-  const start = () => { dots = atkinson(img); print(); };
-  img.complete && img.naturalWidth ? start() : img.addEventListener('load', start, { once: true });
+  const loaded = img.complete && img.naturalWidth ? Promise.resolve() : new Promise(r => img.addEventListener('load', r, { once: true }));
+  Promise.all([loaded, startWhen]).then(() => { dots = atkinson(img); print(); });
   document.documentElement.addEventListener(THEME_EVENT, print);
 
   const develop = (on: boolean) => fig.classList.toggle('dev', on);
   fig.addEventListener('pointerdown', () => develop(true));
   for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) fig.addEventListener(ev, () => develop(false));
+
+  // mouse only: a colour lens that follows the cursor over the dither
+  fig.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse') return;
+    const r = canvas.getBoundingClientRect();
+    fig.style.setProperty('--x', e.clientX - r.left + 'px');
+    fig.style.setProperty('--y', e.clientY - r.top + 'px');
+    fig.classList.add('lens');
+  });
+  fig.addEventListener('pointerleave', () => fig.classList.remove('lens'));
   return { develop };
 }

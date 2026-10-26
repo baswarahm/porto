@@ -25,6 +25,5 @@ export const sections = [
   { id: 'now', label: 'now' },
   { id: 'targets', label: 'targets' },
   { id: 'projects', label: 'projects' },
-  { id: 'lab', label: 'lab' },
   { id: 'contact', label: 'contact' },
 ] as const;

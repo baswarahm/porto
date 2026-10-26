@@ -5,29 +5,35 @@ import { experience } from '../data/experience';
 ---
 <section id="projects" aria-labelledby="projects-h">
   <div class="wrap">
-    <SectionHead n="04" title="Projects" note="things I've shipped" id="projects-h" />
-    <div class="list">
-      {projects.map(p => {
-        const Tag = p.href ? 'a' : 'div';
-        return (
-          <Tag class="item" href={p.href} target={p.href ? '_blank' : undefined} rel={p.href ? 'noopener noreferrer' : undefined}>
+    <SectionHead n="04" title="Projects" note="things I've shipped · click to open" id="projects-h" />
+    <div class="list reveal">
+      {projects.map(p => (
+        <details class="item" data-pill>
+          <summary>
             <span class="y">{p.year}</span>
             <span><span class="t">{p.title}</span><p class="d">{p.description}</p></span>
             <span class="s">{p.stack}</span>
-          </Tag>
-        );
-      })}
+          </summary>
+          <div class="more">
+            <ul>{p.details.map(d => <li>{d}</li>)}</ul>
+            {p.href && <a class="btn" href={p.href} target="_blank" rel="noopener noreferrer">open {p.title.toLowerCase()} ↗</a>}
+          </div>
+        </details>
+      ))}
     </div>
 
     <div class="spacer"></div>
     <SectionHead n="before uni" title="Earlier" small />
-    <div class="list">
+    <div class="list reveal">
       {experience.map(e => (
-        <div class="item">
-          <span class="y">{e.date}</span>
-          <span><span class="t">{e.title}</span><p class="d">{e.org}</p></span>
-          <span class="s">{e.tag}</span>
-        </div>
+        <details class="item" data-pill>
+          <summary>
+            <span class="y">{e.date}</span>
+            <span><span class="t">{e.title}</span><p class="d">{e.org}</p></span>
+            <span class="s">{e.tag}</span>
+          </summary>
+          <div class="more"><ul><li>{e.body}</li></ul></div>
+        </details>
       ))}
     </div>
   </div>

@@ -4,10 +4,20 @@ import { profile, socials } from '../data/profile';
 ---
 <section id="contact" aria-labelledby="contact-h">
   <div class="wrap">
-    <SectionHead n="06" title="Say hi" note='or press <span class="mono">:</span> and type <span class="mono">email</span>' id="contact-h" />
-    <div class="contact">
-      <a href={`mailto:${profile.email}`}>{profile.email}</a>
-      {socials.map(s => <a href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>)}
+    <SectionHead n="05" title="Say hi" note='or press <span class="mono">:</span> and type <span class="mono">email</span>' id="contact-h" />
+    <div class="contact-card reveal">
+      <div class="contact-main">
+        <p class="avail" id="avail"><i aria-hidden="true"></i><span>checking Penang time…</span></p>
+        <a class="email" href={`mailto:${profile.email}`}>{profile.email}</a>
+        <div class="contact-actions">
+          <a class="btn primary" href={`mailto:${profile.email}`}>write an email</a>
+          <button class="btn" type="button" id="copyEmail">copy address</button>
+          <button class="btn" type="button" id="vcard">save contact</button>
+        </div>
+      </div>
+      <nav class="socials" aria-label="Elsewhere">
+        {socials.map(s => <a href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>)}
+      </nav>
     </div>
   </div>
 </section>

@@ -63,22 +63,10 @@ a{ color:inherit; text-underline-offset:3px; }
 section{ padding:72px 0; border-top:1px solid var(--rule); position:relative; }
 .wrap, .status, .cmdline{ position:relative; z-index:1; }
 .status, .cmdline{ position:fixed; }
-.degree, .course, .targets, .list .item, .gitlog, .race-lane, .contact{ background:var(--paper); }
+.degree, .course, .targets, .list .item, .gitlog, .contact{ background:var(--paper); }
 
 /* self-source code background */
 #codebg{ position:fixed; inset:0; z-index:0; pointer-events:none; }
-
-/* sorting race */
-.race{ display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--ink); }
-.race-lane{ border-right:1px solid var(--ink); }
-.race-lane:last-child{ border-right:0; }
-.race-lane header{ display:flex; justify-content:space-between; padding:10px 12px; border-bottom:1px solid var(--ink); font:12px var(--mono); }
-.race-lane header b{ font-weight:500; }
-.race-lane canvas{ display:block; width:100%; height:180px; }
-.race-lane footer{ display:flex; justify-content:space-between; padding:8px 12px; border-top:1px solid var(--rule); font:12px var(--mono); color:var(--ink-3); }
-.race-lane.win header{ background:var(--ink); color:var(--paper); }
-.race-ctl{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; font:12px var(--mono); color:var(--ink-3); }
-.race-ctl input{ accent-color:var(--signal); }
 
 /* x-ray inspect mode */
 body.xray .wrap *{ outline:1px dashed color-mix(in srgb, var(--signal) 45%, transparent); outline-offset:-1px; }
@@ -186,5 +174,14 @@ section.flash{ animation:flash .6s; }
   .item{ grid-template-columns:1fr; gap:2px; }
   .top nav{ display:none; }
   .status .hint, .status .pct{ display:none; }
+}
+.status button{ white-space:nowrap; flex:0 0 auto; }
+.status .mode{ flex:0 0 auto; }
+@media (max-width:520px){
+  .status .file{ display:none; }
+  .status .clock{ flex:1; padding:0 10px; }
+  .status > span, .status button{ padding:0 9px; }
+  .photo-bar span:first-child{ display:none; }
+  .photo-bar{ justify-content:flex-end; }
 }
 @media (prefers-reduced-motion:reduce){ *{ animation:none!important; scroll-behavior:auto!important; } }

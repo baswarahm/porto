@@ -7,23 +7,25 @@ const { year, sem } = degreeProgress();
 ---
 <section id="now" aria-labelledby="now-h">
   <div class="wrap">
-    <SectionHead n="02" title="Taking now" note={`<span data-sem-label>year ${year}, semester ${sem}</span>`} id="now-h" />
+    <SectionHead n="02" title="Taking now" note={`<span data-sem-label>year ${year}, semester ${sem}</span> · hover a course to light up its commits`} id="now-h" />
     <div class="courses">
-      {courses.map(c => {
-        const pct = c.week && c.weeks ? Math.round((c.week / c.weeks) * 100) : null;
-        return (
-          <article class="course">
-            <div class="code"><span class={`c${c.lane}`}>{c.code}</span><span class="wk">{pct !== null ? `week ${c.week}/${c.weeks}` : 'ongoing'}</span></div>
-            <h3>{c.name}</h3>
-            {pct !== null && <div class="bar" role="img" aria-label={`${pct}% through the semester`}><span style={`width:${pct}%`}></span></div>}
-            <ul>
-              {c.learned.map(l => <li>{l}</li>)}
-              {c.doing.map(l => <li class="doing">{l}</li>)}
-            </ul>
-            <p class="stuck">stuck on: {c.stuck}</p>
-          </article>
-        );
-      })}
+      {courses.map((c, idx) => (
+        <article class="course reveal" data-lane={c.lane} style={`transition-delay:${idx * 70}ms`}>
+          <div class="code"><span class={`c${c.lane}`}>{c.code}</span><span class="wk">{c.week ? `week ${c.week}/${c.weeks}` : 'ongoing'}</span></div>
+          <h3>{c.name}</h3>
+          {c.week && c.weeks && (
+            <div class="weeks" style={`--n:${c.weeks}`} role="img" aria-label={`week ${c.week} of ${c.weeks}`}>
+              {Array.from({ length: c.weeks }, (_, i) => <i class={i + 1 < c.week! ? 'on' : i + 1 === c.week ? 'cur' : undefined} style={`--i:${i}`}></i>)}
+            </div>
+          )}
+          <ul>
+            {c.learned.map(l => <li>{l}</li>)}
+            {c.doing.map(l => <li class="doing">{l}</li>)}
+          </ul>
+          <p class="stuck">stuck on: {c.stuck}</p>
+          <button type="button" class="go" data-lane={c.lane}>view commits ↑</button>
+        </article>
+      ))}
     </div>
   </div>
 </section>

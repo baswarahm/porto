@@ -6,31 +6,35 @@ import { degreeProgress } from '../lib/degree';
 const { pct } = degreeProgress();
 const nav = sections.filter(s => s.id !== 'top');
 ---
-<div class="wrap" id="top">
-  <header class="top">
-    <span>~/{profile.handle}</span>
-    <nav aria-label="Sections">
-      {nav.map((s, i) => <a href={`#${s.id}`}><span>{String(i + 1).padStart(2, '0')}</span> {s.label}</a>)}
-    </nav>
-    <button class="chip" id="themeBtn" type="button">theme</button>
-  </header>
+<header class="top-wrap">
+  <div class="wrap">
+    <div class="top">
+      <span>~/{profile.handle}</span>
+      <nav aria-label="Sections">
+        {nav.map((s, i) => <a href={`#${s.id}`} data-nav={s.id}><span>{String(i + 1).padStart(2, '0')}</span> {s.label}</a>)}
+      </nav>
+      <button class="chip" id="themeBtn" type="button">theme</button>
+    </div>
+  </div>
+</header>
 
+<div class="wrap" id="top">
   <div class="hero">
     <div>
       <p class="whoami">$ whoami → <b>{profile.whoami.role}</b>, {profile.whoami.where}</p>
-      <h1>{profile.nameLines.map((l, i) => <>{l}{i < profile.nameLines.length - 1 && <br />}</>)}<span class="cursor" aria-hidden="true"></span></h1>
+      <h1 id="heroName" aria-label={profile.name}>{profile.nameLines.map((l, i) => <><span class="word" aria-hidden="true">{l}</span>{i < profile.nameLines.length - 1 && <br />}</>)}<span class="cursor" aria-hidden="true"></span></h1>
       <p class="intro">From Solo, now in Penang. <strong>Studying Intelligent Computing</strong> and writing down everything I learn on the way — progress, courses, and the goals I'm chasing.</p>
       <dl class="facts">
         <div><dt>degree</dt><dd data-degree-pct>{(pct * 100).toFixed(1)}% done</dd></div>
-        <div><dt>courses now</dt><dd>{courses.length}</dd></div>
-        <div><dt>commits logged</dt><dd>{commits.length}</dd></div>
+        <div><dt>courses now</dt><dd data-count={courses.length}>{courses.length}</dd></div>
+        <div><dt>commits logged</dt><dd data-count={commits.length}>{commits.length}</dd></div>
       </dl>
     </div>
 
     <figure class="photo" id="photo">
       <canvas id="dither" width="600" height="800" aria-hidden="true"></canvas>
       <img src={profile.photo} alt={profile.photoAlt} width="960" height="1280" decoding="async">
-      <figcaption class="photo-bar"><span>1-bit dither</span><span>hold or <kbd>p</kbd> to develop</span></figcaption>
+      <figcaption class="photo-bar"><span>1-bit dither · hover for a lens</span><span>hold or <kbd>p</kbd> to develop</span></figcaption>
     </figure>
   </div>
 </div>
