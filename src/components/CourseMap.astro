@@ -30,7 +30,7 @@ const trackKeys = Object.keys(tracks) as Track[];
     <label class="cmap-search"><span aria-hidden="true">/</span><input type="search" id="cmapSearch" placeholder="search courses, e.g. learning" autocomplete="off" spellcheck="false" aria-label="Search courses"></label>
   </div>
 
-  <div class="cmap reveal wipe" id="cmap">
+  <div class="cmap reveal anim-scan" id="cmap">
     {curriculum.map((list, i) => (
       <div class={`cmap-col ${semesters[i].state}`} data-sem={i}>
         <p class="cmap-head"><span>{semesters[i].label}</span><span>{list.reduce((n, c) => n + c.credits, 0)} cr</span></p>
@@ -44,5 +44,6 @@ const trackKeys = Object.keys(tracks) as Track[];
       </div>
     ))}
   </div>
+  <button class="btn cmap-more" id="cmapMore" type="button" aria-expanded="false" aria-controls="cmap">show the full four-year roadmap ↓</button>
   <p class="cmap-detail" id="cmapDetail" aria-live="polite"><span class="mono">tip:</span> press <kbd>/</kbd> to search the map.</p>
 </div>

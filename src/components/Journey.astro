@@ -14,14 +14,14 @@ const columns: { id: string; title: string; items: TimelineItem[] }[] = [
     <SectionHead n="05" title="Experience & education" note="the road so far · click an entry" id="journey-h" />
     <div class="journey">
       {columns.map(col => (
-        <div class="tl reveal" data-tl={col.id}>
+        <div class={`tl reveal ${col.id === 'exp' ? 'anim-left' : 'anim-right'}`} data-tl={col.id}>
           <h3 class="tl-head"><span>{col.title}</span><span>{col.items.length}</span></h3>
           <div class="tl-line" aria-hidden="true"><span></span></div>
           {col.items.map((it, i) => (
             <details class="tl-item" style={`--i:${i}`} data-pill>
               <summary>
                 <span class="tl-dot" aria-hidden="true"></span>
-                <span class="tl-date">{it.date}</span>
+                <span class="tl-date">{it.ongoing && it.date.endsWith('now') ? <>{it.date.slice(0, -3)}<span class="live-now"><i aria-hidden="true"></i>now</span></> : it.date}</span>
                 <span class="tl-title">{it.title}</span>
                 <span class="tl-org">{it.org}</span>
                 <span class="tl-tag">{it.tag}</span>

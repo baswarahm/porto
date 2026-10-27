@@ -3,16 +3,11 @@
    splittable name, and the entrance effects every section shares.
    ========================================================================== */
 
-/* ---- entrance: section rule draws in, watermark number, wipes ----------- */
+/* ---- entrance: section rule draws in, watermark number (per-block entrances live in entrances.css) */
 section::before{ content:""; position:absolute; left:0; top:-1px; height:1px; width:100%; background:var(--ink); transform:scaleX(0); transform-origin:left; transition:transform 1.1s cubic-bezier(.7,0,.2,1); z-index:1; }
 section.seen::before{ transform:scaleX(1); }
 .wm{ position:absolute; right:12px; top:-28px; font:600 clamp(6rem,16vw,13rem)/1 var(--sans); letter-spacing:-.06em; color:transparent; -webkit-text-stroke:1px var(--rule); pointer-events:none; user-select:none; z-index:-1; transform:translateY(var(--py,0px)); opacity:0; transition:opacity 1s; }
 .seen .wm{ opacity:1; }
-/* a cover panel slides off the table (clip-path on the element itself would
-   give it zero area, and IntersectionObserver would never see it) */
-.reveal.wipe{ opacity:1; transform:none; position:relative; }
-.reveal.wipe::after{ content:""; position:absolute; inset:-1px; z-index:3; pointer-events:none; background:var(--ink); transform-origin:right; transition:transform .9s .1s cubic-bezier(.7,0,.2,1); }
-.reveal.wipe.in::after{ transform:scaleX(0); }
 .sec-head h2 .txt{ display:inline-block; }
 
 /* ---- splittable name ----------------------------------------------------- */
@@ -149,7 +144,6 @@ kbd{ font:11px var(--mono); border:1px solid var(--rule); padding:0 5px; }
   .wm{ font-size:5.5rem; top:-14px; }
 }
 @media (prefers-reduced-motion:reduce){
-  .reveal.wipe::after{ display:none; }
   .tile, .tl-item{ opacity:1; transform:none; }
   section::before{ transform:scaleX(1); }
   #heroName .ch{ transition:none; }
@@ -173,3 +167,15 @@ kbd{ font:11px var(--mono); border:1px solid var(--rule); padding:0 5px; }
   .ticker-item{ padding:12px 18px; }
 }
 @media (prefers-reduced-motion:reduce){ .ticker{ overflow-x:auto; } .ticker-track{ animation:none; } }
+
+/* ---- phones: course map opens on the current semester only ---------------- */
+.cmap-more{ display:none; width:100%; justify-content:center; border-top:0; }
+@media (max-width:640px){
+  .cmap-more{ display:flex; }
+  .cmap:not(.expanded){ grid-template-columns:1fr; }
+  .cmap:not(.expanded) .cmap-col:not(.now){ display:none; }
+  .cmap:not(.expanded) .cmap-col.now{ border-right:0; border-bottom:0; }
+  .cmap:not(.expanded) .tile{ padding:10px 12px; }
+  .cmap:not(.expanded) .tile .name{ font-size:14px; }
+  .cmap.expanded .cmap-col{ animation:fade .35s ease-out; }
+}

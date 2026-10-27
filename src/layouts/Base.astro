@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import '../styles/interactions.css';
 import '../styles/sections.css';
+import '../styles/entrances.css';
 import StatusLine from '../components/StatusLine.astro';
 import { profile } from '../data/profile';
 
@@ -46,7 +47,7 @@ const ogImage = new URL(profile.photo, Astro.site);
     <pre id="opLog"></pre>
     <div class="op-bar"><span id="opBar"></span></div>
     <p class="op-name" id="opName">{profile.nameLines[0].toLowerCase()}<span>.</span></p>
-    <p class="op-skip">click or press any key to skip · <span id="opStyle"></span></p>
+    <p class="op-skip">click or press any key to skip</p>
   </div>
   <a class="skip" href="#progress">Skip to content</a>
   <slot />
