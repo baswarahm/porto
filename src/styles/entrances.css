@@ -74,3 +74,6 @@
   .anim-scan::before, .anim-scan::after{ display:none; }
   .live-now, .live-now i{ animation:none; }
 }
+
+/* hero text stays readable over the binary rain: a soft paper-coloured halo */
+.hero .whoami, .hero h1, .hero .intro, .hero .facts, .name-tools .hint, .sec-head p{ text-shadow:0 0 2px var(--paper), 0 0 8px var(--paper), 0 0 14px var(--paper); }

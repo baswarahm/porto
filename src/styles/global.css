@@ -16,6 +16,10 @@
   --paper:#121210; --paper-2:#1b1b18; --ink:#ece8dc; --ink-2:#a9a596; --ink-3:#6f6c62; --rule:#2b2a25;
   --signal:#ff6a3d; --ok:#4cc38a; --warn:#e0a83a; --b1:#ff6a3d; --b2:#7c9cff; --b3:#4cc38a; --b4:#d08bf0; }
 *{ box-sizing:border-box; margin:0; padding:0; }
+/* nothing may ever widen the page: entrance animations start elements off to
+   the side, and on phones that used to zoom the whole page out until they landed.
+   `clip` (not `hidden`) so the sticky top bar keeps working. */
+html, body{ overflow-x:clip; max-width:100%; }
 html{ scroll-behavior:smooth; }
 body{ background:var(--paper); color:var(--ink); font:16px/1.6 var(--sans); padding-bottom:40px; }
 ::selection{ background:var(--signal); color:var(--paper); }
@@ -67,8 +71,8 @@ section{ padding:72px 0; border-top:1px solid var(--rule); position:relative; }
 .status, .cmdline{ position:fixed; }
 .degree, .course, .targets, .list .item, .gitlog, .contact{ background:var(--paper); }
 
-/* self-source code background */
-#codebg{ position:fixed; inset:0; z-index:0; pointer-events:none; }
+/* binary rain background */
+#binbg{ position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
 
 /* x-ray inspect mode */
 body.xray .wrap *{ outline:1px dashed color-mix(in srgb, var(--signal) 45%, transparent); outline-offset:-1px; }

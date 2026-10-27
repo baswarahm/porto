@@ -9,7 +9,7 @@ import { initProgress, initGitLog, initCourses } from './progress';
 import { initCourseMap } from './coursemap';
 import { initHeroName, initNameSplit, initCounters } from './hero';
 import { initDither } from './dither';
-import { initCodeBackground } from './codebg';
+import { initBinaryBackground } from './binarybg';
 import { initVim, command, key, keyHelp, setMode, goTo } from './vim';
 import { initXray } from './xray';
 import { initReveal, initPill, initTargets, initContact, initSections, initCheatSheet, initSudo, copyEmail, toast } from './ui';
@@ -31,11 +31,11 @@ const name = initHeroName();
 const nameSplit = initNameSplit(() => toast('drag the letters around · reassemble when you are done'));
 const photo = initDither(opened);
 const xray = initXray();
-let bg: ReturnType<typeof initCodeBackground> | null = null;
+let bg: ReturnType<typeof initBinaryBackground> | null = null;
 
 // things that should happen as the page is revealed, not behind the opening
 opened.then(() => {
-  bg = initCodeBackground();
+  bg = initBinaryBackground();
   initReveal();
   initSections();
   name.decrypt();
@@ -57,7 +57,7 @@ key('t', () => { toast(`theme: ${toggleTheme()}`); });
 key('/', () => { map.focusSearch(); });
 key('n', () => { (document.getElementById('heroName')?.classList.contains('split') ? nameSplit.reset : nameSplit.split)(); goTo(0); });
 Object.assign(keyHelp, {
-  p: 'hold to develop the photo', x: 'x-ray: inspect any element', b: 'toggle the code background',
+  p: 'hold to develop the photo', x: 'x-ray: inspect any element', b: 'toggle the binary background',
   t: 'toggle light / dark', '/': 'search the course map', n: 'break / reassemble my name', '?': 'show all shortcuts',
 });
 
@@ -70,7 +70,7 @@ const sheet = initCheatSheet([
   ['p', 'hold to see the photo in colour'],
   ['x', 'x-ray: inspect any element'],
   ['t', 'toggle light / dark'],
-  ['b', 'toggle the code background'],
+  ['b', 'toggle the binary background'],
   [':', 'open the command line (try :help)'],
   ['?', 'this sheet'],
 ]);
@@ -82,7 +82,9 @@ command('skills', 'list what I build with', () => skills.map(s => `${s.name.padE
 command('email', 'copy my email', () => { copyEmail(); return 'copied to clipboard'; });
 command('theme', 'toggle light / dark', () => `theme: ${toggleTheme()}`);
 command('xray', 'inspect the page', () => `x-ray ${xray.toggle() ? 'on — hover anything' : 'off'}`);
-command('src', 'toggle the code background', () => `code background ${toggleBg() ? 'on' : 'off'}`);
+command('bg', 'toggle the binary background', () => `binary background ${toggleBg() ? 'on' : 'off'}`);
+command('decode', 'what the binary rain says', () => bg ? `the rain spells:
+"${bg.message}"` : 'the background is off');
 command('split', 'break my name apart', () => { goTo(0); nameSplit.split(); return 'drag the letters around'; });
 command('reset', 'reassemble my name', () => { nameSplit.reset(); return 'name reassembled'; });
 command('find', 'search the course map', () => { map.focusSearch(); });
