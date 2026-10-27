@@ -12,10 +12,10 @@ const laneClass = (l: number | null) => (l ? `c${l}` : undefined);
 <section id="progress" aria-labelledby="progress-h">
   <div class="wrap">
     <SectionHead n="01" title="Degree progress" note="computed live from today's date · click a semester" id="progress-h" />
-    <div class="degree reveal wipe">
+    <div class="degree reveal anim-flip">
       <div class="sem-track" id="semTrack" role="group" aria-label="Semesters">
         {semesters.map(s => (
-          <button type="button" class={`sem ${s.state}`} data-sem={s.index} aria-pressed={s.index === current ? 'true' : 'false'}>
+          <button type="button" class={`sem ${s.state}`} data-sem={s.index} style={`--i:${s.index}`} aria-pressed={s.index === current ? 'true' : 'false'}>
             <span class="lbl">{s.state === 'now' ? '● now' : `sem ${s.index + 1}`}</span>
             <span class="yr">{s.label}</span>
             <span class="fill" style={`width:${(s.fill * 100).toFixed(1)}%`}></span>

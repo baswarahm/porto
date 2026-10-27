@@ -69,5 +69,8 @@ export function initDither(startWhen: Promise<void> = Promise.resolve()){
     fig.classList.add('lens');
   });
   fig.addEventListener('pointerleave', () => fig.classList.remove('lens'));
+  // no right-click / long-press save menu (it can't stop a determined visitor, but it stops the casual one)
+  fig.addEventListener('contextmenu', e => e.preventDefault());
+  fig.addEventListener('dragstart', e => e.preventDefault());
   return { develop };
 }

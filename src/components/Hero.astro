@@ -39,7 +39,7 @@ const nav = sections.filter(s => s.id !== 'top');
 
     <figure class="photo" id="photo">
       <canvas id="dither" width="600" height="800" aria-hidden="true"></canvas>
-      <img src={profile.photo} alt={profile.photoAlt} width="960" height="1280" decoding="async">
+      <img src={profile.photo} alt={profile.photoAlt} width="960" height="1280" decoding="async" draggable="false">
       <figcaption class="photo-bar"><span>1-bit dither · hover for a lens</span><span>hold or <kbd>p</kbd> to develop</span></figcaption>
     </figure>
   </div>

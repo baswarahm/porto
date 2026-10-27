@@ -29,7 +29,7 @@ export const experience: TimelineItem[] = [
 
 export const education: TimelineItem[] = [
   {
-    date: '2026–2030', tag: 'degree', title: 'B.CS (Intelligent Computing) with Honours', org: 'Universiti Sains Malaysia, Penang',
+    date: '2026 – now', tag: 'degree', title: 'B.CS (Intelligent Computing) with Honours', org: 'Universiti Sains Malaysia, Penang',
     body: 'Computer Science with a concentration in Intelligent Computing: machine learning, NLP, computer vision and computational intelligence.',
     ongoing: true,
   },

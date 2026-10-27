@@ -12,10 +12,8 @@ export const profile = {
 };
 
 export const socials = [
-  { label: 'github', handle: '@baswarahm', icon: 'github', href: 'https://github.com/baswarahm' },
   { label: 'linkedin', handle: 'in/baswarahafizh', icon: 'linkedin', href: 'https://www.linkedin.com/in/baswarahafizh/' },
   { label: 'instagram', handle: '@baswara.hm', icon: 'instagram', href: 'https://instagram.com/baswara.hm' },
-  { label: 'discord', handle: 'join my server', icon: 'discord', href: 'https://discord.gg/3PHBSJscNe' },
 ] as const;
 
 /** Page sections in order. Drives the top nav, vim j/k navigation and `:<id>` commands. */

@@ -21,8 +21,24 @@ export function initCourseMap(){
     col.querySelectorAll('.tile').forEach(t => { t.classList.remove('done', 'now', 'future'); t.classList.add(s); });
   });
 
+  // phones start with only the current semester; the rest is one tap away
+  const more = $<HTMLButtonElement>('#cmapMore');
+  const expand = (on = true) => {
+    map.classList.toggle('expanded', on);
+    if (more){
+      more.setAttribute('aria-expanded', String(on));
+      more.textContent = on ? 'show only this semester ↑' : 'show the full four-year roadmap ↓';
+    }
+  };
+  more?.addEventListener('click', () => {
+    const on = !map.classList.contains('expanded');
+    expand(on);
+    if (!on) map.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+  });
+
   const apply = () => {
     const q = search.value.trim().toLowerCase();
+    if (q) expand();
     tiles.forEach(t => {
       const okTrack = track === 'all' || t.dataset.track === track;
       const okText = !q || `${t.dataset.code} ${t.dataset.name}`.toLowerCase().includes(q);
@@ -54,10 +70,14 @@ export function initCourseMap(){
   };
   tiles.forEach(t => t.addEventListener('click', () => show(t)));
 
-  const focusSem = (i: number) => cols.forEach((c, k) => c.classList.toggle('sel', k === i));
+  const focusSem = (i: number) => {
+    cols.forEach((c, k) => c.classList.toggle('sel', k === i));
+    if (!cols[i]?.classList.contains('now')) expand();
+  };
   const open = (code: string) => {
     const t = tiles.find(x => x.dataset.code === code);
     if (!t) return;
+    if (!t.classList.contains('now')) expand();
     show(t);
     t.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' });
     t.classList.add('hit'); setTimeout(() => apply(), 1400);

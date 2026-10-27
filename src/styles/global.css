@@ -54,7 +54,9 @@ a{ color:inherit; text-underline-offset:3px; }
 
 .photo{ position:relative; width:min(46vw, calc((100svh - 170px) * .75)); border:1px solid var(--ink); background:var(--paper-2); cursor:crosshair; user-select:none; }
 .photo canvas, .photo img{ display:block; width:100%; height:auto; aspect-ratio:3/4; }
-.photo img{ position:absolute; inset:0; object-fit:cover; opacity:0; transition:opacity .25s; }
+.photo img{ position:absolute; inset:0; object-fit:cover; opacity:0; transition:opacity .25s; pointer-events:none; }
+/* no long-press "download image" menu on phones */
+.photo, .photo *{ -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
 .photo.dev img{ opacity:1; }
 .photo-bar{ display:flex; justify-content:space-between; padding:8px 10px; border-top:1px solid var(--ink); font:12px var(--mono); color:var(--ink-2); background:var(--paper); }
 .photo-bar kbd{ font:inherit; border:1px solid var(--rule); padding:0 5px; }

@@ -5,7 +5,7 @@ import { skills } from '../data/skills';
 import { logoSvg, brandColor } from '../lib/brand';
 ---
 <div class="wrap">
-  <div class="skills-band reveal" role="region" aria-label="My skills">
+  <div class="skills-band reveal anim-rise" role="region" aria-label="My skills">
     <p class="skills-cap">my skills</p>
     <ul class="sr-only">{skills.map(s => <li>{s.name}</li>)}</ul>
     <div class="ticker" aria-hidden="true">
