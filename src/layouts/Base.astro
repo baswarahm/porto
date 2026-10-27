@@ -4,25 +4,45 @@ import '../styles/interactions.css';
 import '../styles/sections.css';
 import '../styles/entrances.css';
 import StatusLine from '../components/StatusLine.astro';
-import { profile } from '../data/profile';
+import { profile, socials } from '../data/profile';
+import { degree } from '../data/courses';
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(profile.photo, Astro.site);
+// schema.org Person, so search engines know whose page this is
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  url: Astro.site?.href,
+  image: ogImage.href,
+  email: `mailto:${profile.email}`,
+  jobTitle: 'Computer Science student',
+  description: profile.description,
+  homeLocation: { '@type': 'Place', name: 'Penang, Malaysia' },
+  birthPlace: { '@type': 'Place', name: 'Surakarta (Solo), Indonesia' },
+  affiliation: { '@type': 'CollegeOrUniversity', name: degree.school },
+  alumniOf: [{ '@type': 'HighSchool', name: 'SMA Al-Azhar Syifa Budi Solo' }],
+  sameAs: socials.map(s => s.href),
+};
 ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{profile.handle} — year 1, compiling</title>
+<title>{profile.pageTitle}</title>
 <meta name="description" content={profile.description}>
 <link rel="canonical" href={canonical}>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="sitemap" href="/sitemap.xml">
+<script type="application/ld+json" set:html={JSON.stringify(person)} />
 <meta name="theme-color" content="#f3f0e8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#121210" media="(prefers-color-scheme: dark)">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content={profile.name}>
+<meta property="og:title" content={profile.pageTitle}>
+<meta property="og:site_name" content={profile.name}>
 <meta property="og:description" content={profile.description}>
 <meta property="og:url" content={canonical}>
 <meta property="og:image" content={ogImage}>

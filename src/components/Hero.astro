@@ -23,7 +23,7 @@ const nav = sections.filter(s => s.id !== 'top');
   <div class="hero">
     <div>
       <p class="whoami">$ whoami → <b>{profile.whoami.role}</b>, {profile.whoami.where}</p>
-      <h1 id="heroName" aria-label={profile.name}>{profile.nameLines.map((l, i) => <><span class="word" aria-hidden="true">{l}</span>{i < profile.nameLines.length - 1 && <br />}</>)}<span class="cursor" aria-hidden="true"></span></h1>
+      <h1 id="heroName" aria-label={profile.name}>{profile.nameLines.map((l, i) => <><span class="word">{l}</span>{i < profile.nameLines.length - 1 && <br />}</>)}<span class="cursor" aria-hidden="true"></span></h1>
       <div class="name-tools" id="nameTools">
         <span class="hint">↑ click my name to break it apart</span>
         <button class="btn" type="button" id="nameReset"><Icon name="refresh" size={14} />reassemble</button>
