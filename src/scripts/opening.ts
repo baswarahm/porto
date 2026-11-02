@@ -9,7 +9,7 @@
 import { $ } from './env';
 
 /** how long each slide holds after its entrance, in ms (also the progress bars) */
-const HOLD = [1000, 1000, 1000, 900];
+const HOLD = [650, 700, 650, 600];
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
@@ -88,7 +88,7 @@ export function initOpening(){
     progress(0);
     set(letters[0], (_, i) => ({ transitionDelay: `${i * 22}ms` }));
     enter(s1);
-    await sleep(900 + HOLD[0]);
+    await sleep(700 + HOLD[0]);
     if (done) return;
 
     /* 1 → 2 ─ the welcome letters scatter … */
@@ -99,7 +99,7 @@ export function initOpening(){
       transform: `translate(${rand(-.6, .6) * vw}px, ${rand(-.5, .5) * vh}px) rotate(${rand(-260, 260)}deg) scale(${rand(.2, .7)})`,
       opacity: '0',
     }));
-    await sleep(420);
+    await sleep(340);
     /* … and my name's letters fly back together */
     progress(1);
     enter(s2);
@@ -107,18 +107,18 @@ export function initOpening(){
     set(letters[1], () => ({ transitionDelay: `${rand(0, 260)}ms`, transform: 'none', opacity: '1' }));
     await sleep(500);
     hide(s1);
-    await sleep(600 + HOLD[1]);
+    await sleep(450 + HOLD[1]);
     if (done) return;
 
     /* 2 → 3 ─ my name splits apart sideways, the silhouette sinks … */
     leave(s2);
-    await sleep(380);
+    await sleep(300);
     /* … and the USM crest drops in */
     progress(2);
     enter(s3);
     await sleep(500);
     hide(s2);
-    await sleep(500 + HOLD[2]);
+    await sleep(400 + HOLD[2]);
     if (done) return;
 
     /* 3 → 4 ─ an orange iris bursts from the crest … */
@@ -128,14 +128,14 @@ export function initOpening(){
     iris.style.setProperty('--ix', `${cx}px`); iris.style.setProperty('--iy', `${cy}px`);
     iris.style.setProperty('--iscale', String(Math.ceil(reach / 10) + 2));
     iris.classList.add('grow');
-    await sleep(560);
+    await sleep(480);
     /* … and closes on "enjoy the visit" */
     hide(s3);
     progress(3);
     set(letters[3], (_, i) => ({ transitionDelay: `${180 + i * 35}ms` }));
     enter(s4);
     iris.classList.replace('grow', 'close');
-    await sleep(900 + HOLD[3]);
+    await sleep(650 + HOLD[3]);
     if (done) return;
 
     /* 4 → site ─ the letters fall away and a portal opens */
