@@ -1,55 +1,74 @@
 /* ==========================================================================
-   OPENING.CSS — a calm, editorial intro. No flashes, no shakes: the name
-   rises out of a line, the details fade in under it, the silhouette sits
-   quietly in the background, then the whole panel lifts away.
-   opening.ts only adds `.play` and then `.leave`; everything else is timed
-   here with transition delays.
+   OPENING.CSS — a four-slide intro: welcome → my name with my silhouette
+   behind it → USM → enjoy. The slides sit on one horizontal track that
+   glides left; each slide's text rises in only once it's the current one,
+   so every cut lands on the next line. opening.ts just moves `--n`, marks
+   the current slide `.on`, and finally adds `.leave`.
    ========================================================================== */
-.opening{ position:fixed; inset:0; z-index:100; display:grid; place-items:center; padding:0 24px; overflow:hidden;
-  background:#0f0f0d; color:#ece8dc; font:13px/1.5 var(--mono);
-  clip-path:inset(0 0 0 0); transition:clip-path .9s .15s cubic-bezier(.76,0,.24,1); }
+.opening{ position:fixed; inset:0; z-index:100; overflow:hidden; background:#0f0f0d; color:#ece8dc; font:13px/1.5 var(--mono);
+  clip-path:inset(0 0 0 0); transition:clip-path .9s .1s cubic-bezier(.76,0,.24,1); }
 .no-opening .opening{ display:none; }
 .opening.leave{ clip-path:inset(0 0 100% 0); }
 
-/* the silhouette, very quiet, slowly drifting closer */
-.op-ghost{ position:absolute; left:50%; bottom:-4vh; height:96vh; aspect-ratio:294/900; transform:translateX(-50%) scale(.96); opacity:0;
-  background:linear-gradient(180deg, rgba(236,232,220,.11), rgba(236,232,220,.02) 85%);
+:root{ --op-ease:cubic-bezier(.76,0,.24,1); --op-rise:cubic-bezier(.2,.8,.2,1); }
+
+/* the track: four full-screen slides side by side */
+.op-track{ position:absolute; inset:0; display:flex; width:400%; transform:translateX(calc(var(--n, 0) * -25%)); transition:transform 1s var(--op-ease); }
+.op-slide{ position:relative; flex:0 0 25%; display:grid; place-items:center; padding:0 clamp(24px,8vw,120px); }
+.op-slide > div{ position:relative; width:min(980px,100%); }
+/* the slide being left drifts back a little and dims, so the cut feels deep */
+.op-slide > div{ transition:opacity .6s, transform 1s var(--op-ease); }
+.op-slide.past > div{ opacity:.15; transform:translateX(-6vw) scale(.96); }
+
+/* shared type */
+.op-kicker{ font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:#ff6a3d; margin-bottom:18px;
+  opacity:0; transform:translateY(8px); transition:opacity .5s .15s, transform .6s .15s var(--op-rise); }
+.op-big{ font:600 clamp(2.4rem,8vw,7rem)/1 var(--sans); letter-spacing:-.04em; }
+.op-big em{ font-style:normal; color:#ff6a3d; }
+.op-sub{ margin-top:22px; font-size:13px; letter-spacing:.05em; color:#a9a596; max-width:52ch;
+  opacity:0; transform:translateY(8px); transition:opacity .6s .75s, transform .7s .75s var(--op-rise); }
+/* words rise from behind a hidden edge, one after another */
+.op-big .w{ display:inline-block; overflow:hidden; padding-bottom:.08em; margin-right:.22em; vertical-align:top; }
+.op-big .w > span{ display:inline-block; transform:translateY(108%); transition:transform .9s var(--op-rise); }
+.op-big .w:nth-child(2) > span{ transition-delay:.08s; } .op-big .w:nth-child(3) > span{ transition-delay:.16s; }
+.op-big .w:nth-child(4) > span{ transition-delay:.24s; } .op-big .w:nth-child(5) > span{ transition-delay:.32s; }
+.op-slide.on .op-kicker, .op-slide.on .op-sub{ opacity:1; transform:none; }
+.op-slide.on .op-big .w > span{ transform:none; }
+.op-rule{ height:1px; background:#3a3833; margin-top:24px; transform:scaleX(0); transform-origin:left; transition:transform 1s .45s var(--op-ease); }
+.op-slide.on .op-rule{ transform:none; }
+
+/* slide 2: my silhouette standing behind my name */
+.s-name > div{ display:grid; place-items:center; text-align:center; }
+.op-sil{ position:absolute; left:50%; top:50%; height:min(86vh,760px); aspect-ratio:294/900; transform:translate(-50%,-46%) scale(.94); opacity:0;
+  background:linear-gradient(180deg, rgba(236,232,220,.22), rgba(236,232,220,.05) 80%);
   -webkit-mask:url(/images/silhouette.png) center / contain no-repeat; mask:url(/images/silhouette.png) center / contain no-repeat;
-  transition:opacity 1.4s ease, transform 3.2s cubic-bezier(.2,.8,.2,1); }
-.opening.play .op-ghost{ opacity:1; transform:translateX(-50%) scale(1); }
+  transition:opacity 1.1s .1s, transform 2.4s .1s var(--op-rise); }
+.op-slide.on .op-sil{ opacity:1; transform:translate(-50%,-46%) scale(1); }
+.s-name .op-big{ position:relative; }
+.s-name .op-sub{ margin-left:auto; margin-right:auto; }
 
-.op-inner{ position:relative; width:min(980px,100%); transition:opacity .35s, transform .5s cubic-bezier(.76,0,.24,1); }
-.opening.leave .op-inner{ opacity:0; transform:translateY(-18px); }
+/* slide 3: the university */
+.s-usm > div{ display:flex; align-items:center; gap:clamp(20px,4vw,44px); }
+.s-usm img{ width:clamp(84px,13vw,150px); height:auto; flex:0 0 auto; opacity:0; transform:translateY(16px) scale(.9);
+  transition:opacity .7s .1s, transform 1s .1s var(--op-rise); }
+.op-slide.on.s-usm img{ opacity:1; transform:none; }
+.s-usm .op-big{ font-size:clamp(2rem,5.6vw,4.8rem); }
 
-.op-eyebrow{ font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:#8f8b7d; margin-bottom:18px;
-  opacity:0; transition:opacity .6s .1s; }
-.opening.play .op-eyebrow{ opacity:1; }
+/* slide 4: enjoy */
+.s-end > div{ text-align:center; }
+.s-end .op-sub{ margin-left:auto; margin-right:auto; }
 
-/* each word slides up from behind an invisible edge */
-.op-name{ display:flex; flex-wrap:wrap; gap:0 .28em; font:600 clamp(2.4rem,7.4vw,6.4rem)/1 var(--sans); letter-spacing:-.035em; }
-.op-name .w{ display:inline-block; overflow:hidden; padding-bottom:.08em; }
-.op-name .w > span{ display:inline-block; transform:translateY(105%); transition:transform .9s cubic-bezier(.2,.8,.2,1); }
-.op-name .w:nth-child(2) > span{ transition-delay:.09s; }
-.op-name .w:nth-child(3) > span{ transition-delay:.18s; color:#ff6a3d; }
-.opening.play .op-name .w > span{ transform:none; }
-
-/* a hairline draws across, then the details settle underneath */
-.op-rule{ height:1px; background:#3a3833; margin:22px 0 18px; transform:scaleX(0); transform-origin:left; transition:transform 1s .45s cubic-bezier(.76,0,.24,1); }
-.opening.play .op-rule{ transform:none; }
-.op-meta{ display:flex; justify-content:space-between; align-items:center; gap:14px 28px; flex-wrap:wrap; font-size:12px; letter-spacing:.06em; color:#a9a596; }
-.op-meta > *{ opacity:0; transform:translateY(8px); transition:opacity .6s, transform .7s cubic-bezier(.2,.8,.2,1); }
-.op-meta > :nth-child(1){ transition-delay:.85s; }
-.op-meta > :nth-child(2){ transition-delay:1s; }
-.opening.play .op-meta > *{ opacity:1; transform:none; }
-.op-uni{ display:flex; align-items:center; gap:12px; }
-.op-uni img{ width:30px; height:auto; }
-.op-uni b{ display:block; color:#ece8dc; font-weight:500; letter-spacing:.02em; }
-
-.op-skip{ position:absolute; bottom:22px; left:0; right:0; text-align:center; font-size:11px; letter-spacing:.12em; color:#5b584d; }
-.opening.leave .op-skip{ opacity:0; }
+/* progress: four short bars, the current one fills */
+.op-dots{ position:absolute; left:50%; bottom:54px; transform:translateX(-50%); display:flex; gap:8px; z-index:2; }
+.op-dots i{ width:28px; height:2px; background:#2b2a25; position:relative; overflow:hidden; }
+.op-dots i::after{ content:""; position:absolute; inset:0; background:#ff6a3d; transform:scaleX(0); transform-origin:left; }
+.op-dots i.done::after{ transform:none; }
+.op-dots i.on::after{ transform:none; transition:transform var(--d, 1s) linear; }
+.op-skip{ position:absolute; bottom:22px; left:0; right:0; text-align:center; font-size:11px; letter-spacing:.12em; color:#5b584d; z-index:2; }
+.opening.leave .op-dots, .opening.leave .op-skip{ opacity:0; transition:opacity .2s; }
 
 @media (max-width:640px){
-  .op-meta{ flex-direction:column; align-items:flex-start; }
-  .op-ghost{ height:80vh; }
+  .s-usm > div{ flex-direction:column; align-items:flex-start; }
+  .op-sil{ height:78vh; }
 }
 @media (prefers-reduced-motion:reduce){ .opening{ display:none; } }

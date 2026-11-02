@@ -5,6 +5,7 @@ import '../styles/sections.css';
 import '../styles/entrances.css';
 import '../styles/opening.css';
 import StatusLine from '../components/StatusLine.astro';
+import OpWords from '../components/OpWords.astro';
 import { profile, socials } from '../data/profile';
 import { degree } from '../data/courses';
 
@@ -65,19 +66,41 @@ const person = {
 </head>
 <body>
   <div class="opening" id="opening" aria-hidden="true">
-    <div class="op-ghost"></div>
-    <div class="op-inner">
-      <p class="op-eyebrow">Portfolio · {new Date().getFullYear()}</p>
-      <p class="op-name">{profile.nameLines.map(w => <span class="w"><span>{w}</span></span>)}</p>
-      <div class="op-rule"></div>
-      <div class="op-meta">
-        <div class="op-uni">
-          <img src="/images/usm-crest.svg" alt="" width="30" height="32" decoding="async">
-          <span><b>Universiti Sains Malaysia</b>B.CS · Intelligent Computing</span>
+    <div class="op-track" id="opTrack">
+      <div class="op-slide s-welcome">
+        <div>
+          <p class="op-kicker">hello, visitor</p>
+          <p class="op-big"><OpWords text={'Welcome to my'} /><br><OpWords text={'portfolio'} accent /></p>
+          <div class="op-rule"></div>
         </div>
-        <span>From Surakarta · Studying in Penang</span>
+      </div>
+      <div class="op-slide s-name">
+        <div>
+          <div class="op-sil"></div>
+          <p class="op-kicker">I'm</p>
+          <p class="op-big"><OpWords text={profile.nameLines.slice(0, 2).join(' ')} /><br><OpWords text={profile.nameLines[2]} accent /></p>
+          <p class="op-sub">first-year computer science student</p>
+        </div>
+      </div>
+      <div class="op-slide s-usm">
+        <div>
+          <img src="/images/usm-crest.svg" alt="" width="150" height="160" decoding="async">
+          <div>
+            <p class="op-kicker">studying at</p>
+            <p class="op-big"><OpWords text={'Universiti Sains'} /><br><OpWords text={'Malaysia'} accent /></p>
+            <p class="op-sub">B.CS · Intelligent Computing — from Surakarta, now in Penang</p>
+          </div>
+        </div>
+      </div>
+      <div class="op-slide s-end">
+        <div>
+          <p class="op-kicker">that's me</p>
+          <p class="op-big"><OpWords text={'Enjoy the'} /><OpWords text={'visit.'} accent /></p>
+          <p class="op-sub">scroll around, click things, break my name apart — it's all made to be played with.</p>
+        </div>
       </div>
     </div>
+    <div class="op-dots" id="opDots"><i></i><i></i><i></i><i></i></div>
     <p class="op-skip">click or press any key to skip</p>
   </div>
   <a class="skip" href="#progress">Skip to content</a>

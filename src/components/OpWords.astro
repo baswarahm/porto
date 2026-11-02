@@ -1,0 +1,7 @@
+---
+/* Opening: splits a phrase into words that rise one by one (see opening.css).
+   `accent` paints them orange. */
+interface Props { text: string; accent?: boolean }
+const { text, accent = false } = Astro.props;
+---
+{text.split(' ').map(w => <span class="w"><span>{accent ? <em>{w}</em> : w}</span></span>)}
