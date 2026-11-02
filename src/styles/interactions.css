@@ -1,38 +1,8 @@
 /* ==========================================================================
-   INTERACTIONS.CSS — opening screen and every interactive state on top of
+   INTERACTIONS.CSS — every interactive state on top of
    the base paper-and-ink layout in global.css.
    ========================================================================== */
 
-/* ---- opening: a 2.5 s profile intro before the page appears ------------- */
-.opening{ position:fixed; inset:0; z-index:100; color:#ece8dc; display:grid; place-items:center; padding:0 20px; font:14px/1.6 var(--mono); }
-.no-opening .opening{ display:none; }
-.op-half{ position:absolute; left:0; right:0; height:50.5%; background:#121210; transition:transform .8s cubic-bezier(.7,0,.2,1); }
-.op-half.top{ top:0; } .op-half.bot{ bottom:0; }
-.opening.leave .op-half.top{ transform:translateY(-100%); }
-.opening.leave .op-half.bot{ transform:translateY(100%); }
-.op-stage{ position:relative; z-index:1; width:min(1000px,100%); display:grid; grid-template-columns:auto minmax(0,1fr); gap:clamp(28px,6vw,72px); align-items:center; transition:opacity .3s, transform .5s cubic-bezier(.7,0,.2,1); }
-.op-text{ position:relative; min-width:0; }
-.opening.leave .op-stage{ opacity:0; transform:scale(1.04); }
-.op-eyebrow{ font-size:12px; color:#ff6a3d; letter-spacing:.08em; text-transform:uppercase; margin-bottom:10px; opacity:0; animation:op-in .4s .05s forwards; }
-.op-name{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:0 2px; font:600 clamp(3rem,13vw,8.5rem)/.95 var(--sans); letter-spacing:-.045em; min-height:1em; }
-.op-name .l{ display:inline-grid; place-items:end center; position:relative; }
-.op-name .l .bin{ position:absolute; bottom:.1em; left:50%; transform:translateX(-50%); font:500 clamp(9px,1.4vw,13px)/1 var(--mono); letter-spacing:0; color:#6f6c62; writing-mode:vertical-rl; white-space:nowrap; }
-.op-name .l .ch{ opacity:0; transform:translateY(.15em) scale(.85); display:inline-block; }
-.op-name .l.done .bin{ opacity:0; transition:opacity .15s; }
-.op-name .l.done .ch{ opacity:1; transform:none; transition:opacity .2s, transform .45s cubic-bezier(.2,1.4,.3,1); }
-.op-name .l.done:last-child .ch{ color:#ff6a3d; }
-.op-sub{ font:400 clamp(1.1rem,3.6vw,2rem)/1.2 var(--sans); color:#a9a596; margin-top:8px; opacity:0; transform:translateX(-14px); transition:opacity .4s, transform .5s cubic-bezier(.2,.8,.2,1); }
-.op-sub.show{ opacity:1; transform:none; }
-.op-facts{ position:relative; height:1.6em; overflow:hidden; margin-top:22px; font-size:clamp(13px,1.7vw,16px); }
-.op-facts span{ position:absolute; left:0; top:0; display:flex; gap:10px; align-items:center; transform:translateY(110%); transition:transform .35s cubic-bezier(.7,0,.2,1); }
-.op-facts span::before{ content:"\203A"; color:#ff6a3d; }
-.op-facts span.on{ transform:none; }
-.op-facts span.off{ transform:translateY(-110%); }
-.op-bar{ height:2px; background:#2b2a25; margin-top:18px; }
-.op-bar span{ display:block; height:100%; width:0; background:#ff6a3d; }
-.op-skip{ position:absolute; z-index:1; bottom:22px; left:0; right:0; text-align:center; font-size:12px; opacity:.4; }
-.opening.leave .op-skip{ opacity:0; }
-@keyframes op-in{ to{ opacity:1; } }
 html.opening-on{ overflow:hidden; }
 
 /* ---- sticky top bar with the active section lit ------------------------ */
@@ -153,37 +123,4 @@ details.item .more li::before{ content:"\2192  "; color:var(--signal); font-fami
   .weeks i.on{ transform:none; }
   .opening{ display:none; }
   .gitlog.typing .gl-row{ opacity:1; }
-}
-
-/* opening, scene 2: the name hands over to where I study */
-.op-scene{ transition:opacity .45s, transform .6s cubic-bezier(.7,0,.2,1), filter .45s; }
-.op-a.out{ opacity:0; transform:translateY(-28px) scale(.96); filter:blur(6px); }
-.op-b{ position:absolute; left:0; right:0; top:50%; display:flex; align-items:center; gap:clamp(16px,4vw,32px); opacity:0; pointer-events:none; transform:translateY(-50%); }
-.op-crest{ width:clamp(84px,18vw,142px); height:auto; flex:0 0 auto; transform:scale(.4) rotate(-14deg); opacity:0; transition:transform .8s cubic-bezier(.2,1.35,.3,1), opacity .35s; filter:drop-shadow(0 0 22px rgba(255,106,61,.25)); }
-.op-b .op-eyebrow{ animation:none; opacity:1; }
-.op-uni{ font:600 clamp(1.5rem,5vw,3.2rem)/1.05 var(--sans); letter-spacing:-.03em; clip-path:inset(0 100% 0 0); transition:clip-path .7s .2s cubic-bezier(.7,0,.2,1); }
-.op-deg{ margin-top:6px; color:#a9a596; opacity:0; transition:opacity .4s .6s; }
-.op-b.in{ opacity:1; }
-.op-b.in .op-crest{ transform:none; opacity:1; }
-.op-b.in .op-uni{ clip-path:inset(0 0 0 0); }
-.op-b.in .op-deg{ opacity:1; }
-
-/* opening: the silhouette, first made of binary, then scanned solid */
-.op-figure{ position:relative; height:min(62vh,520px); aspect-ratio:294/900; transition:filter .8s; }
-.op-fig-body{ position:absolute; inset:0; overflow:hidden; opacity:0; transform:translateY(24px);
-  -webkit-mask:url(/images/silhouette.png) center / contain no-repeat; mask:url(/images/silhouette.png) center / contain no-repeat;
-  animation:fig-in .7s .05s cubic-bezier(.2,.8,.2,1) forwards; }
-.op-bits{ position:absolute; inset:0; margin:0; font:10px/10px var(--mono); letter-spacing:0; white-space:pre; color:#ece8dc; opacity:.7; }
-.op-bits b{ font-weight:400; color:#ff6a3d; }
-.op-fill{ position:absolute; inset:0; background:#ece8dc; clip-path:inset(0 0 100% 0); transition:clip-path .9s cubic-bezier(.7,0,.2,1), background .8s; }
-.op-scan{ position:absolute; left:0; right:0; top:0; height:3px; background:#ff6a3d; box-shadow:0 0 14px 2px #ff6a3d; opacity:0; }
-.op-figure.solid .op-fill{ clip-path:inset(0 0 0 0); }
-.op-figure.solid .op-scan{ animation:fig-scan .9s cubic-bezier(.7,0,.2,1) forwards; }
-.op-figure.glow{ filter:drop-shadow(0 0 22px rgba(255,106,61,.55)); }
-.op-figure.glow .op-fill{ background:#ff6a3d; }
-@keyframes fig-in{ to{ opacity:1; transform:none; } }
-@keyframes fig-scan{ 0%{ top:0; opacity:1; } 92%{ opacity:1; } 100%{ top:100%; opacity:0; } }
-@media (max-width:640px){
-  .op-stage{ grid-template-columns:1fr; gap:18px; }
-  .op-figure{ height:30vh; justify-self:center; }
 }

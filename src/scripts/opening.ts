@@ -1,115 +1,84 @@
 /* ==========================================================================
-   OPENING.TS — a ~3 s profile intro before the page is revealed. Beside
-   my silhouette (first made of flickering binary, then scanned solid),
-   each letter of the name decodes from its 8-bit binary, the rest of the
-   name slides in, two facts flip past, the name hands over to the USM
-   crest ("studying at") while the silhouette glows, then the screen
-   splits open.
-   Plays once per browser session (the inline script in Base.astro decides
+   OPENING.TS — a ~3.5 s glitch trailer before the page is revealed.
+   Fast cuts, one card per beat: my silhouette with the name across it,
+   the rest of the name, "from Surakarta", "studying in Penang", then the
+   USM crest. Every cut slams in with a flash, a camera shake and RGB
+   ghosts sliced into jumping bands; then the black backdrop shatters into
+   strips that fly off. Plays once per browser session (Base.astro decides
    before first paint), skippable with any key or click. Everything that
    should start "on reveal" awaits `opened`.
    ========================================================================== */
 import { $ } from './env';
 
+/** how long each card stays up, in ms */
+const BEATS = [950, 520, 430, 430, 820];
+
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-const byte = (ch: string) => ch.charCodeAt(0).toString(2).padStart(8, '0');
-const randomByte = () => Array.from({ length: 8 }, () => (Math.random() < .5 ? '0' : '1')).join('');
+const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
 let resolveOpened!: () => void;
 export const opened = new Promise<void>(r => { resolveOpened = r; });
 
 export function initOpening(){
-  const root = document.documentElement, el = $('#opening');
-  const nameEl = $('#opName'), sub = $('#opSub'), facts = $('#opFacts'), bar = $('#opBar');
-  const sceneA = $('#opSceneA'), sceneB = $('#opSceneB'), figure = $('#opFigure'), bits = $('#opBits');
-  if (!el || !nameEl || !sub || !facts || !bar || !sceneA || !sceneB || !root.classList.contains('opening-on')){
+  const root = document.documentElement, el = $('#opening'), stage = $('#glStage'), flash = $('#glFlash');
+  if (!el || !stage || !flash || !root.classList.contains('opening-on')){
     el?.remove();
     resolveOpened();
     return;
   }
+  const cards = Array.from(stage.querySelectorAll<HTMLElement>('.gl-card'));
   let skipped = false;
   const skip = () => { skipped = true; };
   addEventListener('keydown', skip, { once: true });
   el.addEventListener('pointerdown', skip, { once: true });
-  const progress = (p: number) => { bar.style.width = `${Math.round(p * 100)}%`; };
 
-  // the silhouette's insides: a block of 0s and 1s, reshuffled every few frames
-  let bitsTimer: ReturnType<typeof setInterval> | undefined;
-  if (figure && bits){
-    const cols = Math.ceil(figure.offsetWidth / 6) + 1, rows = Math.ceil(figure.offsetHeight / 10) + 1;
-    const fill = () => {
-      let out = '';
-      for (let r = 0; r < rows; r++){
-        for (let c = 0; c < cols; c++){
-          const bit = Math.random() < .5 ? '0' : '1';
-          out += Math.random() < .04 ? `<b>${bit}</b>` : bit;
-        }
-        out += '\n';
-      }
-      bits.innerHTML = out;
-    };
-    fill();
-    bitsTimer = setInterval(fill, 90);
-  }
+  /* RGB ghosts: two tinted clones of the current card, re-sliced every frame */
+  let ghosts: HTMLElement[] = [], glitchTimer: ReturnType<typeof setInterval> | undefined;
+  const clearGhosts = () => { clearInterval(glitchTimer); ghosts.forEach(g => g.remove()); ghosts = []; };
+  const glitch = (card: HTMLElement, ms: number) => {
+    clearGhosts();
+    ghosts = ['r', 'c'].map(tint => {
+      const g = card.cloneNode(true) as HTMLElement;
+      g.classList.remove('on');
+      g.classList.add('gl-ghost', tint);
+      stage.append(g);
+      return g;
+    });
+    const jolt = () => ghosts.forEach((g, i) => {
+      const top = rand(0, 85), h = rand(4, 22);
+      g.style.clipPath = Math.random() < .25 ? 'none' : `inset(${top}% 0 ${Math.max(0, 100 - top - h)}% 0)`;
+      g.style.transform = `translate(${rand(-18, 18) + (i ? 4 : -4)}px, ${rand(-3, 3)}px)`;
+      g.style.opacity = Math.random() < .15 ? '0' : '.9';
+    });
+    jolt();
+    glitchTimer = setInterval(jolt, 45);
+    setTimeout(clearGhosts, ms);
+  };
 
-  // one cell per letter: its binary on top, the letter underneath
-  const letters = [...(nameEl.dataset.name ?? '')].map(ch => {
-    const cell = document.createElement('span'); cell.className = 'l';
-    const bin = document.createElement('span'); bin.className = 'bin'; bin.textContent = randomByte();
-    const glyph = document.createElement('span'); glyph.className = 'ch'; glyph.textContent = ch;
-    cell.append(bin, glyph);
-    nameEl.append(cell);
-    return { cell, bin, ch };
-  });
+  const slam = (card: HTMLElement) => {
+    cards.forEach(c => c.classList.toggle('on', c === card));
+    flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
+    el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+    glitch(card, 260);
+  };
 
   (async () => {
-    // 1. bits flicker, then each letter locks to its real byte and snaps into place
-    const flicker = setInterval(() => letters.forEach(l => { if (!l.cell.classList.contains('done')) l.bin.textContent = randomByte(); }), 50);
-    await sleep(250);
-    for (const [i, l] of letters.entries()){
+    await sleep(120);
+    for (const [i, card] of cards.entries()){
       if (skipped) break;
-      l.bin.textContent = byte(l.ch);
-      await sleep(60);
-      l.cell.classList.add('done');
-      progress((i + 1) / letters.length * .45);
-      await sleep(55);
-    }
-    clearInterval(flicker);
-
-    // the binary body is scanned into a solid figure
-    figure?.classList.add('solid');
-    setTimeout(() => clearInterval(bitsTimer), 950);
-
-    // 2. the rest of the name
-    if (!skipped){ sub.classList.add('show'); await sleep(320); }
-
-    // 3. the facts flip past
-    const items = Array.from(facts.children) as HTMLElement[];
-    for (const [i, f] of items.entries()){
-      if (skipped) break;
-      items[i - 1]?.classList.replace('on', 'off');
-      f.classList.add('on');
-      progress(.45 + (i + 1) / items.length * .25);
-      await sleep(420);
+      slam(card);
+      // a second, smaller burst in the middle of the longer beats
+      if (BEATS[i] > 700) setTimeout(() => { if (!skipped) glitch(card, 140); }, BEATS[i] * .6);
+      await sleep(BEATS[i]);
     }
 
-    // 4. the name hands over to where I study
-    if (!skipped){
-      sceneA.classList.add('out');
-      figure?.classList.add('glow');
-      await sleep(180);
-      sceneB.classList.add('in');
-      progress(1);
-      await sleep(1050);
-    }
-
-    // 5. split open
+    // shatter
+    clearGhosts();
     try { sessionStorage.setItem('opened', '1'); } catch { /* private mode — non-fatal */ }
     removeEventListener('keydown', skip);
-    clearInterval(bitsTimer);
     root.classList.remove('opening-on');
     el.classList.add('leave');
     resolveOpened();
-    setTimeout(() => el.remove(), 850);
+    setTimeout(() => el.remove(), 1200);
   })();
 }

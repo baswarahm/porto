@@ -3,14 +3,13 @@ import '../styles/global.css';
 import '../styles/interactions.css';
 import '../styles/sections.css';
 import '../styles/entrances.css';
+import '../styles/opening.css';
 import StatusLine from '../components/StatusLine.astro';
 import { profile, socials } from '../data/profile';
 import { degree } from '../data/courses';
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(profile.photo, Astro.site);
-// the three facts that flip past in the opening
-const opFacts = [profile.whoami.role, 'from surakarta · studying in penang'];
 // schema.org Person, so search engines know whose page this is
 const person = {
   '@context': 'https://schema.org',
@@ -66,36 +65,29 @@ const person = {
 </head>
 <body>
   <div class="opening" id="opening" aria-hidden="true">
-    <div class="op-half top"></div>
-    <div class="op-half bot"></div>
-    <div class="op-stage">
-      <div class="op-figure" id="opFigure" aria-hidden="true">
-        <div class="op-fig-body">
-          <pre class="op-bits" id="opBits"></pre>
-          <span class="op-fill"></span>
-          <span class="op-scan"></span>
-        </div>
+    <div class="gl-strips">{Array.from({ length: 12 }, (_, i) => <i style={`--i:${i}`}></i>)}</div>
+    <div class="gl-stage" id="glStage">
+      <div class="gl-card">
+        <div class="gl-hero"><div class="gl-sil"></div><p class="gl-big">{profile.nameLines[0]}</p></div>
       </div>
-      <div class="op-text">
-        <div class="op-scene op-a" id="opSceneA">
-          <p class="op-eyebrow">// loading profile</p>
-          <p class="op-name" id="opName" data-name={profile.nameLines[0].toUpperCase()}></p>
-          <p class="op-sub" id="opSub">{profile.nameLines.slice(1).join(' ')}</p>
-          <p class="op-facts" id="opFacts">
-            {opFacts.map(f => <span>{f}</span>)}
-          </p>
+      <div class="gl-card">
+        <div><p class="gl-tag">// {profile.whoami.role}</p><p class="gl-big">{profile.nameLines[1]}<br><em>{profile.nameLines[2]}</em></p></div>
+      </div>
+      <div class="gl-card">
+        <div><p class="gl-tag">01 / origin</p><p class="gl-big">from<br><em>surakarta</em></p></div>
+      </div>
+      <div class="gl-card">
+        <div><p class="gl-tag">02 / now</p><p class="gl-big">studying in<br><em>penang</em></p></div>
+      </div>
+      <div class="gl-card">
+        <div class="gl-usm">
+          <img src="/images/usm-crest.svg" alt="" width="170" height="181" decoding="async">
+          <div><p class="gl-tag">03 / university</p><p class="gl-mid">Universiti Sains<br>Malaysia</p><p class="gl-deg">B.CS · INTELLIGENT COMPUTING</p></div>
         </div>
-        <div class="op-scene op-b" id="opSceneB">
-          <img class="op-crest" src="/images/usm-crest.svg" alt="" width="142" height="151" decoding="async">
-          <div>
-            <p class="op-eyebrow">studying at</p>
-            <p class="op-uni">Universiti Sains Malaysia</p>
-            <p class="op-deg">B.CS · Intelligent Computing</p>
-          </div>
-        </div>
-        <div class="op-bar"><span id="opBar"></span></div>
       </div>
     </div>
+    <div class="gl-scan"></div>
+    <div class="gl-flash" id="glFlash"></div>
     <p class="op-skip">click or press any key to skip</p>
   </div>
   <a class="skip" href="#progress">Skip to content</a>
