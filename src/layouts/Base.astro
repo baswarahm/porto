@@ -69,23 +69,32 @@ const person = {
     <div class="op-half top"></div>
     <div class="op-half bot"></div>
     <div class="op-stage">
-      <div class="op-scene op-a" id="opSceneA">
-        <p class="op-eyebrow">// loading profile</p>
-        <p class="op-name" id="opName" data-name={profile.nameLines[0].toUpperCase()}></p>
-        <p class="op-sub" id="opSub">{profile.nameLines.slice(1).join(' ')}</p>
-        <p class="op-facts" id="opFacts">
-          {opFacts.map(f => <span>{f}</span>)}
-        </p>
-      </div>
-      <div class="op-scene op-b" id="opSceneB">
-        <img class="op-crest" src="/images/usm-crest.svg" alt="" width="142" height="151" decoding="async">
-        <div>
-          <p class="op-eyebrow">studying at</p>
-          <p class="op-uni">Universiti Sains Malaysia</p>
-          <p class="op-deg">B.CS · Intelligent Computing</p>
+      <div class="op-figure" id="opFigure" aria-hidden="true">
+        <div class="op-fig-body">
+          <pre class="op-bits" id="opBits"></pre>
+          <span class="op-fill"></span>
+          <span class="op-scan"></span>
         </div>
       </div>
-      <div class="op-bar"><span id="opBar"></span></div>
+      <div class="op-text">
+        <div class="op-scene op-a" id="opSceneA">
+          <p class="op-eyebrow">// loading profile</p>
+          <p class="op-name" id="opName" data-name={profile.nameLines[0].toUpperCase()}></p>
+          <p class="op-sub" id="opSub">{profile.nameLines.slice(1).join(' ')}</p>
+          <p class="op-facts" id="opFacts">
+            {opFacts.map(f => <span>{f}</span>)}
+          </p>
+        </div>
+        <div class="op-scene op-b" id="opSceneB">
+          <img class="op-crest" src="/images/usm-crest.svg" alt="" width="142" height="151" decoding="async">
+          <div>
+            <p class="op-eyebrow">studying at</p>
+            <p class="op-uni">Universiti Sains Malaysia</p>
+            <p class="op-deg">B.CS · Intelligent Computing</p>
+          </div>
+        </div>
+        <div class="op-bar"><span id="opBar"></span></div>
+      </div>
     </div>
     <p class="op-skip">click or press any key to skip</p>
   </div>

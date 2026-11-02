@@ -10,7 +10,8 @@
 .op-half.top{ top:0; } .op-half.bot{ bottom:0; }
 .opening.leave .op-half.top{ transform:translateY(-100%); }
 .opening.leave .op-half.bot{ transform:translateY(100%); }
-.op-stage{ position:relative; z-index:1; width:min(760px,100%); transition:opacity .3s, transform .5s cubic-bezier(.7,0,.2,1); }
+.op-stage{ position:relative; z-index:1; width:min(1000px,100%); display:grid; grid-template-columns:auto minmax(0,1fr); gap:clamp(28px,6vw,72px); align-items:center; transition:opacity .3s, transform .5s cubic-bezier(.7,0,.2,1); }
+.op-text{ position:relative; min-width:0; }
 .opening.leave .op-stage{ opacity:0; transform:scale(1.04); }
 .op-eyebrow{ font-size:12px; color:#ff6a3d; letter-spacing:.08em; text-transform:uppercase; margin-bottom:10px; opacity:0; animation:op-in .4s .05s forwards; }
 .op-name{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:0 2px; font:600 clamp(3rem,13vw,8.5rem)/.95 var(--sans); letter-spacing:-.045em; min-height:1em; }
@@ -166,3 +167,23 @@ details.item .more li::before{ content:"\2192  "; color:var(--signal); font-fami
 .op-b.in .op-crest{ transform:none; opacity:1; }
 .op-b.in .op-uni{ clip-path:inset(0 0 0 0); }
 .op-b.in .op-deg{ opacity:1; }
+
+/* opening: the silhouette, first made of binary, then scanned solid */
+.op-figure{ position:relative; height:min(62vh,520px); aspect-ratio:294/900; transition:filter .8s; }
+.op-fig-body{ position:absolute; inset:0; overflow:hidden; opacity:0; transform:translateY(24px);
+  -webkit-mask:url(/images/silhouette.png) center / contain no-repeat; mask:url(/images/silhouette.png) center / contain no-repeat;
+  animation:fig-in .7s .05s cubic-bezier(.2,.8,.2,1) forwards; }
+.op-bits{ position:absolute; inset:0; margin:0; font:10px/10px var(--mono); letter-spacing:0; white-space:pre; color:#ece8dc; opacity:.7; }
+.op-bits b{ font-weight:400; color:#ff6a3d; }
+.op-fill{ position:absolute; inset:0; background:#ece8dc; clip-path:inset(0 0 100% 0); transition:clip-path .9s cubic-bezier(.7,0,.2,1), background .8s; }
+.op-scan{ position:absolute; left:0; right:0; top:0; height:3px; background:#ff6a3d; box-shadow:0 0 14px 2px #ff6a3d; opacity:0; }
+.op-figure.solid .op-fill{ clip-path:inset(0 0 0 0); }
+.op-figure.solid .op-scan{ animation:fig-scan .9s cubic-bezier(.7,0,.2,1) forwards; }
+.op-figure.glow{ filter:drop-shadow(0 0 22px rgba(255,106,61,.55)); }
+.op-figure.glow .op-fill{ background:#ff6a3d; }
+@keyframes fig-in{ to{ opacity:1; transform:none; } }
+@keyframes fig-scan{ 0%{ top:0; opacity:1; } 92%{ opacity:1; } 100%{ top:100%; opacity:0; } }
+@media (max-width:640px){
+  .op-stage{ grid-template-columns:1fr; gap:18px; }
+  .op-figure{ height:30vh; justify-self:center; }
+}
