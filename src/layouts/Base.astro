@@ -5,7 +5,6 @@ import '../styles/sections.css';
 import '../styles/entrances.css';
 import '../styles/opening.css';
 import StatusLine from '../components/StatusLine.astro';
-import OpWords from '../components/OpWords.astro';
 import { profile, socials } from '../data/profile';
 import { degree } from '../data/courses';
 
@@ -66,40 +65,39 @@ const person = {
 </head>
 <body>
   <div class="opening" id="opening" aria-hidden="true">
-    <div class="op-track" id="opTrack">
-      <div class="op-slide s-welcome">
-        <div>
-          <p class="op-kicker">hello, visitor</p>
-          <p class="op-big"><OpWords text={'Welcome to my'} /><br><OpWords text={'portfolio'} accent /></p>
-          <div class="op-rule"></div>
-        </div>
+    <div class="op-slide s1">
+      <div>
+        <p class="op-kicker">hello, visitor</p>
+        <p class="op-big" data-chars>Welcome to my<br><em>portfolio</em></p>
+        <div class="op-rule"></div>
       </div>
-      <div class="op-slide s-name">
-        <div>
-          <div class="op-sil"></div>
-          <p class="op-kicker">I'm</p>
-          <p class="op-big"><OpWords text={profile.nameLines.slice(0, 2).join(' ')} /><br><OpWords text={profile.nameLines[2]} accent /></p>
-          <p class="op-sub">first-year computer science student</p>
-        </div>
+    </div>
+    <div class="op-slide s2">
+      <div>
+        <div class="op-sil"></div>
+        <p class="op-kicker">I'm</p>
+        <p class="op-big" data-chars><span class="ln">{profile.nameLines.slice(0, 2).join(' ')}</span><span class="ln"><em>{profile.nameLines[2]}</em></span></p>
+        <p class="op-sub">first-year computer science student</p>
       </div>
-      <div class="op-slide s-usm">
+    </div>
+    <div class="op-slide s3">
+      <div>
+        <img src="/images/usm-crest.svg" alt="" width="150" height="160" decoding="async" id="opCrest">
         <div>
-          <img src="/images/usm-crest.svg" alt="" width="150" height="160" decoding="async">
-          <div>
-            <p class="op-kicker">studying at</p>
-            <p class="op-big"><OpWords text={'Universiti Sains'} /><br><OpWords text={'Malaysia'} accent /></p>
-            <p class="op-sub">B.CS · Intelligent Computing — from Surakarta, now in Penang</p>
-          </div>
-        </div>
-      </div>
-      <div class="op-slide s-end">
-        <div>
-          <p class="op-kicker">that's me</p>
-          <p class="op-big"><OpWords text={'Enjoy the'} /><OpWords text={'visit.'} accent /></p>
-          <p class="op-sub">scroll around, click things, break my name apart — it's all made to be played with.</p>
+          <p class="op-kicker">studying at</p>
+          <p class="op-big"><span class="ln">Universiti Sains</span><span class="ln"><em>Malaysia</em></span></p>
+          <p class="op-sub">B.CS · Intelligent Computing — from Surakarta, now in Penang</p>
         </div>
       </div>
     </div>
+    <div class="op-slide s4">
+      <div>
+        <p class="op-kicker">that's me</p>
+        <p class="op-big" data-chars>Enjoy the <em>visit.</em></p>
+        <p class="op-sub">scroll around, click things, break my name apart — it's all made to be played with.</p>
+      </div>
+    </div>
+    <div class="op-iris" id="opIris"></div>
     <div class="op-dots" id="opDots"><i></i><i></i><i></i><i></i></div>
     <p class="op-skip">click or press any key to skip</p>
   </div>
