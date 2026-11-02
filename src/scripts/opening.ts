@@ -1,7 +1,8 @@
 /* ==========================================================================
-   OPENING.TS — a ~2.5 s profile intro before the page is revealed:
-   each letter of the name decodes from its 8-bit binary, the rest of the
-   name slides in, three facts flip past, then the screen splits open.
+   OPENING.TS — a ~3 s profile intro before the page is revealed: each
+   letter of the name decodes from its 8-bit binary, the rest of the name
+   slides in, two facts flip past, the name hands over to the USM crest
+   ("studying at"), then the screen splits open.
    Plays once per browser session (the inline script in Base.astro decides
    before first paint), skippable with any key or click. Everything that
    should start "on reveal" awaits `opened`.
@@ -18,7 +19,8 @@ export const opened = new Promise<void>(r => { resolveOpened = r; });
 export function initOpening(){
   const root = document.documentElement, el = $('#opening');
   const nameEl = $('#opName'), sub = $('#opSub'), facts = $('#opFacts'), bar = $('#opBar');
-  if (!el || !nameEl || !sub || !facts || !bar || !root.classList.contains('opening-on')){
+  const sceneA = $('#opSceneA'), sceneB = $('#opSceneB');
+  if (!el || !nameEl || !sub || !facts || !bar || !sceneA || !sceneB || !root.classList.contains('opening-on')){
     el?.remove();
     resolveOpened();
     return;
@@ -56,17 +58,26 @@ export function initOpening(){
     // 2. the rest of the name
     if (!skipped){ sub.classList.add('show'); await sleep(320); }
 
-    // 3. three facts flip past
+    // 3. the facts flip past
     const items = Array.from(facts.children) as HTMLElement[];
     for (const [i, f] of items.entries()){
       if (skipped) break;
       items[i - 1]?.classList.replace('on', 'off');
       f.classList.add('on');
-      progress(.45 + (i + 1) / items.length * .55);
-      await sleep(i === items.length - 1 ? 520 : 400);
+      progress(.45 + (i + 1) / items.length * .25);
+      await sleep(420);
     }
 
-    // 4. split open
+    // 4. the name hands over to where I study
+    if (!skipped){
+      sceneA.classList.add('out');
+      await sleep(180);
+      sceneB.classList.add('in');
+      progress(1);
+      await sleep(1050);
+    }
+
+    // 5. split open
     try { sessionStorage.setItem('opened', '1'); } catch { /* private mode — non-fatal */ }
     removeEventListener('keydown', skip);
     root.classList.remove('opening-on');

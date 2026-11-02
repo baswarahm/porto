@@ -29,7 +29,7 @@ const nav = sections.filter(s => s.id !== 'top');
         <button class="btn" type="button" id="nameReset"><Icon name="refresh" size={14} />reassemble</button>
         <button class="btn" type="button" id="nameShake">shake again</button>
       </div>
-      <p class="intro">From Solo, now in Penang. <strong>Studying Intelligent Computing</strong> and writing down everything I learn on the way — progress, courses, and the goals I'm chasing.</p>
+      <p class="intro">From Surakarta, studying <strong>Intelligent Computing</strong> in Penang — and writing down everything I learn on the way: progress, courses, and the goals I'm chasing.</p>
       <dl class="facts">
         <div><dt>degree</dt><dd data-degree-pct>{(pct * 100).toFixed(1)}% done</dd></div>
         <div><dt>courses now</dt><dd data-count={courses.length}>{courses.length}</dd></div>
@@ -37,10 +37,10 @@ const nav = sections.filter(s => s.id !== 'top');
       </dl>
     </div>
 
-    <figure class="photo" id="photo">
+    <figure class="photo" id="photo" data-cutout={profile.photoCutout}>
       <canvas id="dither" width="600" height="800" aria-hidden="true"></canvas>
       <img src={profile.photo} alt={profile.photoAlt} width="960" height="1280" decoding="async" draggable="false">
-      <figcaption class="photo-bar"><span>1-bit dither · hover for a lens</span><span>hold or <kbd>p</kbd> to develop</span></figcaption>
+      <figcaption class="photo-bar"><span>1-bit sketch · hover for a lens</span><span>hold or <kbd>p</kbd> to develop</span></figcaption>
     </figure>
   </div>
 </div>

@@ -1,13 +1,14 @@
 /* ==========================================================================
-   DITHER.TS — the hero photo as 1-bit Atkinson dither, printed row by row
-   like a thermal printer. Hold the photo (or the p key) to "develop" it
-   back to full colour.
+   DITHER.TS — a 1-bit Atkinson-dither sketch of just me (the background is
+   cut out), printed row by row like a thermal printer. Hold the photo (or
+   the p key) to "develop" it into the full colour photo.
    ========================================================================== */
 import { $, cssVar, isDark, reducedMotion, THEME_EVENT } from './env';
 
 const W = 300, H = 400, SCALE = 2;   // dither at low res, draw each dot as 2×2
 const ROWS_PER_FRAME = 14;
 
+/** dithered luminance per pixel; NaN marks the cut-out background, which is never inked */
 function atkinson(img: HTMLImageElement){
   const off = document.createElement('canvas'); off.width = W; off.height = H;
   const o = off.getContext('2d')!;
@@ -15,14 +16,18 @@ function atkinson(img: HTMLImageElement){
   o.drawImage(img, (W - img.naturalWidth * s) / 2, (H - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s);
   const d = o.getImageData(0, 0, W, H).data;
   const lum = new Float32Array(W * H);
-  for (let i = 0; i < W * H; i++) lum[i] = (d[i * 4] * .299 + d[i * 4 + 1] * .587 + d[i * 4 + 2] * .114) * 1.08 - 6;
+  for (let i = 0; i < W * H; i++){
+    lum[i] = d[i * 4 + 3] < 110 ? NaN : (d[i * 4] * .299 + d[i * 4 + 1] * .587 + d[i * 4 + 2] * .114) * 1.08 - 6;
+  }
   const spread = [[1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]];
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){
-    const i = y * W + x, v = lum[i] < 128 ? 0 : 255, err = (lum[i] - v) / 8;
+    const i = y * W + x;
+    if (Number.isNaN(lum[i])) continue;
+    const v = lum[i] < 128 ? 0 : 255, err = (lum[i] - v) / 8;
     lum[i] = v;
     for (const [dx, dy] of spread){
       const nx = x + dx, ny = y + dy;
-      if (nx >= 0 && nx < W && ny < H) lum[ny * W + nx] += err;
+      if (nx >= 0 && nx < W && ny < H) lum[ny * W + nx] += err;   // NaN stays NaN
     }
   }
   return lum;
@@ -52,8 +57,11 @@ export function initDither(startWhen: Promise<void> = Promise.resolve()){
     requestAnimationFrame(frame);
   }
 
-  const loaded = img.complete && img.naturalWidth ? Promise.resolve() : new Promise(r => img.addEventListener('load', r, { once: true }));
-  Promise.all([loaded, startWhen]).then(() => { dots = atkinson(img); print(); });
+  // the sketch comes from the cut-out (just me); the <img> is the colour photo for "develop"
+  const cutout = new Image();
+  cutout.src = fig.dataset.cutout ?? img.src;
+  const loaded = cutout.decode().catch(() => undefined);
+  Promise.all([loaded, startWhen]).then(() => { dots = atkinson(cutout); print(); });
   document.documentElement.addEventListener(THEME_EVENT, print);
 
   const develop = (on: boolean) => fig.classList.toggle('dev', on);

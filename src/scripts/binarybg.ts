@@ -8,7 +8,7 @@
    ========================================================================== */
 import { cssVar, isDark, reducedMotion, THEME_EVENT } from './env';
 
-const MESSAGE = "hello, I'm baswara. first-year cs student at USM, from Solo, now in Penang. still compiling. ";
+const MESSAGE = "hello, I'm baswara. first-year cs student at USM. from Surakarta, studying in Penang. still compiling. ";
 const BITS = [...MESSAGE].map(ch => ch.charCodeAt(0).toString(2).padStart(8, '0')).join('');
 
 interface Drop { x: number; y: number; speed: number; bit: number; hot: number }

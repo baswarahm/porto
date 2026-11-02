@@ -153,3 +153,16 @@ details.item .more li::before{ content:"\2192  "; color:var(--signal); font-fami
   .opening{ display:none; }
   .gitlog.typing .gl-row{ opacity:1; }
 }
+
+/* opening, scene 2: the name hands over to where I study */
+.op-scene{ transition:opacity .45s, transform .6s cubic-bezier(.7,0,.2,1), filter .45s; }
+.op-a.out{ opacity:0; transform:translateY(-28px) scale(.96); filter:blur(6px); }
+.op-b{ position:absolute; left:0; right:0; top:50%; display:flex; align-items:center; gap:clamp(16px,4vw,32px); opacity:0; pointer-events:none; transform:translateY(-50%); }
+.op-crest{ width:clamp(84px,18vw,142px); height:auto; flex:0 0 auto; transform:scale(.4) rotate(-14deg); opacity:0; transition:transform .8s cubic-bezier(.2,1.35,.3,1), opacity .35s; filter:drop-shadow(0 0 22px rgba(255,106,61,.25)); }
+.op-b .op-eyebrow{ animation:none; opacity:1; }
+.op-uni{ font:600 clamp(1.5rem,5vw,3.2rem)/1.05 var(--sans); letter-spacing:-.03em; clip-path:inset(0 100% 0 0); transition:clip-path .7s .2s cubic-bezier(.7,0,.2,1); }
+.op-deg{ margin-top:6px; color:#a9a596; opacity:0; transition:opacity .4s .6s; }
+.op-b.in{ opacity:1; }
+.op-b.in .op-crest{ transform:none; opacity:1; }
+.op-b.in .op-uni{ clip-path:inset(0 0 0 0); }
+.op-b.in .op-deg{ opacity:1; }

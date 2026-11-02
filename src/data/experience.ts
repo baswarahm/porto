@@ -35,10 +35,10 @@ export const education: TimelineItem[] = [
   },
   {
     date: '2023–2026', tag: 'high school', title: 'Senior High School', org: 'SMA Al-Azhar Syifa Budi Solo',
-    body: 'Completed senior high school in Solo, alongside organizational work and competition seasons.',
+    body: 'Completed senior high school in Surakarta, alongside organizational work and competition seasons.',
   },
   {
     date: '2020–2023', tag: 'junior high', title: 'Junior High School', org: 'SMP Al-Azhar Syifa Budi Solo',
-    body: 'Completed junior high school in Solo.',
+    body: 'Completed junior high school in Surakarta.',
   },
 ];
