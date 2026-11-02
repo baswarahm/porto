@@ -9,6 +9,8 @@ import { degree } from '../data/courses';
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(profile.photo, Astro.site);
+// the three facts that flip past in the opening
+const opFacts = [profile.whoami.role, profile.whoami.where, 'solo → penang'];
 // schema.org Person, so search engines know whose page this is
 const person = {
   '@context': 'https://schema.org',
@@ -64,9 +66,17 @@ const person = {
 </head>
 <body>
   <div class="opening" id="opening" aria-hidden="true">
-    <pre id="opLog"></pre>
-    <div class="op-bar"><span id="opBar"></span></div>
-    <p class="op-name" id="opName">{profile.nameLines[0].toLowerCase()}<span>.</span></p>
+    <div class="op-half top"></div>
+    <div class="op-half bot"></div>
+    <div class="op-stage">
+      <p class="op-eyebrow">// loading profile</p>
+      <p class="op-name" id="opName" data-name={profile.nameLines[0].toUpperCase()}></p>
+      <p class="op-sub" id="opSub">{profile.nameLines.slice(1).join(' ')}</p>
+      <p class="op-facts" id="opFacts">
+        {opFacts.map(f => <span>{f}</span>)}
+      </p>
+      <div class="op-bar"><span id="opBar"></span></div>
+    </div>
     <p class="op-skip">click or press any key to skip</p>
   </div>
   <a class="skip" href="#progress">Skip to content</a>

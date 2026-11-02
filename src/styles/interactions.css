@@ -3,21 +3,35 @@
    the base paper-and-ink layout in global.css.
    ========================================================================== */
 
-/* ---- opening: a fake compile run before the page appears --------------- */
-.opening{ position:fixed; inset:0; z-index:100; background:#121210; color:#ece8dc; display:flex; flex-direction:column; justify-content:center; padding:0 clamp(20px,8vw,120px); font:clamp(13px,1.6vw,16px)/1.8 var(--mono); transition:transform .8s cubic-bezier(.7,0,.2,1); }
+/* ---- opening: a 2.5 s profile intro before the page appears ------------- */
+.opening{ position:fixed; inset:0; z-index:100; color:#ece8dc; display:grid; place-items:center; padding:0 20px; font:14px/1.6 var(--mono); }
 .no-opening .opening{ display:none; }
-.opening pre{ font:inherit; white-space:pre-wrap; min-height:11em; }
-.opening .ok{ color:#4cc38a; }
-.opening .pc{ color:#e0a83a; }
-.opening .prompt{ color:#ff6a3d; }
-.opening .caret{ display:inline-block; width:.6em; height:1.1em; background:#ece8dc; vertical-align:-.2em; animation:blink 1s steps(1) infinite; }
-.opening .op-name{ font:600 clamp(2.6rem,9vw,7rem)/1 var(--sans); letter-spacing:-.04em; margin-top:.3em; opacity:0; transform:translateY(12px); transition:all .5s cubic-bezier(.2,.8,.2,1); }
-.opening .op-name.show{ opacity:1; transform:none; }
-.opening .op-name span{ color:#ff6a3d; }
-.opening .op-skip{ position:absolute; bottom:24px; left:0; right:0; text-align:center; font-size:12px; opacity:.45; }
-.opening .op-bar{ height:2px; background:#2b2a25; margin-top:1.2em; max-width:520px; }
-.opening .op-bar span{ display:block; height:100%; width:0; background:#ff6a3d; }
-.opening.leave{ transform:translateY(-100%); }
+.op-half{ position:absolute; left:0; right:0; height:50.5%; background:#121210; transition:transform .8s cubic-bezier(.7,0,.2,1); }
+.op-half.top{ top:0; } .op-half.bot{ bottom:0; }
+.opening.leave .op-half.top{ transform:translateY(-100%); }
+.opening.leave .op-half.bot{ transform:translateY(100%); }
+.op-stage{ position:relative; z-index:1; width:min(760px,100%); transition:opacity .3s, transform .5s cubic-bezier(.7,0,.2,1); }
+.opening.leave .op-stage{ opacity:0; transform:scale(1.04); }
+.op-eyebrow{ font-size:12px; color:#ff6a3d; letter-spacing:.08em; text-transform:uppercase; margin-bottom:10px; opacity:0; animation:op-in .4s .05s forwards; }
+.op-name{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:0 2px; font:600 clamp(3rem,13vw,8.5rem)/.95 var(--sans); letter-spacing:-.045em; min-height:1em; }
+.op-name .l{ display:inline-grid; place-items:end center; position:relative; }
+.op-name .l .bin{ position:absolute; bottom:.1em; left:50%; transform:translateX(-50%); font:500 clamp(9px,1.4vw,13px)/1 var(--mono); letter-spacing:0; color:#6f6c62; writing-mode:vertical-rl; white-space:nowrap; }
+.op-name .l .ch{ opacity:0; transform:translateY(.15em) scale(.85); display:inline-block; }
+.op-name .l.done .bin{ opacity:0; transition:opacity .15s; }
+.op-name .l.done .ch{ opacity:1; transform:none; transition:opacity .2s, transform .45s cubic-bezier(.2,1.4,.3,1); }
+.op-name .l.done:last-child .ch{ color:#ff6a3d; }
+.op-sub{ font:400 clamp(1.1rem,3.6vw,2rem)/1.2 var(--sans); color:#a9a596; margin-top:8px; opacity:0; transform:translateX(-14px); transition:opacity .4s, transform .5s cubic-bezier(.2,.8,.2,1); }
+.op-sub.show{ opacity:1; transform:none; }
+.op-facts{ position:relative; height:1.6em; overflow:hidden; margin-top:22px; font-size:clamp(13px,1.7vw,16px); }
+.op-facts span{ position:absolute; left:0; top:0; display:flex; gap:10px; align-items:center; transform:translateY(110%); transition:transform .35s cubic-bezier(.7,0,.2,1); }
+.op-facts span::before{ content:"\203A"; color:#ff6a3d; }
+.op-facts span.on{ transform:none; }
+.op-facts span.off{ transform:translateY(-110%); }
+.op-bar{ height:2px; background:#2b2a25; margin-top:18px; }
+.op-bar span{ display:block; height:100%; width:0; background:#ff6a3d; }
+.op-skip{ position:absolute; z-index:1; bottom:22px; left:0; right:0; text-align:center; font-size:12px; opacity:.4; }
+.opening.leave .op-skip{ opacity:0; }
+@keyframes op-in{ to{ opacity:1; } }
 html.opening-on{ overflow:hidden; }
 
 /* ---- sticky top bar with the active section lit ------------------------ */
