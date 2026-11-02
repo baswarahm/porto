@@ -172,7 +172,7 @@ section.flash{ animation:flash .6s; }
   .hero .photo{ order:-1; width:100%; }
   /* phones: a wide banner crop (upper body + the sea of clouds) instead of
      a full portrait that fills the whole first screen */
-  .hero .photo canvas, .hero .photo img{ aspect-ratio:16/10; object-fit:cover; object-position:50% 28%; }
+  .hero .photo canvas, .hero .photo img{ aspect-ratio:16/10; object-fit:cover; object-position:50% 66%; }
   .hero .photo img{ bottom:auto; height:auto; }
   .facts{ grid-template-columns:repeat(2,auto); }
   .sem-track{ grid-template-columns:repeat(4,1fr); }

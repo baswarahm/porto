@@ -8,9 +8,7 @@ export const profile = {
   description:
     'Baswara Hafizh Muttaqin — first-year Computer Science (Intelligent Computing) student at Universiti Sains Malaysia. Progress, courses, what I learn, and what I am aiming for.',
   whoami: { role: 'first-year cs student', where: 'universiti sains malaysia' },
-  photo: '/images/me.jpg',
-  /** same frame as `photo` with the background removed; the hero sketch is drawn from it */
-  photoCutout: '/images/me-cutout.png',
+  photo: '/images/dadas.jpeg',
   photoAlt: 'Baswara standing above a sea of clouds at sunrise',
   email: 'baswara@student.usm.my',
 };
