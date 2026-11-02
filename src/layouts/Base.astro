@@ -65,29 +65,19 @@ const person = {
 </head>
 <body>
   <div class="opening" id="opening" aria-hidden="true">
-    <div class="gl-strips">{Array.from({ length: 12 }, (_, i) => <i style={`--i:${i}`}></i>)}</div>
-    <div class="gl-stage" id="glStage">
-      <div class="gl-card">
-        <div class="gl-hero"><div class="gl-sil"></div><p class="gl-big">{profile.nameLines[0]}</p></div>
-      </div>
-      <div class="gl-card">
-        <div><p class="gl-tag">// {profile.whoami.role}</p><p class="gl-big">{profile.nameLines[1]}<br><em>{profile.nameLines[2]}</em></p></div>
-      </div>
-      <div class="gl-card">
-        <div><p class="gl-tag">01 / origin</p><p class="gl-big">from<br><em>surakarta</em></p></div>
-      </div>
-      <div class="gl-card">
-        <div><p class="gl-tag">02 / now</p><p class="gl-big">studying in<br><em>penang</em></p></div>
-      </div>
-      <div class="gl-card">
-        <div class="gl-usm">
-          <img src="/images/usm-crest.svg" alt="" width="170" height="181" decoding="async">
-          <div><p class="gl-tag">03 / university</p><p class="gl-mid">Universiti Sains<br>Malaysia</p><p class="gl-deg">B.CS · INTELLIGENT COMPUTING</p></div>
+    <div class="op-ghost"></div>
+    <div class="op-inner">
+      <p class="op-eyebrow">Portfolio · {new Date().getFullYear()}</p>
+      <p class="op-name">{profile.nameLines.map(w => <span class="w"><span>{w}</span></span>)}</p>
+      <div class="op-rule"></div>
+      <div class="op-meta">
+        <div class="op-uni">
+          <img src="/images/usm-crest.svg" alt="" width="30" height="32" decoding="async">
+          <span><b>Universiti Sains Malaysia</b>B.CS · Intelligent Computing</span>
         </div>
+        <span>From Surakarta · Studying in Penang</span>
       </div>
     </div>
-    <div class="gl-scan"></div>
-    <div class="gl-flash" id="glFlash"></div>
     <p class="op-skip">click or press any key to skip</p>
   </div>
   <a class="skip" href="#progress">Skip to content</a>
