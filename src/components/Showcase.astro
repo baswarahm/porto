@@ -1,0 +1,59 @@
+---
+/* A project's "features & screenshots" dialog: a screenshot gallery on one
+   side, grouped features on the other, and the access note for invite-only
+   projects. Opened by any [data-showcase="<slug>"] button (showcase.ts). */
+import Icon from './Icon.astro';
+import type { Project } from '../data/projects';
+
+interface Props { project: Project }
+const { project: p } = Astro.props;
+const sc = p.showcase!;
+const first = sc.shots[0];
+---
+<dialog class="showcase" id={`sc-${p.slug}`} aria-labelledby={`sc-${p.slug}-h`}>
+  <div class="sc-card">
+    <header class="sc-head">
+      <div>
+        <p class="sc-kicker">project · {p.year} · {p.stack}</p>
+        <h3 id={`sc-${p.slug}-h`}>{p.title}</h3>
+      </div>
+      <button class="sc-close" type="button" data-close aria-label="Close"><Icon name="close" size={20} /></button>
+    </header>
+
+    <div class="sc-body">
+      <div class="sc-gallery" data-gallery>
+        <figure class="sc-stage">
+          <img src={first.src} alt={first.alt} width="800" height="500" loading="lazy" decoding="async" data-main>
+          <button class="sc-nav prev" type="button" data-step="-1" aria-label="Previous screenshot"><Icon name="prev" size={20} /></button>
+          <button class="sc-nav next" type="button" data-step="1" aria-label="Next screenshot"><Icon name="next" size={20} /></button>
+          <figcaption data-caption><span data-count>1 / {sc.shots.length}</span>{first.caption}</figcaption>
+        </figure>
+        <div class="sc-thumbs" role="group" aria-label="Screenshots">
+          {sc.shots.map((s, i) => (
+            <button type="button" class="sc-thumb" aria-pressed={i === 0 ? 'true' : 'false'}
+              data-src={s.src} data-alt={s.alt} data-caption={s.caption} aria-label={`Show screenshot ${i + 1}: ${s.caption}`}>
+              <img src={s.src} alt="" width="160" height="100" loading="lazy" decoding="async">
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div class="sc-info">
+        <p class="sc-intro">{sc.intro}</p>
+        {sc.features.map(g => (
+          <div class="sc-group">
+            <h4>{g.heading}</h4>
+            <ul>{g.items.map(it => <li>{it}</li>)}</ul>
+          </div>
+        ))}
+        {p.access && (
+          <div class="sc-access">
+            <span class="sc-lock"><Icon name="lock" size={18} /></span>
+            <p>{p.access.note}</p>
+            <a class="btn primary" href={p.access.href} target="_blank" rel="noopener noreferrer"><Icon name="instagram" size={16} />{p.access.cta}</a>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</dialog>

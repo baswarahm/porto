@@ -10,8 +10,13 @@ import copy from '@tabler/icons/outline/copy.svg?raw';
 import contact from '@tabler/icons/outline/address-book.svg?raw';
 import refresh from '@tabler/icons/outline/refresh.svg?raw';
 import arrow from '@tabler/icons/outline/arrow-up-right.svg?raw';
+import lock from '@tabler/icons/outline/lock.svg?raw';
+import photo from '@tabler/icons/outline/photo.svg?raw';
+import prev from '@tabler/icons/outline/chevron-left.svg?raw';
+import next from '@tabler/icons/outline/chevron-right.svg?raw';
+import close from '@tabler/icons/outline/x.svg?raw';
 
-const icons = { mail, github, linkedin, instagram, discord, copy, contact, refresh, arrow };
+const icons = { mail, github, linkedin, instagram, discord, copy, contact, refresh, arrow, lock, photo, prev, next, close };
 export type IconName = keyof typeof icons;
 
 interface Props { name: IconName; size?: number }

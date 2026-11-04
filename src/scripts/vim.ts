@@ -89,7 +89,9 @@ export function initVim(){
   key('g', () => { if (Date.now() - lastG < 400) goTo(0); lastG = Date.now(); });
   key(':', open);
 
-  const typing = (e: KeyboardEvent) => (e.target as HTMLElement).matches?.('input, textarea, select') || e.metaKey || e.ctrlKey || e.altKey;
+  // also stand down while a modal dialog (project showcase) is open
+  const typing = (e: KeyboardEvent) => (e.target as HTMLElement).matches?.('input, textarea, select') || e.metaKey || e.ctrlKey || e.altKey
+    || !!document.querySelector('dialog[open]');
   addEventListener('keydown', e => {
     if (e.key === 'Escape'){ close(); return; }
     if (typing(e) || e.repeat) return;

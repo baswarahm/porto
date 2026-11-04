@@ -1,5 +1,7 @@
 ---
 import SectionHead from './SectionHead.astro';
+import Showcase from './Showcase.astro';
+import Icon from './Icon.astro';
 import { projects } from '../data/projects';
 ---
 <section id="projects" aria-labelledby="projects-h">
@@ -10,12 +12,20 @@ import { projects } from '../data/projects';
         <details class="item project" data-pill>
           <summary>
             <span class="y">{String(i + 1).padStart(2, '0')} · {p.year}</span>
-            <span><span class="t">{p.title}</span><p class="d">{p.description}</p></span>
+            <span>
+              <span class="t">{p.title}</span>
+              {p.access && <span class="usm-tag"><Icon name="lock" size={12} />usm students only</span>}
+              <p class="d">{p.description}</p>
+            </span>
             <span class="s">{p.stack}</span>
           </summary>
           <div class="more">
             <ul>{p.details.map(d => <li>{d}</li>)}</ul>
-            {p.href && <a class="btn" href={p.href} target="_blank" rel="noopener noreferrer">open {p.title.toLowerCase()} ↗</a>}
+            <div class="more-actions">
+              {p.showcase && <button class="btn primary" type="button" data-showcase={p.slug}><Icon name="photo" size={16} />see features &amp; screenshots</button>}
+              {p.href && <a class="btn" href={p.href} target="_blank" rel="noopener noreferrer">open {p.title.toLowerCase()} ↗</a>}
+              {p.access && <a class="btn" href={p.access.href} target="_blank" rel="noopener noreferrer"><Icon name="instagram" size={16} />{p.access.cta} for access</a>}
+            </div>
           </div>
         </details>
       ))}
@@ -26,4 +36,5 @@ import { projects } from '../data/projects';
       </div>
     </div>
   </div>
+  {projects.filter(p => p.showcase).map(p => <Showcase project={p} />)}
 </section>
