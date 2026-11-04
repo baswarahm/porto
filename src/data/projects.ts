@@ -1,4 +1,16 @@
-export interface Shot { src: string; alt: string; caption: string }
+export interface Shot { src: string; alt: string; label: string }
+
+/** one tool inside a project's tour: a tab in the showcase dialog */
+export interface Tool {
+  id: string;
+  name: string;
+  /** course it belongs to, e.g. "CCA102 · Computer Organisation" */
+  course: string;
+  blurb: string;
+  points: string[];
+  /** more than one shot shows small switches under the screenshot */
+  shots: Shot[];
+}
 
 export interface Project {
   /** used for the showcase dialog's id */
@@ -11,64 +23,106 @@ export interface Project {
   details: string[];
   /** live demo or repo */
   href?: string;
-  /** "see features & screenshots" showcase: one group of features per heading, plus a gallery */
+  /** the live demo is down for now: no link, a "under maintenance" tag instead */
+  maintenance?: string;
+  /** "take the tool tour" dialog */
   showcase?: {
     intro: string;
-    features: { heading: string; items: string[] }[];
-    shots: Shot[];
+    /** how and when the project keeps growing */
+    updates: string;
+    tools: Tool[];
   };
   /** the site is invite-only: no public link, visitors are asked to DM instead */
   access?: { note: string; cta: string; href: string };
 }
 
-const aacShot = (file: string, alt: string, caption: string): Shot =>
-  ({ src: `/images/projects/all-about-cs/${file}.webp`, alt, caption });
+const shot = (file: string, alt: string, label: string): Shot =>
+  ({ src: `/images/projects/revision-lab/${file}.webp`, alt, label });
 
 export const projects: Project[] = [
   {
-    slug: 'all-about-cs',
-    title: 'All About CS',
+    slug: 'revision-lab',
+    title: 'Revision Lab',
     year: '2026',
-    description: 'One revision hub for every Year 1 Semester 1 CS course at USM: notes, mock tests, a C++ judge and step-by-step solvers.',
+    description: 'A revision site for my CS batch at USM: step-by-step solvers, a C++ scratchpad and a question generator for the courses we take.',
     stack: 'html · css · js · supabase',
     details: [
-      'Three course sites behind one hub: Computer Organisation, Discrete Structures and Principles of Programming',
-      'Mock tests, past papers with corrected answers and question banks with hundreds of questions',
-      'A live "people online" counter, so you can see who else is revising right now',
-      'Made for USM CS students; lecturer slides stay private and never leave my computer',
+      'Step-by-step solvers that lay out the working the way our lecturers do',
+      'A C++ scratchpad and a question generator marked by a real compiler',
+      'Interactive labs for logic and graphs, plus mock tests and past papers',
+      'I add the new courses every semester, so it grows with my batch',
     ],
     showcase: {
-      intro: 'Built while taking these courses myself, so every page is the revision I wished I had. Plain HTML, CSS and JavaScript with no build step, and Supabase Realtime for the live counter.',
-      features: [
-        { heading: 'Computer Organisation · CCA102', items: [
-          'Notes for every Test 1 topic, with a read counter per chapter',
-          'Last year\'s paper with the answers corrected, plus two mock papers',
-          'A random Test 1 that is new every time, from a 308+ question bank',
-          'Drills and solvers that show the working, and a scientific / BASE-N calculator',
-        ] },
-        { heading: 'Discrete Structures · CKC111', items: [
-          'Weekly lessons turned into short interactive pages',
-          'Practice questions that check your answer straight away',
-          'An exam lab and a timed mock paper with a full marking scheme',
-          'A graph lab with Dijkstra tables',
-        ] },
-        { heading: 'Principles of Programming · CCA101', items: [
-          'Notes with C++ code you can run in the page',
-          'A 321-question Test 1 mock, timed or by topic',
-          '134 CodeRunner-style problems marked by a real compiler with hidden tests',
-          'A question generator and a g++ 13 scratchpad with keyboard input',
-        ] },
-        { heading: 'Across the site', items: [
-          'Live "people online" counter (Supabase Realtime Presence)',
-          'Each course shows when it was last updated and what changed',
-          'Progress is saved in your browser, light and dark themes',
-        ] },
-      ],
-      shots: [
-        aacShot('hub', 'The All About CS hub with three course cards and a live online counter', 'The hub: pick a course, see who\'s online'),
-        aacShot('computer-organisation', 'Computer Organisation revision page with notes and papers', 'Computer Organisation: notes, past paper, mocks, solvers'),
-        aacShot('discrete-structures', 'Discrete Structures study guide with weekly lessons', 'Discrete Structures: one week at a time, plus an exam lab'),
-        aacShot('principles-of-programming', 'Principles of Programming page with a mock test and coding practice', 'Principles of Programming: mock test, CodeRunner practice, C++ scratchpad'),
+      intro: 'Tools I built while taking these courses myself, so my batch can check their own working instead of waiting for answer keys.',
+      updates: 'Updated every semester as my batch moves up. Right now: Year 1 Semester 1 (CCA101, CCA102, CKC111).',
+      tools: [
+        {
+          id: 'solvers',
+          name: 'Step-by-step solvers',
+          course: 'CCA102 · Computer Organisation',
+          blurb: 'Type any numbers and get the full working, table by table, laid out the way the lecturer shows it. Every tool updates as you type.',
+          points: [
+            "Booth's algorithm, add-shift multiplication and restoring division, cycle by cycle",
+            "Base conversion, signed representations and 2's complement add / subtract with overflow checks",
+            'IEEE 754 (32-bit) encoding and CPI / MIPS / execution time',
+          ],
+          shots: [
+            shot('booth', "Booth's algorithm solver showing each cycle of A, Q and Q-1", "Booth's algorithm"),
+            shot('base-conversion', 'Base conversion and signed representation solvers', 'Base conversion'),
+            shot('ieee754', 'IEEE 754 encoder and CPI / MIPS calculator', 'IEEE 754 & CPI'),
+          ],
+        },
+        {
+          id: 'scratchpad',
+          name: 'C++ scratchpad',
+          course: 'CCA101 · Principles of Programming',
+          blurb: 'Write any C++ program, type the keyboard input for cin, and run it with g++ 13 right in the browser. No install, works on any laptop in the lab.',
+          points: [
+            'Real g++ 13 compile, with the output and exit code',
+            'A stdin box, so programs that use cin just work',
+            'Ctrl + Enter to run, one click to reset',
+          ],
+          shots: [shot('scratchpad', 'C++ scratchpad running a loop program with its output', 'Run a program')],
+        },
+        {
+          id: 'generator',
+          name: 'Question generator',
+          course: 'CCA101 · Principles of Programming',
+          blurb: 'Every press builds a brand-new CodeRunner-style question with a random theme, random numbers and fresh hidden tests, in the same partial-program format as our assessment.',
+          points: [
+            'Ten question types across sequence, selection, repetition and files',
+            'Answers are marked by a compiler against hidden tests',
+            'Each question has a code, so a friend can open exactly the same one',
+          ],
+          shots: [
+            shot('generator', 'Question generator with topic and type pickers', 'Pick a topic'),
+            shot('generated-question', 'A generated switch-menu question with an answer editor', 'A fresh question'),
+          ],
+        },
+        {
+          id: 'graph-lab',
+          name: 'Graph lab',
+          course: 'CKC111 · Discrete Structures',
+          blurb: 'Type the edges of any graph and it draws it, then works out the degrees, neighbourhoods, graph type and adjacency list and matrices.',
+          points: [
+            'Directed and undirected graphs, loops and multiple edges',
+            'Dijkstra tables worked out step by step',
+            'One-click examples taken from the lecture slides',
+          ],
+          shots: [shot('graph-lab', 'Graph lab drawing a graph next to its degree table', 'Draw & analyse')],
+        },
+        {
+          id: 'logic-lab',
+          name: 'Logic lab',
+          course: 'CKC111 · Discrete Structures',
+          blurb: 'Flip switches to see when a statement is true. Logic is taught as small experiments before the truth tables.',
+          points: [
+            'Interactive implication, connectives and truth-table labs',
+            'Practice sets that check your answer straight away',
+            'A weekly checkpoint and a timed mock paper',
+          ],
+          shots: [shot('logic-lab', 'Logic lab with switches for p and q and the result of p implies q', 'Flip the switches')],
+        },
       ],
     },
     access: {
@@ -89,6 +143,6 @@ export const projects: Project[] = [
       'Tax and service charge are shared in proportion to what each person ate',
       'Exports the result as an image for the group chat',
     ],
-    href: 'https://split-bill-azure.vercel.app',
+    maintenance: 'The live demo is under maintenance right now. It will be back soon.',
   },
 ];

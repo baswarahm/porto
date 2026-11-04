@@ -15,6 +15,7 @@ import { projects } from '../data/projects';
             <span>
               <span class="t">{p.title}</span>
               {p.access && <span class="usm-tag"><Icon name="lock" size={12} />usm students only</span>}
+              {p.maintenance && <span class="usm-tag maint"><Icon name="tool" size={12} />under maintenance</span>}
               <p class="d">{p.description}</p>
             </span>
             <span class="s">{p.stack}</span>
@@ -22,8 +23,9 @@ import { projects } from '../data/projects';
           <div class="more">
             <ul>{p.details.map(d => <li>{d}</li>)}</ul>
             <div class="more-actions">
-              {p.showcase && <button class="btn primary" type="button" data-showcase={p.slug}><Icon name="photo" size={16} />see features &amp; screenshots</button>}
-              {p.href && <a class="btn" href={p.href} target="_blank" rel="noopener noreferrer">open {p.title.toLowerCase()} ↗</a>}
+              {p.showcase && <button class="btn primary" type="button" data-showcase={p.slug}><Icon name="play" size={16} />take the tool tour · {p.showcase.tools.length} tools</button>}
+              {p.href && !p.maintenance && <a class="btn" href={p.href} target="_blank" rel="noopener noreferrer">open {p.title.toLowerCase()} ↗</a>}
+              {p.maintenance && <span class="maint-note"><Icon name="tool" size={14} />{p.maintenance}</span>}
               {p.access && <a class="btn" href={p.access.href} target="_blank" rel="noopener noreferrer"><Icon name="instagram" size={16} />{p.access.cta} for access</a>}
             </div>
           </div>

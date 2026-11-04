@@ -15,8 +15,16 @@ import photo from '@tabler/icons/outline/photo.svg?raw';
 import prev from '@tabler/icons/outline/chevron-left.svg?raw';
 import next from '@tabler/icons/outline/chevron-right.svg?raw';
 import close from '@tabler/icons/outline/x.svg?raw';
+import solvers from '@tabler/icons/outline/calculator.svg?raw';
+import scratchpad from '@tabler/icons/outline/terminal-2.svg?raw';
+import generator from '@tabler/icons/outline/dice-5.svg?raw';
+import graph from '@tabler/icons/outline/topology-star-3.svg?raw';
+import logic from '@tabler/icons/outline/toggle-right.svg?raw';
+import tool from '@tabler/icons/outline/tool.svg?raw';
+import play from '@tabler/icons/outline/player-play.svg?raw';
 
-const icons = { mail, github, linkedin, instagram, discord, copy, contact, refresh, arrow, lock, photo, prev, next, close };
+const icons = { mail, github, linkedin, instagram, discord, copy, contact, refresh, arrow, lock, photo, prev, next, close,
+  solvers, scratchpad, generator, 'graph-lab': graph, 'logic-lab': logic, tool, play };
 export type IconName = keyof typeof icons;
 
 interface Props { name: IconName; size?: number }
