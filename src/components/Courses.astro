@@ -7,7 +7,7 @@ const { year, sem } = degreeProgress();
 ---
 <section id="now" aria-labelledby="now-h">
   <div class="wrap">
-    <SectionHead n="02" title="Taking now" note={`<span data-sem-label>year ${year}, semester ${sem}</span> · hover a course to light up its commits`} id="now-h" />
+    <SectionHead n="02" title="Taking this semester" note={`<span data-sem-label>year ${year}, semester ${sem}</span> · hover a course to light up its commits`} id="now-h" />
     <div class="courses">
       {courses.map((c, idx) => (
         <article class="course reveal anim-deal" data-lane={c.lane} style={`--i:${idx}`}>

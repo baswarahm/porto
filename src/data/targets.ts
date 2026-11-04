@@ -4,11 +4,11 @@ export interface Target { title: string; label: string; due: string; steps: Step
 
 export const targets: Record<'doing' | 'next' | 'done', Target[]> = {
   doing: [
-    { title: 'Finish year 1 with a strong CGPA', label: 'uni', due: 'jun 2027', steps: [
-      { text: 'Never miss a lab', done: true },
-      { text: 'Weekly review every Sunday', done: true },
-      { text: 'Ace the semester 1 finals', done: false },
-      { text: 'Ace the semester 2 finals', done: false },
+    { title: 'Finish year 1 with a good CGPA', label: 'uni', due: 'jun 2027', steps: [
+      { text: 'Go to every lab', done: true },
+      { text: 'Review every Sunday', done: true },
+      { text: 'Do well in the semester 1 finals', done: false },
+      { text: 'Do well in the semester 2 finals', done: false },
     ] },
     { title: 'Solve 100 data-structure problems in C++', label: 'dsa', due: 'mar 2027', steps: [
       { text: 'Arrays and strings (25)', done: false },
@@ -24,7 +24,7 @@ export const targets: Record<'doing' | 'next' | 'done', Target[]> = {
     { title: 'Build an ML project for Intelligent Computing', label: 'ai', due: '2027', steps: [
       { text: 'Finish an intro ML course', done: false }, { text: 'Pick a real dataset', done: false }, { text: 'Train, evaluate, write it up', done: false },
     ] },
-    { title: 'Land a strong industrial training placement (CFC453)', label: 'career', due: '2030', steps: [
+    { title: 'Get a good industrial training placement (CFC453)', label: 'career', due: '2030', steps: [
       { text: 'CV and portfolio ready', done: true }, { text: '3 solid projects', done: false }, { text: 'Apply to 20 places', done: false },
     ] },
   ],
@@ -33,7 +33,7 @@ export const targets: Record<'doing' | 'next' | 'done', Target[]> = {
       { text: 'Finish SMA', done: true }, { text: 'Get accepted at USM', done: true },
     ] },
     { title: 'Rebuild my portfolio from scratch', label: 'build', due: 'oct 2026', steps: [
-      { text: 'Astro + TypeScript', done: true }, { text: 'Real curriculum and progress', done: true }, { text: 'Interactive everything', done: true },
+      { text: 'Astro + TypeScript', done: true }, { text: 'Real curriculum and progress', done: true }, { text: 'Make it interactive', done: true },
     ] },
   ],
 };

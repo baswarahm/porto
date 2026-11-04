@@ -11,7 +11,7 @@ const columns: { id: string; title: string; items: TimelineItem[] }[] = [
 ---
 <section id="journey" aria-labelledby="journey-h">
   <div class="wrap">
-    <SectionHead n="05" title="Experience & education" note="the road so far · click an entry" id="journey-h" />
+    <SectionHead n="05" title="Experience & education" note="tap an entry for details" id="journey-h" />
     <div class="journey">
       {columns.map(col => (
         <div class={`tl reveal ${col.id === 'exp' ? 'anim-left' : 'anim-right'}`} data-tl={col.id}>

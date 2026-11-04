@@ -77,7 +77,7 @@ export function initVim(){
     e.preventDefault();
     const name = input.value.trim().replace(/^:/, '');
     const c = commands.get(name);
-    const res = c ? c.run() : `E492: not an editor command: ${name} — try :help`;
+    const res = c ? c.run() : `E492: not an editor command: ${name}, try :help`;
     if (cmd.classList.contains('open')){ out.textContent = res ?? ''; input.value = ''; }
   });
 

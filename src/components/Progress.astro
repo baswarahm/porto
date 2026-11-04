@@ -11,7 +11,7 @@ const laneClass = (l: number | null) => (l ? `c${l}` : undefined);
 ---
 <section id="progress" aria-labelledby="progress-h">
   <div class="wrap">
-    <SectionHead n="01" title="Degree progress" note="computed live from today's date · click a semester" id="progress-h" />
+    <SectionHead n="01" title="Degree progress" note="based on today's date · tap a semester to see its courses" id="progress-h" />
     <div class="degree reveal anim-flip">
       <div class="sem-track" id="semTrack" role="group" aria-label="Semesters">
         {semesters.map(s => (
@@ -33,7 +33,7 @@ const laneClass = (l: number | null) => (l ? `c${l}` : undefined);
     <CourseMap />
 
     <div class="spacer"></div>
-    <SectionHead n="git log" title="What I've learned" note="every course is a branch · click a commit to see the diff" small />
+    <SectionHead n="git log" title="What I've learned so far" note="one branch per course · tap a commit to open it" small />
     <div class="gl-tools" id="glTools" role="group" aria-label="Filter by course">
       <button class="chip" type="button" aria-pressed="true" data-f="all">all</button>
       {courses.map(c => <button class="chip" type="button" aria-pressed="false" data-f={c.lane}><i class={`c${c.lane}`}>●</i> {c.code === 'SELF' ? 'self-study' : c.code}</button>)}

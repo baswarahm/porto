@@ -2,11 +2,11 @@ export const profile = {
   name: 'Baswara Hafizh Muttaqin',
   nameLines: ['Baswara', 'Hafizh', 'Muttaqin'],
   handle: 'baswara',
-  title: 'First-year CS (Intelligent Computing) student — USM',
+  title: 'First-year CS (Intelligent Computing) student at USM',
   /** browser tab and search-result title: the full name first, so name searches match */
   pageTitle: 'BASWARA HAFIZH MUTTAQIN - Portfolio',
   description:
-    'Baswara Hafizh Muttaqin — first-year Computer Science (Intelligent Computing) student at Universiti Sains Malaysia. Progress, courses, what I learn, and what I am aiming for.',
+    'Baswara Hafizh Muttaqin, a first-year Computer Science (Intelligent Computing) student at Universiti Sains Malaysia. Progress, courses, what I learn, and what I am aiming for.',
   whoami: { role: 'first-year cs student', where: 'universiti sains malaysia' },
   photo: '/images/dadas.jpeg',
   photoAlt: 'Baswara standing above a sea of clouds at sunrise',

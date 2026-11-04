@@ -128,7 +128,7 @@ export function initSudo(){
   addEventListener('keydown', e => {
     if ((e.target as HTMLElement).matches?.('input, textarea') || e.key.length !== 1) return;
     buf = (buf + e.key.toLowerCase()).slice(-4);
-    if (buf === 'sudo'){ toast('nice try — baswara is not in the sudoers file. this incident will be reported.'); buf = ''; }
+    if (buf === 'sudo'){ toast('nice try. baswara is not in the sudoers file. this incident will be reported.'); buf = ''; }
   });
 }
 
@@ -174,8 +174,8 @@ export function initContact(){
       const awake = h >= 6 && h < 23;
       avail.classList.toggle('away', !awake);
       avail.querySelector('span')!.textContent = awake
-        ? `${t} in Penang · usually replies within a day`
-        : `${t} in Penang · asleep, will reply in the morning`;
+        ? `${t} in Penang · I usually reply within a day`
+        : `${t} in Penang · probably asleep, I'll reply in the morning`;
     };
     tick(); setInterval(tick, 30_000);
   }

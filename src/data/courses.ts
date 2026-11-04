@@ -57,15 +57,15 @@ export interface Course {
 export const courses: Course[] = [
   {
     code: 'CCA101', name: 'Programming Fundamentals', lane: 1, week: 4, weeks: 14,
-    learned: ['First C++ program that compiles on the first try', 'Loops, functions and scope'],
+    learned: ['First C++ program that compiled first try', 'Loops, functions and scope'],
     doing: ['Pointers vs references'],
-    stuck: 'why my segfault only happens sometimes',
+    stuck: 'a segfault that only happens sometimes',
   },
   {
     code: 'CKC111', name: 'Discrete Structures', lane: 2, week: 4, weeks: 14,
     learned: ['Truth tables and logical equivalence', 'Proof by induction'],
     doing: ['Set theory and relations'],
-    stuck: 'writing proofs that sound like proofs',
+    stuck: 'writing proofs that read like proofs',
   },
   {
     code: 'CCA102', name: 'Computer Organisation', lane: 3, week: 4, weeks: 14,
@@ -75,9 +75,9 @@ export const courses: Course[] = [
   },
   {
     code: 'SELF', name: 'Self-study: Git + web', lane: 4,
-    learned: ['Rebuilt this site in Astro + TypeScript', 'Git branching without fear'],
+    learned: ['Rebuilt this site in Astro + TypeScript', 'Git branching'],
     doing: ['Data structures in C++, ahead of CKC212'],
-    stuck: "reading other people's code fast",
+    stuck: "reading other people's code quickly",
   },
 ];
 

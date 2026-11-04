@@ -83,7 +83,7 @@ command('courses', "list what I'm taking", () => courses.map(c => `${c.code.padE
 command('skills', 'list what I build with', () => skills.map(s => `${s.name.padEnd(14)}${s.usedIn}`).join('\n'));
 command('email', 'copy my email', () => { copyEmail(); return 'copied to clipboard'; });
 command('theme', 'toggle light / dark', () => `theme: ${toggleTheme()}`);
-command('xray', 'inspect the page', () => `x-ray ${xray.toggle() ? 'on — hover anything' : 'off'}`);
+command('xray', 'inspect the page', () => `x-ray ${xray.toggle() ? 'on, hover anything' : 'off'}`);
 command('bg', 'toggle the binary background', () => `binary background ${toggleBg() ? 'on' : 'off'}`);
 command('decode', 'what the binary rain says', () => bg ? `the rain spells:
 "${bg.message}"` : 'the background is off');
@@ -94,7 +94,7 @@ command('replay', 'replay the opening', () => {
   try { sessionStorage.removeItem('opened'); } catch { /* non-fatal */ }
   location.reload();
 });
-command('sudo', 'try it', () => 'nice try — baswara is not in the sudoers file.');
+command('sudo', 'try it', () => 'nice try. baswara is not in the sudoers file.');
 
 /* perf readout, once everything has loaded */
 addEventListener('load', () => setTimeout(() => {

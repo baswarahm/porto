@@ -6,7 +6,7 @@ import { projects } from '../data/projects';
 ---
 <section id="projects" aria-labelledby="projects-h">
   <div class="wrap">
-    <SectionHead n="04" title="Projects" note="things I've built and shipped · click to open" id="projects-h" />
+    <SectionHead n="04" title="Projects" note="things I've built · tap to open" id="projects-h" />
     <div class="list reveal anim-unfold">
       {projects.map((p, i) => (
         <details class="item project" data-pill>
@@ -33,7 +33,7 @@ import { projects } from '../data/projects';
       ))}
       <div class="item next-slot">
         <span class="y">{String(projects.length + 1).padStart(2, '0')} · next</span>
-        <span><span class="t">Next project loading<span class="dots"><i>.</i><i>.</i><i>.</i></span></span><p class="d">Probably something with data structures. Ideas welcome — say hi below.</p></span>
+        <span><span class="t">Next project loading<span class="dots"><i>.</i><i>.</i><i>.</i></span></span><p class="d">Probably something with data structures. If you have an idea, tell me below.</p></span>
         <span class="s">tbd</span>
       </div>
     </div>

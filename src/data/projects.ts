@@ -44,7 +44,7 @@ export const projects: Project[] = [
     slug: 'revision-lab',
     title: 'Revision Lab',
     year: '2026',
-    description: 'A revision site for my CS batch at USM: step-by-step solvers, a C++ scratchpad and a question generator for the courses we take.',
+    description: 'A revision site I made for my CS batch at USM, with step-by-step solvers, a C++ scratchpad and a question generator.',
     stack: 'html · css · js · supabase',
     details: [
       'Step-by-step solvers that lay out the working the way our lecturers do',
@@ -53,7 +53,7 @@ export const projects: Project[] = [
       'I add the new courses every semester, so it grows with my batch',
     ],
     showcase: {
-      intro: 'Tools I built while taking these courses myself, so my batch can check their own working instead of waiting for answer keys.',
+      intro: 'I built these while taking the courses myself, so my batch can check their working without waiting for answer keys.',
       updates: 'Updated every semester as my batch moves up. Right now: Year 1 Semester 1 (CCA101, CCA102, CKC111).',
       tools: [
         {
@@ -88,7 +88,7 @@ export const projects: Project[] = [
           id: 'generator',
           name: 'Question generator',
           course: 'CCA101 · Principles of Programming',
-          blurb: 'Every press builds a brand-new CodeRunner-style question with a random theme, random numbers and fresh hidden tests, in the same partial-program format as our assessment.',
+          blurb: 'Each click makes a new CodeRunner-style question with a random theme, random numbers and new hidden tests, in the same partial-program format as our assessment.',
           points: [
             'Ten question types across sequence, selection, repetition and files',
             'Answers are marked by a compiler against hidden tests',
@@ -115,7 +115,7 @@ export const projects: Project[] = [
           id: 'logic-lab',
           name: 'Logic lab',
           course: 'CKC111 · Discrete Structures',
-          blurb: 'Flip switches to see when a statement is true. Logic is taught as small experiments before the truth tables.',
+          blurb: 'Flip switches to see when a statement is true. You try the logic first, then get the truth tables.',
           points: [
             'Interactive implication, connectives and truth-table labs',
             'Practice sets that check your answer straight away',
@@ -135,7 +135,7 @@ export const projects: Project[] = [
     slug: 'split-bill',
     title: 'Split Bill',
     year: '2026',
-    description: 'Scan a receipt, tap who ate what, share a fair per-person split.',
+    description: 'Scan a receipt, tap who ate what, and send everyone their share.',
     stack: 'react · ts · gemini',
     details: [
       'Gemini reads every line item, tax and service charge from a photo of the receipt',
@@ -143,6 +143,6 @@ export const projects: Project[] = [
       'Tax and service charge are shared in proportion to what each person ate',
       'Exports the result as an image for the group chat',
     ],
-    maintenance: 'The live demo is under maintenance right now. It will be back soon.',
+    maintenance: 'The demo is down for maintenance. It will be back soon.',
   },
 ];

@@ -11,7 +11,7 @@ const now = credits(current, current + 1);
 const trackKeys = Object.keys(tracks) as Track[];
 ---
 <div class="cmap-wrap">
-  <SectionHead n="map" title="Four-year course map" note="the real USM study plan, CS courses only · click any course" small />
+  <SectionHead n="map" title="Course map" note="the actual USM study plan, CS courses only · tap a course" small />
 
   <div class="cmap-stats reveal" id="cmapStats" data-total={total}>
     <div><b data-count={done}>{done}</b><span>credits done</span></div>
@@ -44,6 +44,6 @@ const trackKeys = Object.keys(tracks) as Track[];
       </div>
     ))}
   </div>
-  <button class="btn cmap-more" id="cmapMore" type="button" aria-expanded="false" aria-controls="cmap">show the full four-year roadmap ↓</button>
+  <button class="btn cmap-more" id="cmapMore" type="button" aria-expanded="false" aria-controls="cmap">show the whole four-year plan ↓</button>
   <p class="cmap-detail" id="cmapDetail" aria-live="polite"><span class="mono">tip:</span> press <kbd>/</kbd> to search the map.</p>
 </div>
