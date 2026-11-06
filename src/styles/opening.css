@@ -1,9 +1,7 @@
 /* ==========================================================================
-   OPENING.CSS — four slides, and every cut between them is different:
-     1 → 2  the welcome letters scatter; my name's letters fly back together
-     2 → 3  my name splits apart sideways; the USM crest drops in
-     3 → 4  an orange iris bursts from the crest and closes on "enjoy"
-     4 → ✕  the letters fall away and a portal opens onto the site
+   OPENING.CSS — two slides:
+     name   scattered letters fly together, then split apart sideways
+     USM    the crest drops in; the slide lifts away and a portal opens
    opening.ts drives the phases by toggling classes; the motion is here.
    ========================================================================== */
 @property --hole{ syntax:'<length>'; inherits:false; initial-value:0px; }
@@ -35,15 +33,7 @@
 .op-big .wd{ display:inline-block; white-space:nowrap; }
 .op-big .c{ display:inline-block; will-change:transform, opacity; }
 
-/* slide 1: words rise from behind an edge, then every letter scatters */
-.s1 .op-big .c{ transform:translateY(.9em); opacity:0; transition:transform .8s var(--op-in), opacity .5s; }
-.s1.show .op-big .c{ transform:none; opacity:1; }
-.s1 .op-rule{ height:1px; background:#3a3833; margin-top:24px; transform:scaleX(0); transform-origin:left; transition:transform .9s .3s var(--op-glide); }
-.s1.show .op-rule{ transform:none; }
-.s1.out .op-rule{ transform:scaleX(0); transform-origin:right; transition:transform .45s var(--op-glide); }
-.op-big.scatter .c{ transition:transform .75s var(--op-out), opacity .6s .1s; }
-
-/* slide 2: the name assembles from scattered letters; the silhouette rises behind */
+/* name slide: the name assembles from scattered letters; the silhouette rises behind */
 .s2 > div{ display:grid; place-items:center; text-align:center; }
 .op-sil{ position:absolute; left:50%; top:50%; height:min(86vh,760px); aspect-ratio:294/900; opacity:0; transform:translate(-50%,-38%);
   background:linear-gradient(180deg, rgba(236,232,220,.22), rgba(236,232,220,.05) 80%);
@@ -58,7 +48,7 @@
 .s2.out .ln:last-child{ transform:translateX(75vw) skewX(-18deg); opacity:0; }
 .s2.out .op-sil{ opacity:0; transform:translate(-50%,-20%); transition:opacity .5s, transform .7s var(--op-glide); }
 
-/* slide 3: the crest drops in spinning, the lines wipe in */
+/* USM slide: the crest drops in spinning, the lines wipe in */
 .s3 > div{ display:flex; align-items:center; gap:clamp(20px,4vw,44px); }
 .s3 img{ width:clamp(84px,13vw,150px); height:auto; flex:0 0 auto; opacity:0; transform:translateY(-70vh) rotate(-35deg);
   transition:transform .9s var(--op-in), opacity .3s; }
@@ -67,21 +57,10 @@
 .s3 .ln{ display:block; clip-path:inset(0 100% 0 0); transition:clip-path .7s var(--op-glide); }
 .s3.show .ln:first-child{ clip-path:inset(0 0 0 0); transition-delay:.35s; }
 .s3.show .ln:last-child{ clip-path:inset(0 0 0 0); transition-delay:.5s; }
+/* …and then it lifts away as the portal opens */
+.s3.out > div{ transform:translateY(-6vh) scale(.96); opacity:0; transition:transform .7s var(--op-glide), opacity .5s; }
 
-/* the iris: an orange disc that bursts from the crest, then closes */
-.op-iris{ position:absolute; z-index:3; left:var(--ix,50%); top:var(--iy,50%); width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%;
-  background:#ff6a3d; transform:scale(0); pointer-events:none; }
-.op-iris.grow{ transform:scale(var(--iscale,150)); transition:transform .55s var(--op-glide); }
-.op-iris.close{ transform:scale(0); transition:transform .6s var(--op-glide); }
-
-/* slide 4: letters pop up one by one, and finally fall away */
-.s4 > div{ text-align:center; }
-.s4 .op-sub{ margin-left:auto; margin-right:auto; }
-.s4 .op-big .c{ transform:translateY(.6em) scale(.6); opacity:0; transition:transform .55s var(--op-in), opacity .3s; }
-.s4.show .op-big .c{ transform:none; opacity:1; }
-.op-big.fall .c{ transition:transform .7s var(--op-out), opacity .5s .2s; }
-
-/* progress: four short bars, the current one fills */
+/* progress: one short bar per slide, the current one fills */
 .op-dots{ position:absolute; left:50%; bottom:54px; transform:translateX(-50%); display:flex; gap:8px; z-index:4; }
 .op-dots i{ width:28px; height:2px; background:#2b2a25; position:relative; overflow:hidden; }
 .op-dots i::after{ content:""; position:absolute; inset:0; background:#ff6a3d; transform:scaleX(0); transform-origin:left; }
