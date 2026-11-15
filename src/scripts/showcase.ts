@@ -2,6 +2,15 @@
    Tabs switch tools (click, or ← / → while a tab has focus), view buttons
    switch screenshots inside a tool, close with ✕, Esc or the backdrop. */
 export function initShowcase(){
+  // project rows: the hover spotlight follows the cursor
+  document.querySelectorAll<HTMLElement>('details.project summary').forEach(s => {
+    s.addEventListener('pointermove', e => {
+      const r = s.getBoundingClientRect();
+      s.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      s.style.setProperty('--my', `${e.clientY - r.top}px`);
+    }, { passive: true });
+  });
+
   document.querySelectorAll<HTMLButtonElement>('[data-showcase]').forEach(btn => {
     const dialog = document.getElementById(`sc-${btn.dataset.showcase}`) as HTMLDialogElement | null;
     if (!dialog) return;

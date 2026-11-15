@@ -19,6 +19,7 @@ import { projects } from '../data/projects';
               <p class="d">{p.description}</p>
             </span>
             <span class="s">{p.stack}</span>
+            <span class="tgl" aria-hidden="true"></span>
           </summary>
           <div class="more">
             <ul>{p.details.map(d => <li>{d}</li>)}</ul>
