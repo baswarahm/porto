@@ -6,7 +6,7 @@
    ========================================================================== */
 @property --hole{ syntax:'<length>'; inherits:false; initial-value:0px; }
 
-.opening{ position:fixed; inset:0; z-index:100; overflow:hidden; background:#0f0f0d; color:#ece8dc; font:13px/1.5 var(--mono);
+.opening{ position:fixed; inset:0; z-index:100; overflow:hidden; background:#0b0812; color:#ede8f7; font:13px/1.5 var(--mono);
   --hole:0px;
   -webkit-mask:radial-gradient(circle at 50% 50%, transparent var(--hole), #000 calc(var(--hole) + 1px));
           mask:radial-gradient(circle at 50% 50%, transparent var(--hole), #000 calc(var(--hole) + 1px));
@@ -21,10 +21,10 @@
 .op-slide > div{ position:relative; width:min(980px,100%); }
 
 /* shared type */
-.op-kicker{ font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:#ff6a3d; margin-bottom:18px; opacity:0; transition:opacity .45s .1s; }
+.op-kicker{ font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:#b38bff; margin-bottom:18px; opacity:0; transition:opacity .45s .1s; }
 .op-big{ font:600 clamp(2.4rem,8vw,7rem)/1 var(--sans); letter-spacing:-.04em; }
-.op-big em{ font-style:normal; color:#ff6a3d; }
-.op-sub{ margin-top:22px; font-size:13px; letter-spacing:.05em; color:#a9a596; max-width:52ch; opacity:0; transform:translateY(8px); transition:opacity .5s .55s, transform .6s .55s var(--op-in); }
+.op-big em{ font-style:normal; color:#b38bff; }
+.op-sub{ margin-top:22px; font-size:13px; letter-spacing:.05em; color:#a9a0c2; max-width:52ch; opacity:0; transform:translateY(8px); transition:opacity .5s .55s, transform .6s .55s var(--op-in); }
 .op-slide.show .op-kicker{ opacity:1; }
 .op-slide.show .op-sub{ opacity:1; transform:none; }
 .op-slide.out .op-kicker, .op-slide.out .op-sub{ opacity:0; transition-delay:0s; transform:none; }
@@ -36,7 +36,7 @@
 /* name slide: the name assembles from scattered letters; the silhouette rises behind */
 .s2 > div{ display:grid; place-items:center; text-align:center; }
 .op-sil{ position:absolute; left:50%; top:50%; height:min(86vh,760px); aspect-ratio:294/900; opacity:0; transform:translate(-50%,-38%);
-  background:linear-gradient(180deg, rgba(236,232,220,.22), rgba(236,232,220,.05) 80%);
+  background:linear-gradient(180deg, rgba(196,170,255,.24), rgba(120,70,200,.06) 80%);
   -webkit-mask:url(/images/silhouette.png) center / contain no-repeat; mask:url(/images/silhouette.png) center / contain no-repeat;
   transition:opacity .9s .2s, transform 1.3s .2s var(--op-in); }
 .s2.show .op-sil{ opacity:1; transform:translate(-50%,-46%); }
@@ -62,11 +62,11 @@
 
 /* progress: one short bar per slide, the current one fills */
 .op-dots{ position:absolute; left:50%; bottom:54px; transform:translateX(-50%); display:flex; gap:8px; z-index:4; }
-.op-dots i{ width:28px; height:2px; background:#2b2a25; position:relative; overflow:hidden; }
-.op-dots i::after{ content:""; position:absolute; inset:0; background:#ff6a3d; transform:scaleX(0); transform-origin:left; }
+.op-dots i{ width:28px; height:2px; background:#271f3b; position:relative; overflow:hidden; }
+.op-dots i::after{ content:""; position:absolute; inset:0; background:#b38bff; transform:scaleX(0); transform-origin:left; }
 .op-dots i.done::after{ transform:none; }
 .op-dots i.on::after{ transform:none; transition:transform var(--d, 1s) linear; }
-.op-skip{ position:absolute; bottom:22px; left:0; right:0; text-align:center; font-size:11px; letter-spacing:.12em; color:#5b584d; z-index:4; }
+.op-skip{ position:absolute; bottom:22px; left:0; right:0; text-align:center; font-size:11px; letter-spacing:.12em; color:#6d6588; z-index:4; }
 .opening.leave .op-dots, .opening.leave .op-skip{ opacity:0; transition:opacity .2s; }
 
 @media (max-width:640px){

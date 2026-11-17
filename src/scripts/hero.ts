@@ -57,6 +57,8 @@ export function initNameSplit(onSplit?: () => void){
   const apply = (el: HTMLElement) => { const p = pos.get(el)!; el.style.transform = `translate(${p.x}px, ${p.y}px) rotate(${p.r}deg)`; };
 
   const split = () => {
+    // drop the 3D tilt first so the letters are measured flat
+    h1.style.transform = ''; h1.style.textShadow = '';
     // scatter inside the hero's left column, never off-screen
     const box = h1.parentElement!.getBoundingClientRect();
     const minX = Math.max(8, box.left), maxX = Math.min(innerWidth - 48, box.right - 20);
@@ -105,6 +107,44 @@ export function initNameSplit(onSplit?: () => void){
     el.addEventListener('pointercancel', up);
   });
   return { split, reset };
+}
+
+/* ==========================================================================
+   Name tilt: the name leans toward the cursor like a physical sign, and a
+   stack of text-shadows gives it an extruded purple edge that shifts with
+   the angle. Mouse only; stands down while the letters are split apart.
+   ========================================================================== */
+export function initNameTilt(){
+  const h1 = document.getElementById('heroName'), area = h1?.parentElement;
+  if (!h1 || !area || reducedMotion || !matchMedia('(hover: hover)').matches) return;
+  const cur = { x: 0, y: 0 }, target = { x: 0, y: 0 };
+  let raf = 0;
+  const LAYERS = 7;
+
+  const paint = () => {
+    raf = 0;
+    cur.x += (target.x - cur.x) * .12; cur.y += (target.y - cur.y) * .12;
+    if (h1.classList.contains('split')){ h1.style.transform = ''; h1.style.textShadow = ''; return; }
+    h1.style.transform = `perspective(900px) rotateX(${(-cur.y * 9).toFixed(2)}deg) rotateY(${(cur.x * 13).toFixed(2)}deg)`;
+    // the edge shows on the side facing away from the cursor
+    const sh: string[] = [];
+    for (let k = 1; k <= LAYERS; k++)
+      sh.push(`${(-cur.x * k * .9).toFixed(2)}px ${(k * .55 - cur.y * k * .7).toFixed(2)}px 0 var(--extrude)`);
+    sh.push(`${(-cur.x * 10).toFixed(1)}px ${(8 - cur.y * 8).toFixed(1)}px 28px color-mix(in srgb, var(--usm) 45%, transparent)`);
+    h1.style.textShadow = sh.join(', ');
+    if (Math.abs(target.x - cur.x) > .002 || Math.abs(target.y - cur.y) > .002) raf = requestAnimationFrame(paint);
+  };
+  const kick = () => { if (!raf) raf = requestAnimationFrame(paint); };
+
+  area.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse') return;
+    const r = h1.getBoundingClientRect();
+    target.x = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
+    target.y = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height / 1.2)));
+    kick();
+  });
+  area.addEventListener('pointerleave', () => { target.x = 0; target.y = .15; kick(); });
+  target.y = .15; kick();   // a slight resting angle so the depth is visible before you move
 }
 
 export function initCounters(){

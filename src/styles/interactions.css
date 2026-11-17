@@ -99,7 +99,7 @@ details.item .more li::before{ content:"\2192  "; color:var(--signal); font-fami
 .btn:hover{ background:var(--ink); color:var(--paper); }
 .btn:active{ transform:translateY(1px); }
 .btn.primary{ background:var(--ink); color:var(--paper); }
-.btn.primary:hover{ background:var(--signal); border-color:var(--signal); color:#fff; }
+.btn.primary:hover{ background:var(--signal); border-color:var(--signal); color:var(--on-signal); }
 .socials{ display:grid; align-content:start; }
 .socials a{ display:flex; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--rule); text-decoration:none; font:15px var(--mono); transition:padding .2s, background .2s, color .2s; }
 .socials a:last-child{ border-bottom:0; }

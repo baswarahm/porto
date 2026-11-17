@@ -4,17 +4,17 @@
    ========================================================================== */
 :root{
   --paper:#f3f0e8; --paper-2:#e9e5da; --ink:#16150f; --ink-2:#5b584d; --ink-3:#8f8b7d;
-  --rule:#d6d1c3; --signal:#e8461e; --ok:#1f7a4d; --warn:#b07a0a;
+  --rule:#d6d1c3; --signal:#e8461e; --on-signal:#fff; --usm:#5b2c90; --extrude:#d8d2c2; --ok:#1f7a4d; --warn:#b07a0a;
   --b1:#e8461e; --b2:#2f5fd0; --b3:#1f7a4d; --b4:#9a3fb5;
   --mono:'IBM Plex Mono', ui-monospace, monospace;
   --sans:'IBM Plex Sans', system-ui, sans-serif;
 }
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
-  --paper:#121210; --paper-2:#1b1b18; --ink:#ece8dc; --ink-2:#a9a596; --ink-3:#6f6c62; --rule:#2b2a25;
-  --signal:#ff6a3d; --ok:#4cc38a; --warn:#e0a83a; --b1:#ff6a3d; --b2:#7c9cff; --b3:#4cc38a; --b4:#d08bf0; } }
+  --paper:#0d0a14; --paper-2:#161026; --ink:#ede8f7; --ink-2:#a9a0c2; --ink-3:#6d6588; --rule:#271f3b;
+  --signal:#b38bff; --on-signal:#140c24; --usm:#6a35b8; --extrude:#3a2466; --ok:#4cc38a; --warn:#e0a83a; --b1:#b38bff; --b2:#7c9cff; --b3:#4cc38a; --b4:#f28fd0; } }
 :root[data-theme="dark"]{
-  --paper:#121210; --paper-2:#1b1b18; --ink:#ece8dc; --ink-2:#a9a596; --ink-3:#6f6c62; --rule:#2b2a25;
-  --signal:#ff6a3d; --ok:#4cc38a; --warn:#e0a83a; --b1:#ff6a3d; --b2:#7c9cff; --b3:#4cc38a; --b4:#d08bf0; }
+  --paper:#0d0a14; --paper-2:#161026; --ink:#ede8f7; --ink-2:#a9a0c2; --ink-3:#6d6588; --rule:#271f3b;
+  --signal:#b38bff; --on-signal:#140c24; --usm:#6a35b8; --extrude:#3a2466; --ok:#4cc38a; --warn:#e0a83a; --b1:#b38bff; --b2:#7c9cff; --b3:#4cc38a; --b4:#f28fd0; }
 *{ box-sizing:border-box; margin:0; padding:0; }
 /* nothing may ever widen the page: entrance animations start elements off to
    the side, and on phones that used to zoom the whole page out until they landed.
@@ -45,7 +45,7 @@ a{ color:inherit; text-underline-offset:3px; }
 
 /* hero */
 .hero{ display:grid; grid-template-columns:1fr auto; gap:40px; padding:40px 0 64px; align-items:end; }
-.hero h1{ font:600 clamp(3rem,7.4vw,6.4rem)/.9 var(--sans); letter-spacing:-.045em; }
+.hero h1{ font:600 clamp(3rem,7.4vw,6.4rem)/.9 var(--sans); letter-spacing:-.045em; transform-origin:30% 50%; will-change:transform; }
 .hero h1 .cursor{ display:inline-block; width:.08em; height:.78em; background:var(--signal); margin-left:.06em; vertical-align:-.02em; animation:blink 1.1s steps(1) infinite; }
 @keyframes blink{ 50%{ opacity:0 } }
 .whoami{ font:14px var(--mono); color:var(--ink-2); margin-bottom:22px; }
@@ -76,10 +76,10 @@ section{ padding:72px 0; border-top:1px solid var(--rule); position:relative; }
 
 /* x-ray inspect mode */
 body.xray .wrap *{ outline:1px dashed color-mix(in srgb, var(--signal) 45%, transparent); outline-offset:-1px; }
-.xlabel{ position:fixed; z-index:60; pointer-events:none; font:11px/1.4 var(--mono); background:var(--signal); color:#fff; padding:2px 6px; display:none; white-space:nowrap; }
+.xlabel{ position:fixed; z-index:60; pointer-events:none; font:11px/1.4 var(--mono); background:var(--signal); color:var(--on-signal); padding:2px 6px; display:none; white-space:nowrap; }
 body.xray .xlabel{ display:block; }
 .status button{ font:inherit; color:inherit; background:none; border:0; border-left:1px solid color-mix(in srgb, var(--paper) 20%, transparent); padding:0 12px; cursor:pointer; }
-.status button[aria-pressed="true"]{ background:var(--signal); color:#fff; }
+.status button[aria-pressed="true"]{ background:var(--signal); color:var(--on-signal); }
 .sec-head{ display:flex; align-items:baseline; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:36px; }
 .sec-head h2{ font:600 clamp(1.8rem,3.4vw,2.6rem)/1.05 var(--sans); letter-spacing:-.03em; }
 .sec-head h2 .n{ font:500 .5em var(--mono); color:var(--signal); vertical-align:.7em; margin-right:8px; letter-spacing:0; }
@@ -156,7 +156,7 @@ body.xray .xlabel{ display:block; }
 /* vim statusline */
 .status{ position:fixed; left:0; right:0; bottom:0; z-index:50; display:flex; font:12px/28px var(--mono); background:var(--ink); color:var(--paper); }
 .status > span{ padding:0 12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.status .mode{ background:var(--signal); color:#fff; font-weight:600; }
+.status .mode{ background:var(--signal); color:var(--on-signal); font-weight:600; }
 .status .file{ flex:1; }
 .status .dim{ opacity:.6; }
 .cmdline{ position:fixed; left:0; right:0; bottom:28px; z-index:49; background:var(--paper); border-top:1px solid var(--ink); font:14px var(--mono); display:none; }

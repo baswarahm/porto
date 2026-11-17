@@ -33,7 +33,7 @@ details.project summary .y{ transition:transform .35s cubic-bezier(.2,.8,.2,1), 
   details.project summary:hover .t{ background-size:100% 1px; }
   details.project summary:hover .y{ color:var(--signal); }
   details.project summary:hover .tgl{ border-color:var(--signal); background:var(--signal); transform:rotate(90deg); }
-  details.project summary:hover .tgl::before, details.project summary:hover .tgl::after{ background:#fff; }
+  details.project summary:hover .tgl::before, details.project summary:hover .tgl::after{ background:var(--on-signal); }
 }
 details.project summary:active{ transform:scale(.99); }
 details.project summary:focus-visible{ outline:2px solid var(--signal); outline-offset:2px; }
@@ -42,7 +42,7 @@ details.project summary:focus-visible::after{ transform:scaleY(1); }
 details.project[open] summary::after{ transform:scaleY(1); }
 details.project[open] summary .y{ color:var(--signal); }
 details.project[open] .tgl{ transform:rotate(135deg); border-color:var(--signal); background:var(--signal); }
-details.project[open] .tgl::before, details.project[open] .tgl::after{ background:#fff; }
+details.project[open] .tgl::before, details.project[open] .tgl::after{ background:var(--on-signal); }
 @media (hover:hover){ details.project[open] summary:hover .tgl{ transform:rotate(225deg); } }
 
 @media (max-width:860px){
@@ -56,7 +56,7 @@ details.project[open] .tgl::before, details.project[open] .tgl::after{ backgroun
 
 /* the dialog */
 .showcase{ width:min(1180px, calc(100vw - 32px)); max-height:calc(100dvh - 32px); padding:0; border:1px solid var(--ink); background:var(--paper); color:var(--ink); overflow:hidden; }
-.showcase::backdrop{ background:color-mix(in srgb, #0f0f0d 72%, transparent); backdrop-filter:blur(3px); }
+.showcase::backdrop{ background:color-mix(in srgb, #08060d 74%, transparent); backdrop-filter:blur(3px); }
 .showcase[open]{ animation:sc-in .35s cubic-bezier(.2,.9,.25,1.1); }
 .showcase[open]::backdrop{ animation:fade .3s; }
 @keyframes sc-in{ from{ opacity:0; transform:translateY(24px) scale(.97); } }
@@ -98,17 +98,17 @@ details.project[open] .tgl::before, details.project[open] .tgl::after{ backgroun
 @keyframes sc-pop{ from{ opacity:0; transform:translateY(10px) scale(.985); } }
 @keyframes sc-rise{ from{ opacity:0; transform:translateY(8px); } }
 
-.sc-window{ border:1px solid var(--ink); background:#0f0f0d; box-shadow:6px 6px 0 color-mix(in srgb, var(--ink) 14%, transparent); }
-.sc-bar{ display:flex; align-items:center; gap:6px; padding:8px 10px; background:#1b1b18; border-bottom:1px solid #000; font:11px var(--mono); color:#8b8a82; }
+.sc-window{ border:1px solid var(--ink); background:#0b0812; box-shadow:6px 6px 0 color-mix(in srgb, var(--ink) 14%, transparent); }
+.sc-bar{ display:flex; align-items:center; gap:6px; padding:8px 10px; background:#151022; border-bottom:1px solid #000; font:11px var(--mono); color:#8b8a82; }
 .sc-bar i{ width:9px; height:9px; border-radius:50%; background:#3a3a35; }
 .sc-bar i:first-child{ background:var(--signal); }
 .sc-bar span{ margin-left:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .sc-window img{ display:block; width:100%; height:auto; aspect-ratio:8/5; object-fit:cover; object-position:top; transition:opacity .2s, transform .35s cubic-bezier(.2,.8,.2,1); }
 .sc-window img.swap{ opacity:0; transform:scale(1.015); }
-.sc-views{ display:flex; flex-wrap:wrap; gap:6px; padding:8px 10px; background:#1b1b18; border-top:1px solid #000; }
+.sc-views{ display:flex; flex-wrap:wrap; gap:6px; padding:8px 10px; background:#151022; border-top:1px solid #000; }
 .sc-views button{ font:11px var(--mono); padding:4px 10px; border:1px solid #3a3a35; background:none; color:#b9b7ad; cursor:pointer; transition:border-color .2s, color .2s, background .2s; }
 .sc-views button:hover{ color:#fff; border-color:#8b8a82; }
-.sc-views button[aria-pressed="true"]{ background:var(--signal); border-color:var(--signal); color:#fff; }
+.sc-views button[aria-pressed="true"]{ background:var(--signal); border-color:var(--signal); color:var(--on-signal); }
 
 .sc-desc{ display:grid; gap:10px; align-content:start; }
 .sc-course{ font:500 12px var(--mono); text-transform:uppercase; letter-spacing:.06em; color:var(--signal); }
@@ -130,7 +130,7 @@ details.project[open] .tgl::before, details.project[open] .tgl::after{ backgroun
 .sc-access{ display:flex; flex-wrap:wrap; align-items:center; gap:10px 12px; padding:8px 8px 8px 12px; border:1px solid var(--signal);
   background:color-mix(in srgb, var(--signal) 7%, var(--paper)); flex:1 1 380px; }
 .sc-access p{ font-size:13px; flex:1 1 200px; }
-.sc-lock{ display:grid; place-items:center; width:28px; height:28px; background:var(--signal); color:#fff; flex:0 0 auto; }
+.sc-lock{ display:grid; place-items:center; width:28px; height:28px; background:var(--signal); color:var(--on-signal); flex:0 0 auto; }
 
 @media (max-width:860px){
   /* the whole card scrolls on small screens; the tool tabs stay pinned */
