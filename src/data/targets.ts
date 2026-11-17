@@ -1,39 +1,31 @@
-/* PLACEHOLDERS: replace with real targets. */
+/* My goals, kept honest: mostly I just want to be happy and chill, and get
+   through the semester calmly. Semester dates come from the course planners. */
 export interface Step { text: string; done: boolean }
 export interface Target { title: string; label: string; due: string; steps: Step[] }
 
 export const targets: Record<'doing' | 'next' | 'done', Target[]> = {
   doing: [
-    { title: 'Finish year 1 with a good CGPA', label: 'uni', due: 'jun 2027', steps: [
-      { text: 'Go to every lab', done: true },
-      { text: 'Review every Sunday', done: true },
-      { text: 'Do well in the semester 1 finals', done: false },
-      { text: 'Do well in the semester 2 finals', done: false },
+    { title: 'Be happy and chill', label: 'life', due: 'always', steps: [
+      { text: 'Enjoy the mid-semester break', done: false },
     ] },
-    { title: 'Solve 100 data-structure problems in C++', label: 'dsa', due: 'mar 2027', steps: [
-      { text: 'Arrays and strings (25)', done: false },
-      { text: 'Linked lists and stacks (25)', done: false },
-      { text: 'Trees and graphs (25)', done: false },
-      { text: 'Dynamic programming (25)', done: false },
+    { title: 'Get through semester 1 calmly', label: 'uni', due: 'jan 2027', steps: [
+      { text: 'CCA101 test 1 (3 Nov)', done: true },
+      { text: 'CCA101 timed assessment 1 (11 Nov)', done: true },
+      { text: 'CKC111 test 1 and tutorial 1', done: true },
+      { text: 'CCA102 assignment 1 and test 1 (12 Nov)', done: true },
+      { text: 'CCA101 report assessment (13 Dec)', done: false },
+      { text: 'Test 2s and assignment 2', done: false },
+      { text: 'Final exams', done: false },
     ] },
   ],
   next: [
-    { title: 'Join my first hackathon', label: 'build', due: '2027', steps: [
-      { text: 'Find a team', done: false }, { text: 'Ship something in 48 hours', done: false },
-    ] },
-    { title: 'Build an ML project for Intelligent Computing', label: 'ai', due: '2027', steps: [
-      { text: 'Finish an intro ML course', done: false }, { text: 'Pick a real dataset', done: false }, { text: 'Train, evaluate, write it up', done: false },
-    ] },
-    { title: 'Get a good industrial training placement (CFC453)', label: 'career', due: '2030', steps: [
-      { text: 'CV and portfolio ready', done: true }, { text: '3 solid projects', done: false }, { text: 'Apply to 20 places', done: false },
+    { title: 'Year 1, semester 2', label: 'uni', due: '2027', steps: [
+      { text: 'Start semester 2', done: false },
     ] },
   ],
   done: [
-    { title: 'Get into a CS degree', label: 'uni', due: '2026', steps: [
-      { text: 'Finish SMA', done: true }, { text: 'Get accepted at USM', done: true },
-    ] },
-    { title: 'Rebuild my portfolio from scratch', label: 'build', due: 'oct 2026', steps: [
-      { text: 'Astro + TypeScript', done: true }, { text: 'Real curriculum and progress', done: true }, { text: 'Make it interactive', done: true },
+    { title: 'Start my CS degree at USM', label: 'uni', due: 'sep 2026', steps: [
+      { text: 'Finish SMA in Solo', done: true }, { text: 'Move to Penang', done: true }, { text: 'First weeks of classes', done: true },
     ] },
   ],
 };

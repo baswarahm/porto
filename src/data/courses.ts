@@ -49,35 +49,40 @@ export interface Course {
   /** current week / total weeks; omit for self-study */
   week?: number;
   weeks?: number;
+  /** a short status beside the week, e.g. "mid-sem break" */
+  status?: string;
   learned: string[];
   doing: string[];
-  stuck: string;
+  /** what comes after the break */
+  next?: string[];
+  stuck?: string;
 }
 
+/* From the official course planners (semester I, 2026/2027). Week 8 is the
+   mid-semester break (16–22 Nov 2026). */
 export const courses: Course[] = [
   {
-    code: 'CCA101', name: 'Programming Fundamentals', lane: 1, week: 9, weeks: 14,
-    learned: ['First C++ program that compiled first try', 'Loops, functions and scope'],
-    doing: ['Pointers vs references'],
-    stuck: 'a segfault that only happens sometimes',
+    code: 'CCA101', name: 'Programming Fundamentals', lane: 1, week: 8, weeks: 15, status: 'mid-sem break',
+    learned: ['C++ basics: I/O, variables, arithmetic', 'Problem solving with pseudocode and flowcharts', 'Selection: if, nested if, switch', 'Loops: while, for, do-while, nested', 'Text file input/output and formatting'],
+    doing: ['Report-based programming assessment (due 13 Dec)'],
+    next: ['Functions, reference and pointer parameters', 'Arrays (1D, 2D) and pointers'],
   },
   {
-    code: 'CKC111', name: 'Discrete Structures', lane: 2, week: 9, weeks: 14,
-    learned: ['Truth tables and logical equivalence', 'Proof by induction'],
-    doing: ['Set theory and relations'],
-    stuck: 'writing proofs that read like proofs',
+    code: 'CKC111', name: 'Discrete Structures', lane: 2, week: 8, weeks: 16, status: 'mid-sem break',
+    learned: ['Logic and proofs', 'Basic algorithms', 'Relations', 'Graphs: connectivity and shortest paths', 'Trees: traversal and minimum spanning trees'],
+    doing: ['Resting before part 2 of the course'],
+    next: ['Sets, functions, sequences, sums and matrices', 'Induction and recursion, counting'],
   },
   {
-    code: 'CCA102', name: 'Computer Organisation', lane: 3, week: 9, weeks: 14,
-    learned: ["Binary, hex and two's complement"],
-    doing: ['Logic gates to adders'],
-    stuck: 'nothing yet, ask me next week',
+    code: 'CCA102', name: 'Computer Organisation', lane: 3, week: 8, weeks: 15, status: 'mid-sem break',
+    learned: ['Number systems and computer arithmetic', 'Boolean algebra, gates, combinational circuits', 'Flip-flops, registers, counters', 'Memory addressing and instruction types', 'Addressing modes and instruction formats'],
+    doing: ['Resting before the CPU chapters'],
+    next: ['CPU, control unit, I/O', 'Memory, cache and virtual memory'],
   },
   {
     code: 'SELF', name: 'Self-study: Git + web', lane: 4,
-    learned: ['Rebuilt this site in Astro + TypeScript', 'Git branching'],
-    doing: ['Data structures in C++, ahead of CKC212'],
-    stuck: "reading other people's code quickly",
+    learned: ['Rebuilt this site in Astro + TypeScript', 'three.js and WebGL for the 3D world', 'Git branching'],
+    doing: ['Keeping this site up to date every semester'],
   },
 ];
 
@@ -93,19 +98,29 @@ export interface Commit {
 
 /** Newest first, like `git log`. */
 export const commits: Commit[] = [
-  { lane: 4, hash: 'a91c2e', msg: 'rebuild portfolio in astro + typescript', date: 'oct 2026',
-    notes: ['components render from typed data files', 'the git graph you are reading is built at compile time'] },
-  { lane: 1, hash: '7f3d10', msg: 'pointers vs references (wip)', date: 'oct 2026',
-    notes: ['a reference is an alias, a pointer is an address', '- still mixing up *p and &x under pressure'] },
-  { lane: 2, hash: 'c4e8a2', msg: 'proof by induction, finally', date: 'oct 2026',
-    notes: ['base case, then assume n, prove n + 1', 'it is recursion, but for proofs'] },
-  { lane: 3, hash: '19be44', msg: "two's complement by hand", date: 'oct 2026',
-    notes: ['flip the bits, add one', 'why -128 fits in a byte but +128 does not'] },
-  { lane: 1, hash: 'e02f9b', msg: 'loops, functions and scope', date: 'oct 2026' },
-  { lane: 2, hash: '5d71c0', msg: 'truth tables + logical equivalence', date: 'oct 2026' },
-  { lane: 4, hash: 'b8a3f1', msg: 'learn git branching properly', date: 'oct 2026',
-    notes: ['branch, commit, merge, rebase', 'this log is shaped like what I learned'] },
-  { lane: 1, hash: '0c9e7d', msg: 'hello, world (compiled first try)', date: 'oct 2026' },
-  { lane: 0, hash: '3f2a0b', msg: 'enrol: b.cs intelligent computing @ USM', date: 'oct 2026', ref: 'tag: year-1' },
+  { lane: 4, hash: 'b3e91f', msg: 'rebuild this site as a one-page 3D world', date: 'nov 2026', ref: 'HEAD',
+    notes: ['three.js network, hologram, firewall you can break', 'the git graph you are reading is built at compile time'] },
+  { lane: 3, hash: '4c2a7e', msg: 'test 1: number systems to addressing', date: '12 nov 2026' },
+  { lane: 1, hash: '9d10b5', msg: 'timed programming assessment 1', date: '11 nov 2026',
+    notes: ['control structures and file processing', 'report-based assessment released the same day'] },
+  { lane: 1, hash: 'e7f203', msg: 'text files: input, output, formatting', date: 'week 7' },
+  { lane: 3, hash: '61ab9c', msg: 'addressing modes + instruction formats', date: 'week 7' },
+  { lane: 2, hash: 'a58d14', msg: 'trees: traversal, spanning trees, mst', date: 'week 7',
+    notes: ['tutorial cw#1 submitted'] },
+  { lane: 2, hash: '0f6ce2', msg: 'graphs: connectivity + shortest paths', date: 'week 6' },
+  { lane: 3, hash: 'c91e30', msg: 'memory locations, addressing, instruction types', date: 'week 6',
+    notes: ['assignment 1 submitted'] },
+  { lane: 1, hash: '2b8f47', msg: 'test 1: up to loops', date: '3 nov 2026' },
+  { lane: 2, hash: 'd4730a', msg: 'test 1: logic, proofs, algorithms', date: 'week 5' },
+  { lane: 3, hash: '87e5d1', msg: 'flip-flops, registers, counters', date: 'week 5' },
+  { lane: 1, hash: '5fa0c8', msg: 'loops: while, for, do-while, nested', date: 'week 5–6' },
+  { lane: 3, hash: 'f12b6d', msg: 'boolean algebra, gates, combinational circuits', date: 'week 4',
+    notes: ['multiplexers, decoders, PLA, ROM'] },
+  { lane: 1, hash: '3e9d21', msg: 'selection: if, nested if, switch', date: 'week 4' },
+  { lane: 2, hash: '76c4b0', msg: 'relations + basic algorithms', date: 'week 3–4' },
+  { lane: 3, hash: 'aa0e53', msg: 'binary, hex, integer + floating point', date: 'week 2–3' },
+  { lane: 2, hash: '1d8f9e', msg: 'logic and proofs', date: 'week 1–2' },
+  { lane: 1, hash: '6b2e07', msg: 'hello, c++: first program + pseudocode', date: 'week 1–3' },
+  { lane: 0, hash: '3f2a0b', msg: 'enrol: b.cs intelligent computing @ USM', date: 'sep 2026', ref: 'tag: year-1' },
   { lane: 0, hash: '91d4c6', msg: 'graduate SMA Al-Azhar Syifa Budi Solo', date: '2026', ref: 'tag: sma' },
 ];

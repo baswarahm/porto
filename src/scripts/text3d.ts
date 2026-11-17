@@ -1,15 +1,17 @@
 /* 3D type: every .t3d heading is split into letters that flip up out of
    the page one after another when it scrolls into view, and ripple in a
-   wave when hovered (one.css does the motion). Screen readers get the
-   plain text through aria-label. */
+   wave when hovered (one.css does the motion). Screen readers read a
+   hidden plain copy of the text; the letter spans are hidden from them. */
 import { reducedMotion } from './env';
 
 export function initText3d(){
   const els = Array.from(document.querySelectorAll<HTMLElement>('.t3d'));
   els.forEach(el => {
     const text = el.textContent ?? '';
-    el.setAttribute('aria-label', text);
     el.textContent = '';
+    const plain = document.createElement('span');
+    plain.className = 'sr-only'; plain.textContent = text;
+    el.append(plain);
     let i = 0;
     text.split(/(\s+)/).forEach(part => {
       if (/^\s+$/.test(part)){ el.append(' '); return; }

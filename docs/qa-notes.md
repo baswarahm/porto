@@ -43,6 +43,17 @@ Checked in the browser on 1440×900 desktop, 375×812 phone, NIGHT and DAY. Buil
 | Cards (courses, goals, timeline, semesters, picker, dossier, scan) | Lean toward the cursor in 3D with a lime spotlight under it | ok |
 | Keys (buttons) | Press down like keycaps; a lime fill sweeps across on hover | ok |
 | Nav | Pill nav marks the section you're in while you scroll | ok |
+| Cursor | **Target-lock reticle** replaces the pointer (mouse/trackpad only): lime brackets with live screen coordinates; over anything clickable the brackets snap out to frame it and read LOCK; a click flashes it. The normal caret returns in text fields | ok |
+| Radar | **Top-down radar** bottom-left: sweeping beam, every host as a blip turned to the camera's heading, the current one pinging lime, projects red. Sits under the panels so it never covers content; desktop only | ok |
+| Firewall | **Break it by hand:** clicking (or tapping) the wall shatters the struck cell and its neighbours in a ripple; a live counter shows cells breached, and after 160 it says the firewall is failing | ok |
+
+## Round 3: cleanup, accessibility, share card
+- Removed from the bundle: the opening slides, the old entrance effects, the parked projects/showcase styles and script, the old name-splitting feature, and every style rule no element uses (found by measuring the built page). About 29 KB less CSS; main script 36 KB → 29 KB.
+- Headings in 3D letters now carry a hidden plain-text copy for screen readers.
+- Muted text colours raised to pass 4.5:1 contrast in day and night.
+- One clear lime focus ring on every link, button and card for keyboard users.
+- Reduced motion: the 3D world's decorative spin and drift stand still; scrolling still moves the camera.
+- Share card: `public/images/og.png` (1200×630, silhouette + name, lime on graphite), with large-image preview tags for WhatsApp, LinkedIn and X.
 
 ## Fixed during the check
 - The camera lagged a whole section behind on slow machines: easing is now time-based.
@@ -59,3 +70,27 @@ Checked in the browser on 1440×900 desktop, 375×812 phone, NIGHT and DAY. Buil
 - three.js is 136 KB gzipped, loaded after the page's text.
 - The scroll-driven 3D rise needs a browser with scroll timelines (Chrome, Edge, newer Safari). In others the blocks simply appear; nothing breaks.
 - Reduced-motion visitors get still versions: no glitch, no tilt, no rise, and the letters show at once.
+
+## Round 4: real content
+- Courses come from the official course planners (semester I, 2026/2027): CCA101, CKC111, CCA102 are at **week 8, the mid-semester break** (16–22 Nov 2026). Each card lists the topics covered in weeks 1–7, what's happening now, and what comes after the break.
+- The commit log is rebuilt from the same planners: each topic and test in order, per course (e.g. CCA102 test 1 on 12 Nov, CCA101 timed assessment on 11 Nov).
+- Goals are the real ones: be happy and chill; get through semester 1 calmly (tests and assignments ticked as they've happened); semester 2 next; starting the degree done.
+- Nothing was made up: no "stuck on" lines until there's a real one to write.
+
+## Round 5: the crazy ones
+| Feature | What it does | Status |
+|---|---|---|
+| Particle swarm | 12,000 particles (4,500 on phones) form a glowing aura of my silhouette, then explode and re-form into each section's object as you scroll: a galaxy over the network, semester pillars, course orbits, goal rings, the locked cube, a shell round the globe, beacon rings, a star sphere at root | ok |
+| Warp speed | Fast camera moves (nav clicks, terminal jumps, quick scrolling) bring rushing lime rings, stretched speed lines, a wider field of view and a flash on arrival | ok |
+| Terminal takeover | `~` or the `>_` key opens a 3D CRT terminal (folds up, scanlines, glow). Commands: help, whoami, ls, cat (progress.log, courses.db, goals.txt, journey.git, contact.vcf), open/cd (flies there), date, theme, matrix, breach, sudo su, exit, clear. ↑/↓ history, Tab completes | ok |
+| Root mode | Konami code (↑↑↓↓←→←→ B A) or `sudo su`: everything turns red alert, alarm light sweeps, the firewall rebuilds, the silhouette glitches hard, 3 hidden nodes appear with messages. Esc or `exit` stands down | ok |
+
+## Round 6: innovations
+| Feature | What it does | Status |
+|---|---|---|
+| Degree rings | Under the network: one ring per semester, every course on the real study plan is a node. Finished semesters glow solid, the current ring fills as an arc with the semester, future rings are ghosts. Hover a node for the course name. It fills by itself as the date moves on | ok |
+| Live Penang weather | Real weather from Open-Meteo (free, no key, cached 15 min): the HUD shows it ("PNG 22:39 · 25° drizzle"), rain falls through the 3D world when it's wet in Penang, thunderstorms flash, and the key light follows Penang's time of day (dawn, day, dusk, night). Falls back to time only if offline | ok |
+
+Note: the weather is fetched by each visitor's browser from api.open-meteo.com (Penang's coordinates only; nothing about the visitor is sent beyond the normal request).
+
+- The algorithm lab was tried and then removed at Baswara's request (degree rings and live weather stay).

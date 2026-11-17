@@ -5,8 +5,7 @@
    ========================================================================== */
 
 /* ---- top bar --------------------------------------------------------------- */
-.home-link{ text-decoration:none; color:inherit; }
-.home-link:hover{ color:var(--signal); }
+
 .top nav a[aria-current="page"], .top nav a[aria-current="page"] span{ color:var(--signal); }
 .course a.go{ text-decoration:none; }
 
@@ -19,24 +18,10 @@
 }
 
 /* ---- home menu --------------------------------------------------------------- */
-.menu-h{ font:600 clamp(1.8rem,3.4vw,2.6rem)/1.05 var(--sans); letter-spacing:-.03em; margin-bottom:28px; }
+
 .menu{ list-style:none; padding:0; margin:0; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; perspective:1100px; }
-.menu-card{ position:relative; display:grid; grid-template-rows:auto auto 1fr auto; gap:8px; height:100%; min-height:190px; padding:22px 22px 18px;
-  border:1px solid var(--rule); background:var(--paper-2); color:inherit; text-decoration:none;
-  transform-style:preserve-3d; transition:transform .45s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .45s; }
-.mc-n{ font:600 3rem/1 var(--sans); letter-spacing:-.04em; color:var(--ink-3); transition:transform .45s cubic-bezier(.2,.8,.2,1), color .25s; }
-.mc-t{ font:600 1.2rem/1.2 var(--sans); letter-spacing:-.01em; }
-.mc-d{ font-size:14px; color:var(--ink-2); }
-.mc-go{ font:12px var(--mono); color:var(--ink-3); transition:color .25s, transform .45s cubic-bezier(.2,.8,.2,1); }
-.menu-card.soon .mc-go{ color:var(--warn); }
-@media (hover:hover){
-  .menu-card:hover{ border-color:var(--signal); }
-  .menu-card:hover .mc-n{ color:var(--signal); transform:translateZ(46px); }
-  .menu-card:hover .mc-go{ color:var(--signal); transform:translateZ(24px); }
-}
-.menu-card:focus-visible{ outline:2px solid var(--signal); outline-offset:3px; }
 @media (max-width:860px){ .menu{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
-@media (max-width:520px){ .menu{ grid-template-columns:minmax(0,1fr); } .menu-card{ min-height:0; } .mc-n{ font-size:2.2rem; } }
+@media (max-width:520px){ .menu{ grid-template-columns:minmax(0,1fr); } }
 
 /* ---- prev / home / next on sub-pages ------------------------------------------- */
 .page-nav{ display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:16px; padding-top:28px; padding-bottom:56px; border-top:1px solid var(--rule); }
@@ -60,7 +45,6 @@
 /* the outgoing page falls back into the screen, the new one comes forward.
    The top bar and the status line stay put. */
 @view-transition{ navigation:auto; }
-.top-wrap{ view-transition-name:topbar; }
 .status{ view-transition-name:statusline; }
 ::view-transition-old(root){ animation:vt-out .38s cubic-bezier(.7,0,.84,0) both; }
 ::view-transition-new(root){ animation:vt-in .5s cubic-bezier(.16,1,.3,1) .08s both; }

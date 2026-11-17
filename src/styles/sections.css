@@ -11,16 +11,7 @@ section.seen::before{ transform:scaleX(1); }
 .sec-head h2 .txt{ display:inline-block; }
 
 /* ---- splittable name ----------------------------------------------------- */
-#heroName{ cursor:pointer; position:relative; user-select:none; }
-#heroName .ch{ transition:transform .9s cubic-bezier(.2,1.4,.3,1), color .2s; will-change:transform; }
-#heroName.split{ cursor:default; }
-#heroName.split .ch{ cursor:grab; touch-action:none; }
-#heroName.split .ch:hover{ color:var(--signal); }
-#heroName .ch.drag{ transition:none; cursor:grabbing; color:var(--signal); z-index:5; position:relative; }
-.name-tools{ display:flex; align-items:center; gap:10px; margin-top:14px; font:12px var(--mono); color:var(--ink-3); min-height:30px; }
-.name-tools .btn{ padding:5px 10px; font-size:12px; display:none; }
-.name-tools.on .btn{ display:inline-flex; }
-.name-tools.on .hint{ display:none; }
+
 .hint{ animation:nudge 2.4s ease-in-out infinite; }
 @keyframes nudge{ 50%{ transform:translateX(4px); } }
 
@@ -90,10 +81,7 @@ kbd{ font:11px var(--mono); border:1px solid var(--rule); padding:0 5px; }
 .in .tl-item{ opacity:1; transform:none; }
 
 /* ---- projects: next slot -------------------------------------------------- */
-.next-slot{ color:var(--ink-3); }
-.next-slot .t{ color:var(--ink-2); }
-.dots i{ font-style:normal; animation:dot 1.4s infinite; }
-.dots i:nth-child(2){ animation-delay:.2s; } .dots i:nth-child(3){ animation-delay:.4s; }
+
 @keyframes dot{ 0%,60%,100%{ opacity:.2 } 30%{ opacity:1 } }
 
 /* ---- contact icons -------------------------------------------------------- */
@@ -146,27 +134,11 @@ kbd{ font:11px var(--mono); border:1px solid var(--rule); padding:0 5px; }
 @media (prefers-reduced-motion:reduce){
   .tile, .tl-item{ opacity:1; transform:none; }
   section::before{ transform:scaleX(1); }
-  #heroName .ch{ transition:none; }
 }
 
 /* ---- "my skills" band: caption + moving logo strip ---------------------- */
 .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
-.skills-band{ display:grid; grid-template-columns:auto 1fr; align-items:stretch; border:1px solid var(--ink); background:var(--paper); margin-bottom:8px; }
-.skills-cap{ display:flex; align-items:center; gap:10px; padding:0 22px; background:var(--ink); color:var(--paper); font:500 13px var(--mono); letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
-.skills-cap::before{ content:""; width:8px; height:8px; background:var(--signal); animation:pulse 1.6s ease-in-out infinite; }
-.ticker{ overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
-.ticker-track{ display:flex; width:max-content; animation:ticker 40s linear infinite; }
-.ticker:hover .ticker-track{ animation-play-state:paused; }
-.ticker-item{ display:inline-flex; align-items:center; gap:10px; padding:16px 26px; border-right:1px solid var(--rule); font:13px var(--mono); color:var(--ink-2); transition:color .2s, transform .2s; }
-.ticker-item b{ font-weight:400; }
-.ticker-item:hover{ color:var(--brand); transform:translateY(-2px); }
 @keyframes ticker{ to{ transform:translateX(-50%); } }
-@media (max-width:520px){
-  .skills-band{ grid-template-columns:1fr; }
-  .skills-cap{ padding:8px 14px; }
-  .ticker-item{ padding:12px 18px; }
-}
-@media (prefers-reduced-motion:reduce){ .ticker{ overflow-x:auto; } .ticker-track{ animation:none; } }
 
 /* ---- course map: opens on this semester only; a small button shows the rest -------- */
 .cmap:not(.expanded){ grid-template-columns:1fr; }

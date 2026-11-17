@@ -13,7 +13,7 @@ const { year, sem } = degreeProgress();
         <article class="course reveal anim-deal" id={`c-${c.code}`} data-lane={c.lane} style={`--i:${idx}`}>
           <div class="flip">
             <div class="face front">
-              <div class="code"><span class={`c${c.lane}`}>{c.code}</span><span class="wk">{c.week ? `week ${c.week}/${c.weeks}` : 'ongoing'}</span></div>
+              <div class="code"><span class={`c${c.lane}`}>{c.code}</span><span class="wk">{c.week ? `week ${c.week}/${c.weeks}${c.status ? ` · ${c.status}` : ''}` : 'ongoing'}</span></div>
               <h3>{c.name}</h3>
               {c.week && c.weeks && (
                 <div class="weeks" style={`--n:${c.weeks}`} role="img" aria-label={`week ${c.week} of ${c.weeks}`}>
@@ -28,7 +28,8 @@ const { year, sem } = degreeProgress();
                 {c.learned.map(l => <li>{l}</li>)}
                 {c.doing.map(l => <li class="doing">{l}</li>)}
               </ul>
-              <p class="stuck">stuck on: {c.stuck}</p>
+              {c.next && <p class="stuck">after the break: {c.next.join(' · ')}</p>}
+              {c.stuck && <p class="stuck">stuck on: {c.stuck}</p>}
               <p class="back-row"><a class="go" href="#gitlog">view commits ↑</a><button type="button" class="flip-btn">back <span aria-hidden="true">↺</span></button></p>
             </div>
           </div>

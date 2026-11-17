@@ -14,7 +14,7 @@ import Journey from '../components/Journey.astro';
 import Contact from '../components/Contact.astro';
 import Outro from '../components/Outro.astro';
 import { degreeProgress } from '../lib/degree';
-import { courses } from '../data/courses';
+import { courses, curriculum } from '../data/courses';
 import { targets } from '../data/targets';
 import { skills } from '../data/skills';
 import { brandIcon } from '../lib/brand';
@@ -24,6 +24,8 @@ const world = {
   sems: deg.semesters.map(s => ({ state: s.state, fill: +s.fill.toFixed(3) })),
   courses: courses.length,
   goals: [targets.doing.length, targets.next.length, targets.done.length],
+  // the degree as rings: one per semester, every course a node
+  plan: deg.semesters.map((sm, i) => ({ state: sm.state, fill: +sm.fill.toFixed(3), courses: curriculum[i].map(c => ({ code: c.code, name: c.name })) })),
   // my stack, for the 3D ring around the hologram
   skills: skills.map(s => ({ name: s.name, ...brandIcon(s.logo) })),
 };

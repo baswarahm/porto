@@ -3,10 +3,8 @@
    the base paper-and-ink layout in global.css.
    ========================================================================== */
 
-html.opening-on{ overflow:hidden; }
-
 /* ---- sticky top bar with the active section lit ------------------------ */
-.top-wrap{ position:sticky; top:0; z-index:20; background:var(--paper); }
+
 .top nav a[aria-current="true"], .top nav a[aria-current="true"] span{ color:var(--signal); }
 
 /* ---- reveal on scroll ---------------------------------------------------- */
@@ -16,9 +14,6 @@ html.opening-on{ overflow:hidden; }
 /* ---- hero: scrambling name, photo lens ----------------------------------- */
 .hero h1 .ch{ display:inline-block; transition:color .2s; }
 .hero h1 .ch.hot{ color:var(--signal); }
-.photo.lens img{ opacity:1; transition:none; -webkit-mask-image:radial-gradient(circle 90px at var(--x,50%) var(--y,50%), #000 96%, transparent 100%); mask-image:radial-gradient(circle 90px at var(--x,50%) var(--y,50%), #000 96%, transparent 100%); }
-.photo.dev img{ opacity:1; -webkit-mask-image:none; mask-image:none; }
-.facts dd{ font-variant-numeric:tabular-nums; }
 
 /* ---- semesters as buttons + a detail line -------------------------------- */
 button.sem{ cursor:pointer; text-align:left; color:inherit; background:none; border:0; border-right:1px solid var(--rule); transition:background .2s; }
@@ -75,13 +70,7 @@ details.issue summary:hover{ background:var(--paper-2); }
 .done .issue > p:first-child{ text-decoration:none; }
 
 /* ---- projects: expandable rows + a pill that follows the cursor ---------- */
-details.item{ display:block; padding:0; }
-details.item summary{ list-style:none; cursor:pointer; display:grid; grid-template-columns:120px 1fr auto; gap:20px; padding:18px 0; align-items:baseline; }
-details.item summary::-webkit-details-marker{ display:none; }
-details.item summary:hover .t{ color:var(--signal); }
-details.item .more{ padding:0 0 20px 140px; display:grid; gap:12px; animation:drop .25s ease-out; }
-details.item .more ul{ list-style:none; display:grid; gap:4px; color:var(--ink-2); font-size:15px; }
-details.item .more li::before{ content:"\2192  "; color:var(--signal); font-family:var(--mono); }
+
 .pill{ position:fixed; left:0; top:0; z-index:40; pointer-events:none; font:12px var(--mono); background:var(--ink); color:var(--paper); padding:4px 10px; opacity:0; transition:opacity .15s; }
 .pill.show{ opacity:1; }
 
@@ -114,8 +103,6 @@ details.item .more li::before{ content:"\2192  "; color:var(--signal); font-fami
 @media (max-width:860px){
   .contact-card{ grid-template-columns:1fr; }
   .contact-main{ border-right:0; border-bottom:1px solid var(--ink); }
-  details.item summary{ grid-template-columns:1fr; gap:2px; }
-  details.item .more{ padding-left:0; }
   .sem-track button.sem:nth-child(4){ border-right:0; }
 }
 @media (prefers-reduced-motion:reduce){

@@ -3,24 +3,24 @@
    `:commands` with the vim layer.
    ========================================================================== */
 import { $ } from './env';
-import { initOpening, opened } from './opening';
 import { initTheme, toggleTheme } from './theme';
 import { initProgress, initGitLog, initCourses } from './progress';
 import { initCourseMap } from './coursemap';
-import { initHeroName, initNameSplit, initNameTilt, initCounters } from './hero';
+import { initCounters } from './hero';
 import { initBinaryBackground } from './binarybg';
-import { initVim, command, key, keyHelp, goTo } from './vim';
+import { initVim, command, key, keyHelp } from './vim';
 import { initXray } from './xray';
-import { initShowcase } from './showcase';
 import { initMenu } from './menu';
 import { initText3d } from './text3d';
 import { initTilt } from './tilt';
 import { initSections3d } from './sections3d';
+import { initCursor } from './cursor';
+import { initRoot } from './root';
+import { initTerminal } from './terminal';
 import { initReveal, initPill, initTargets, initContact, initSections, initCheatSheet, initSudo, copyEmail, toast } from './ui';
 import { courses } from '../data/courses';
 import { skills } from '../data/skills';
 
-initOpening();
 initTheme();
 const menu = initMenu();
 // the home page's breach scene loads three.js only where it's needed
@@ -28,28 +28,26 @@ const menu = initMenu();
 initText3d();
 initTilt();
 initSections3d();
+initCursor();
+initRoot();
+initTerminal();
 if (document.getElementById('world')) import('./world').then(m => m.initWorld());
 const map = initCourseMap();
 initProgress(map);
 const git = initGitLog();
 initCourses(git);
 initTargets();
-initShowcase();
 initContact();
 initPill();
 initVim();
 initSudo();
-const name = initHeroName();
-initNameTilt();
-const nameSplit = initNameSplit(() => toast('drag the letters around · reassemble when you are done'));
 const xray = initXray();
 let bg: ReturnType<typeof initBinaryBackground> | null = null;
 
-// things that should happen as the page is revealed, not behind the opening
-opened.then(() => {
+// things that start once the page is up
+Promise.resolve().then(() => {
   initReveal();
   initSections();
-  name.decrypt();
   initCounters();
 });
 
@@ -67,10 +65,9 @@ key('x', () => { xray.toggle(); });
 key('b', () => { toggleBg(); });
 key('t', () => { toast(`theme: ${toggleTheme()}`); });
 key('/', () => { map.focusSearch(); });
-key('n', () => { (document.getElementById('heroName')?.classList.contains('split') ? nameSplit.reset : nameSplit.split)(); goTo(0); });
 Object.assign(keyHelp, {
   x: 'x-ray: inspect any element', b: 'toggle the binary background',
-  t: 'toggle light / dark', '/': 'search the course map', n: 'break / reassemble my name', '?': 'show all shortcuts',
+  t: 'toggle light / dark', '/': 'search the course map', '?': 'show all shortcuts',
 });
 
 const sheet = initCheatSheet([
@@ -78,12 +75,12 @@ const sheet = initCheatSheet([
   ['g g', 'back to the top'],
   ['G', 'jump to the bottom'],
   ['/', 'search the course map'],
-  ['n', 'break apart / reassemble my name'],
   ['x', 'x-ray: inspect any element'],
   ['t', 'toggle light / dark'],
   ['b', 'toggle the binary background'],
   [':', 'open the command line (try :help)'],
   ['m', 'open the menu'],
+  ['~', 'open the terminal'],
   ['?', 'this sheet'],
 ]);
 key('?', sheet.toggle);
@@ -98,13 +95,7 @@ command('xray', 'inspect the page', () => `x-ray ${xray.toggle() ? 'on, hover an
 command('bg', 'toggle the binary background', () => `binary background ${toggleBg() ? 'on' : 'off'}`);
 command('decode', 'what the binary rain says', () => bg ? `the rain spells:
 "${bg.message}"` : 'the background is off');
-command('split', 'break my name apart', () => { goTo(0); nameSplit.split(); return 'drag the letters around'; });
-command('reset', 'reassemble my name', () => { nameSplit.reset(); return 'name reassembled'; });
 command('find', 'search the course map', () => { map.focusSearch(); });
-command('replay', 'replay the opening', () => {
-  try { sessionStorage.removeItem('opened'); } catch { /* non-fatal */ }
-  location.reload();
-});
 command('sudo', 'try it', () => 'nice try. baswara is not in the sudoers file.');
 
 /* perf readout, once everything has loaded */

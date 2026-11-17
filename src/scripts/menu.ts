@@ -1,5 +1,6 @@
 /* The HUD (Menu.astro): the phone menu and the Penang clock. `m` also opens the menu. */
 import { $ } from './env';
+import { penangWeather, type Weather } from './weather';
 
 export function initMenu(){
   const btn = $('#menuBtn'), dlg = $<HTMLDialogElement>('#menu3d');
@@ -15,8 +16,10 @@ export function initMenu(){
   const clock = $('#hudClock');
   if (clock){
     const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kuala_Lumpur', hour: '2-digit', minute: '2-digit', hour12: false });
-    const tick = () => { clock.textContent = `PNG ${fmt.format(new Date())}`; };
+    let wx: Weather | null = null;
+    const tick = () => { clock.textContent = `PNG ${fmt.format(new Date())}${wx ? ` · ${wx.temp}° ${wx.label}` : ''}`; };
     tick(); setInterval(tick, 20_000);
+    penangWeather().then(x => { wx = x; tick(); });
   }
   return { toggle: () => (dlg.open ? close() : open()) };
 }
