@@ -18,7 +18,9 @@ export function setReducedMotion(on: boolean){
 }
 
 export type Quality = 'high' | 'low';
-export let quality: Quality = (store.get('bhm-quality') as Quality | null) ?? ((navigator.hardwareConcurrency || 8) <= 4 ? 'low' : 'high');
+/** phones and small or 4-core machines start on low; the visitor can switch it in the fx panel */
+export const autoQuality: Quality = matchMedia('(max-width: 640px), (pointer: coarse)').matches || (navigator.hardwareConcurrency || 8) <= 4 ? 'low' : 'high';
+export let quality: Quality = (store.get('bhm-quality') as Quality | null) ?? autoQuality;
 export const QUALITY_EVENT = 'qualitychange';
 export function setQuality(q: Quality){
   quality = q; store.set('bhm-quality', q);
@@ -38,5 +40,5 @@ export function isDark(){
 export const THEME_EVENT = 'themechange';
 
 /** Things that happen in the 3D world, fired on window. */
-export const WORLD = { ready: 'worldready', arrive: 'hostarrive', shatter: 'shatter', nmap: 'nmapscan', breach: 'breach' } as const;
+export const WORLD = { ready: 'worldready', arrive: 'hostarrive', shatter: 'shatter', nmap: 'nmapscan', breach: 'breach', ping: 'pinghost', fps: 'worldfps' } as const;
 export const emit = (name: string, detail?: unknown) => dispatchEvent(new CustomEvent(name, { detail }));

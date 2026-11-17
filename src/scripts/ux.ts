@@ -11,7 +11,8 @@
                  panel and its note types itself out (first time only)
      · my name   click it: the letters fly apart and the 3D network shatters
    ========================================================================== */
-import { reducedMotion, setReducedMotion, quality, setQuality, store, WORLD, emit, MOTION_EVENT, QUALITY_EVENT, type Quality } from './env';
+import { reducedMotion, setReducedMotion, quality, setQuality, autoQuality, store, WORLD, emit, MOTION_EVENT, QUALITY_EVENT, type Quality } from './env';
+import { toast } from './ui';
 
 const LABELS: Record<string, string> = { top: 'profile', network: 'network', progress: 'progress', now: 'now', targets: 'goals', projects: 'projects', journey: 'journey', contact: 'contact', root: 'root' };
 
@@ -121,17 +122,38 @@ export function initUx(){
   pop.className = 'fx-pop b-win'; pop.id = 'fxPop'; pop.hidden = true; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Display settings');
   pop.innerHTML = `<p class="fx-h">display.cfg</p>
     <div class="fx-row"><span>quality</span><div role="group" aria-label="Quality"><button type="button" class="chip" data-q="high">high</button><button type="button" class="chip" data-q="low">low</button></div></div>
-    <p class="fx-note">low turns off bloom and the CRT pass and thins the particles.</p>
+    <p class="fx-note">high: bloom glow, CRT scanlines and grain, every particle. low: none of that, sharper on slow phones.${autoQuality === 'low' ? ' Your device started on low.' : ''}</p>
+    <p class="fx-meter" aria-live="off"><span>render</span><b data-fps>-- fps</b><i><em data-fpsbar></em></i></p>
     <div class="fx-row"><span>motion</span><div role="group" aria-label="Motion"><button type="button" class="chip" data-m="full">full</button><button type="button" class="chip" data-m="reduced">reduced</button></div></div>
+    <div class="fx-row"><span>panels</span><div role="group" aria-label="Panels"><button type="button" class="chip" data-p="glass">glass</button><button type="button" class="chip" data-p="solid">solid</button></div></div>
     <div class="fx-row"><span>tour</span><button type="button" class="chip" data-tour>replay</button></div>`;
   document.body.append(pop);
+  // panels: see-through glass (default) or solid, for easier reading over the 3D world
+  const setPanels = (v: string) => { html.classList.toggle('solid-panels', v === 'solid'); store.set('bhm-panels', v); sync(); };
+  html.classList.toggle('solid-panels', store.get('bhm-panels') === 'solid');
   const sync = () => {
+    pop.querySelectorAll<HTMLButtonElement>('[data-p]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.p === 'solid') === html.classList.contains('solid-panels'))));
     pop.querySelectorAll<HTMLButtonElement>('[data-q]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.q === quality)));
     pop.querySelectorAll<HTMLButtonElement>('[data-m]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.m === 'reduced') === reducedMotion)));
   };
   sync();
   html.addEventListener(QUALITY_EVENT, sync); html.addEventListener(MOTION_EVENT, sync);
-  pop.querySelectorAll<HTMLButtonElement>('[data-q]').forEach(b => b.addEventListener('click', () => setQuality(b.dataset.q as Quality)));
+  pop.querySelectorAll<HTMLButtonElement>('[data-q]').forEach(b => b.addEventListener('click', () => {
+    const q = b.dataset.q as Quality;
+    if (q === quality) return;
+    setQuality(q);
+    // make the switch obvious: a sweep across the screen and a note of what changed
+    html.classList.remove('qswitch'); void html.offsetWidth; html.classList.add('qswitch');
+    setTimeout(() => html.classList.remove('qswitch'), 900);
+    toast(q === 'high' ? 'quality high · bloom, CRT and all particles on' : 'quality low · bloom and CRT off, fewer particles');
+  }));
+  pop.querySelectorAll<HTMLButtonElement>('[data-p]').forEach(b => b.addEventListener('click', () => setPanels(b.dataset.p!)));
+  const fpsEl = pop.querySelector<HTMLElement>('[data-fps]')!, fpsBar = pop.querySelector<HTMLElement>('[data-fpsbar]')!;
+  addEventListener(WORLD.fps, e => {
+    const f = (e as CustomEvent<number>).detail;
+    fpsEl.textContent = f <= 1 || document.hidden ? 'paused' : `${f} fps`; fpsBar.style.width = `${Math.min(100, f / 60 * 100)}%`;
+    fpsBar.classList.toggle('slow', f < 30);
+  });
   pop.querySelectorAll<HTMLButtonElement>('[data-m]').forEach(b => b.addEventListener('click', () => setReducedMotion(b.dataset.m === 'reduced')));
   pop.querySelector('[data-tour]')!.addEventListener('click', () => { closePop(); window.scrollTo({ top: 0, behavior: 'auto' }); openTour(); });
   let opener: HTMLElement | null = null;
@@ -147,6 +169,14 @@ export function initUx(){
   }));
   addEventListener('click', e => { if (!pop.hidden && !pop.contains(e.target as Node)) closePop(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden){ e.stopPropagation(); closePop(); } }, true);
+
+  /* ---- breach: a red sweep crosses the screen ------------------------------------------------------------------ */
+  addEventListener(WORLD.breach, () => {
+    if (reducedMotion) return;
+    const sw = document.createElement('div'); sw.className = 'breach-sweep'; sw.setAttribute('aria-hidden', 'true');
+    sw.innerHTML = '<span>breach // firewall bypassed</span>';
+    document.body.append(sw); setTimeout(() => sw.remove(), 1300);
+  });
 
   /* ---- click ripples ------------------------------------------------------------------------------------------- */
   addEventListener('pointerdown', e => {

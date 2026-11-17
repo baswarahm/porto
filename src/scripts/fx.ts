@@ -60,7 +60,8 @@ export function createFx(renderer: THREE.WebGLRenderer, scene: THREE.Scene, came
     setEnabled(v: boolean){ on = v; },
     setTheme(isDark: boolean){
       dark = isDark;
-      bloom.enabled = isDark;
+      // day: a softer bloom with a high threshold, so the paper background never glows
+      bloom.threshold = isDark ? .86 : .97; bloom.radius = isDark ? .35 : .5;
       crt.uniforms.uScan.value = isDark ? .05 : .025;
       crt.uniforms.uGrain.value = isDark ? .045 : .03;
       crt.uniforms.uVig.value = isDark ? .45 : .14;
@@ -72,7 +73,7 @@ export function createFx(renderer: THREE.WebGLRenderer, scene: THREE.Scene, came
       glitch = Math.max(0, glitch - dt * 1.6);
       crt.uniforms.uTime.value = t;
       crt.uniforms.uGlitch.value = Math.min(1, glitch + extraGlitch);
-      bloom.strength = dark ? .45 + glitch * .5 : 0;
+      bloom.strength = (dark ? .45 : .32) + glitch * .5;
       composer.render(dt);
     },
   };

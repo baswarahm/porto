@@ -18,6 +18,15 @@ export const readPalette = (): Palette => ({
   ink: new THREE.Color(cssVar('--ink')), ink3: new THREE.Color(cssVar('--ink-3')), bg: new THREE.Color(cssVar('--paper')),
 });
 
+const SHAPES: Record<string, () => THREE.BufferGeometry> = {
+  progress: () => new THREE.CylinderGeometry(.26, .3, .62, 6),            // a semester pillar
+  now: () => new THREE.TorusKnotGeometry(.2, .065, 72, 8),                 // courses, all tangled up
+  targets: () => new THREE.TorusGeometry(.28, .1, 10, 28),                 // a target ring
+  projects: () => new THREE.BoxGeometry(.5, .5, .5),                       // the locked cube
+  journey: () => new THREE.TetrahedronGeometry(.44),                       // a fork in the road
+  contact: () => new THREE.CapsuleGeometry(.16, .34, 4, 12),               // an antenna
+};
+
 export async function createNetwork(){
   let seed = 23;
   const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
@@ -64,7 +73,8 @@ export async function createNetwork(){
   // hosts: a solid core inside a slowly turning wire shell
   const hosts = hostIds.slice(1).map((id, i) => {
     const g = new THREE.Group(); g.position.copy(hostPos[i + 1]);
-    const core = new THREE.Mesh(new THREE.IcosahedronGeometry(.34, 1), new THREE.MeshStandardMaterial({ metalness: .4, roughness: .3 }));
+    // every host has its own shape, so you can tell them apart before reading the label
+    const core = new THREE.Mesh(SHAPES[id]?.() ?? new THREE.IcosahedronGeometry(.34, 1), new THREE.MeshStandardMaterial({ metalness: .4, roughness: .3, flatShading: true }));
     const shell = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(.75, 1)), new THREE.LineBasicMaterial({ transparent: true, opacity: .55 }));
     // a bigger invisible ball, so the host is easy to hover
     const hit = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 10), new THREE.MeshBasicMaterial({ visible: false }));
@@ -94,18 +104,43 @@ export async function createNetwork(){
   });
   group.add(packets);
 
-  let P: Palette | null = null;
+  // data streams: glowing points flowing along arcs from me to every host and back,
+  // and around the ring of hosts; the stream to the host you're on runs hot
+  const STREAM_N = 34;
+  const arcs = hostPos.slice(1).map((p, i) => {
+    const mid = p.clone().multiplyScalar(.5), lift = new THREE.Vector3(0, 1, 0).cross(p).normalize().multiplyScalar(1.4).add(new THREE.Vector3(0, 1.2, 0));
+    return { id: hostIds[i + 1], curve: new THREE.QuadraticBezierCurve3(hostPos[0], mid.add(lift), p) };
+  });
+  const ringArcs = hostPos.slice(1).map((p, i, arr) => new THREE.QuadraticBezierCurve3(p, p.clone().add(arr[(i + 1) % arr.length]).multiplyScalar(.5).multiplyScalar(1.25), arr[(i + 1) % arr.length]));
+  const streamCount = arcs.length * STREAM_N + ringArcs.length * 14;
+  const streamPos = new Float32Array(streamCount * 3), streamCol = new Float32Array(streamCount * 3);
+  const streamGeo = new THREE.BufferGeometry();
+  streamGeo.setAttribute('position', new THREE.BufferAttribute(streamPos, 3));
+  streamGeo.setAttribute('color', new THREE.BufferAttribute(streamCol, 3));
+  const streamMat = new THREE.PointsMaterial({ size: .16, vertexColors: true, transparent: true, depthWrite: false, opacity: .95 });
+  const streams = new THREE.Points(streamGeo, streamMat); streams.frustumCulled = false;
+  group.add(streams);
+  const burst: Record<string, number> = {};
+  const cHot = new THREE.Color(), cDim = new THREE.Color(), cTmp = new THREE.Color();
+
+  let P: Palette | null = null, isDarkPal = true;
   const paint = (pal: Palette) => {
     P = pal;
     majorLineMat.color.copy(pal.ink); minorLineMat.color.copy(pal.ink3);
     minorMat.color.copy(pal.ink3); packetMat.color.copy(pal.signal); ringMat.color.copy(pal.signal);
-    coreMat.color.copy(pal.signal); coreMat.emissive.copy(pal.signal); (coreShell.material as THREE.LineBasicMaterial).color.copy(pal.ink);
+    coreMat.color.copy(pal.signal); coreMat.emissive.copy(pal.signal);
+    const dark = pal.bg.getHSL({ h: 0, s: 0, l: 0 }).l < .5; isDarkPal = dark;
+    minorMat.color.copy(dark ? pal.ink3 : pal.ink).lerp(pal.bg, dark ? 0 : .35);
+    streamMat.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; streamMat.size = dark ? .16 : .12; streamMat.needsUpdate = true;
+    cHot.copy(dark ? new THREE.Color('#ffffff').lerp(pal.signal, .35) : pal.signal); cDim.copy(dark ? pal.signal : pal.signal.clone().lerp(pal.ink, .25)); (coreShell.material as THREE.LineBasicMaterial).color.copy(pal.ink);
     hosts.forEach(h => (h.shell.material as THREE.LineBasicMaterial).color.copy(h.id === 'projects' ? pal.alert : pal.ink));
   };
 
   let hovered = '', shatterAt = -1e9;
   /** light a host up for a moment (arrival, an nmap scan passing it) */
   const ping = (id: string) => { const h = hosts.find(x => x.id === id); if (h) h.flash = performance.now(); };
+  /** send a burst of data to one host (`ping`) */
+  const pingBurst = (id: string) => { burst[id] = performance.now(); ping(id); };
   /** blow the network apart and let it fall back together */
   const shatter = () => { shatterAt = performance.now(); };
   const SHATTER_MS = 1500;
@@ -114,9 +149,21 @@ export async function createNetwork(){
   const update = (t: number, active: string) => {
     if (!P) return;
     const now = performance.now();
-    hosts.forEach(hst => {
+    // shatter: minor nodes fly out and come back, the links blink out meanwhile
+    const u = (now - shatterAt) / SHATTER_MS;
+    const blow = u >= 0 && u <= 1 ? Math.sin(u * Math.PI) * (1 - u * .3) : 0;
+    if (u >= 0 && u <= 1.05){
+      placeMinors(blow);
+      majorLineMat.opacity = .7 * (1 - blow * .9); minorLineMat.opacity = .26 * (1 - blow);
+      packets.visible = blow < .3; streams.visible = blow < .3;
+    }
+    hosts.forEach((hst, i) => {
+      // hosts float gently, and drift out when the network shatters
+      hst.g.position.copy(hostPos[i + 1]).multiplyScalar(1 + blow * .35);
+      hst.g.position.y += Math.sin(t * .9 + i * 1.3) * .14;
+      hst.core.rotation.set(t * .3 + i, t * .5, 0);
       const fl = Math.max(0, 1 - (now - hst.flash) / 700);
-      const on = hst.id === active || hst.id === hovered || fl > 0, col = hst.id === 'projects' ? P!.alert : on ? P!.signal : P!.ink3;
+      const on = hst.id === active || hst.id === hovered || fl > 0, col = hst.id === 'projects' ? P!.alert : on ? P!.signal : isDarkPal ? P!.ink3 : P!.ink;
       const mat = hst.core.material as THREE.MeshStandardMaterial;
       mat.color.copy(col); mat.emissive.copy(col); mat.emissiveIntensity += ((on ? .9 + fl * 1.5 : .05) - mat.emissiveIntensity) * .1;
       const target = (hst.id === active ? 1.3 : hst.id === hovered ? 1.45 : 1) + fl * .5;
@@ -132,18 +179,37 @@ export async function createNetwork(){
       packets.setMatrixAt(i, m4.compose(v, q.identity(), sc.set(s3, s3, s3)));
     });
     packets.instanceMatrix.needsUpdate = true;
-    // shatter: minor nodes fly out and come back, the links blink out meanwhile
-    const u = (now - shatterAt) / SHATTER_MS;
-    if (u >= 0 && u <= 1.05){
-      const blow = Math.sin(Math.min(1, u) * Math.PI) * (1 - Math.min(1, u) * .3);
-      placeMinors(u > 1 ? 0 : blow);
-      majorLineMat.opacity = .7 * (1 - blow * .9); minorLineMat.opacity = .26 * (1 - blow);
-      packets.visible = blow < .3;
-      hosts.forEach((h, i) => h.g.position.copy(hostPos[i + 1]).multiplyScalar(1 + blow * .35));
-    }
+    // data streams
+    let j = 0;
+    arcs.forEach(a => {
+      const hot = a.id === active || a.id === hovered, b = Math.max(0, 1 - (now - (burst[a.id] ?? -1e9)) / 1600);
+      const sp = (hot ? .55 : .16) + b * 1.6;
+      for (let n = 0; n < STREAM_N; n++, j++){
+        // the first half flows out to the host, the second half comes back
+        const out = n < STREAM_N / 2, f = ((t * sp + (n % (STREAM_N / 2)) / (STREAM_N / 2)) % 1);
+        a.curve.getPoint(out ? f : 1 - f, v);
+        streamPos[j * 3] = v.x; streamPos[j * 3 + 1] = v.y; streamPos[j * 3 + 2] = v.z;
+        const fade = Math.sin(f * Math.PI);
+        cTmp.copy(hot || b > 0 ? cHot : cDim).multiplyScalar((hot || b > 0 ? 1 : .55) * (.35 + fade * .65));
+        streamCol[j * 3] = cTmp.r; streamCol[j * 3 + 1] = cTmp.g; streamCol[j * 3 + 2] = cTmp.b;
+      }
+    });
+    ringArcs.forEach(c => {
+      for (let n = 0; n < 14; n++, j++){
+        const f = (t * .07 + n / 14) % 1;
+        c.getPoint(f, v);
+        streamPos[j * 3] = v.x; streamPos[j * 3 + 1] = v.y; streamPos[j * 3 + 2] = v.z;
+        cTmp.copy(cDim).multiplyScalar(.45 * Math.sin(f * Math.PI) + .1);
+        streamCol[j * 3] = cTmp.r; streamCol[j * 3 + 1] = cTmp.g; streamCol[j * 3 + 2] = cTmp.b;
+      }
+    });
+    streamGeo.attributes.position.needsUpdate = true; streamGeo.attributes.color.needsUpdate = true;
   };
   const hitTargets = hosts.map(h => h.hit);
   const hover = (id: string) => { hovered = id; };
 
-  return { group, paint, update, ping, shatter, hover, hitTargets };
+  /** reduced motion: the moving data (packets, streams) stays hidden */
+  const setCalm = (on: boolean) => { packets.visible = !on; streams.visible = !on; };
+
+  return { group, paint, update, ping, pingBurst, shatter, hover, hitTargets, minorMesh, setCalm };
 }

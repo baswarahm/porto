@@ -27,7 +27,7 @@ const FILES: Record<string, () => string[]> = {
   'projects/': () => ['!permission denied: projects/ is locked while it is rebuilt. coming soon.'],
 };
 const SECTIONS: Record<string, string> = { top: 'top', home: 'top', network: 'network', root: 'root', ...Object.fromEntries(pages.map(p => [p.label, p.id])) };
-const COMMANDS = ['help', 'whoami', 'ls', 'cat', 'open', 'cd', 'nmap', 'breach', 'date', 'theme', 'matrix', 'tour', 'sudo', 'exit', 'clear'];
+const COMMANDS = ['help', 'whoami', 'ls', 'cat', 'open', 'cd', 'nmap', 'ping', 'breach', 'date', 'theme', 'matrix', 'tour', 'sudo', 'exit', 'clear'];
 
 export function initTerminal(){
   const wrap = document.createElement('div');
@@ -73,7 +73,7 @@ export function initTerminal(){
       case 'help': return print([
         'whoami            who I am', 'ls                list my files', 'cat <file>        read one, e.g. cat goals.txt',
         'open <section>    fly there: progress, now, goals, projects, journey, contact', 'date              the time in Penang',
-        'nmap              scan my network (watch the 3D world)', 'breach            blow the network apart and fly in',
+        'nmap              scan my network (watch the 3D world)', 'ping <host>       send a burst of data to a host, e.g. ping journey', 'breach            blow the network apart and fly in',
         'theme             switch day / night', 'matrix            binary rain on / off', 'tour              replay the quick tour',
         'sudo su           ...', 'clear · exit']);
       case 'whoami': return print([profile.name, 'first-year CS student · Intelligent Computing · Universiti Sains Malaysia', 'from Solo, Indonesia · now in Penang, Malaysia']);
@@ -93,6 +93,16 @@ export function initTerminal(){
         print(['Starting Nmap scan on 10.0.0.0/24 ...', 'HOST        NAME       PORT      STATE'], 'dim');
         Object.keys(HOSTS).forEach((id, i) => setTimeout(() => print([`10.0.0.${i + 1}`.padEnd(12) + (id === 'you' ? 'baswara' : id === 'targets' ? 'goals' : id).padEnd(11) + '443/tcp   ' + (id === 'projects' ? 'filtered' : 'open')], id === 'projects' ? 'err' : 'ok'), 280 + i * 260));
         setTimeout(() => { print([`Nmap done: ${Object.keys(HOSTS).length} hosts up · try "open journey"`], 'dim'); wrap.classList.remove('peek'); }, 2600);
+        return;
+      }
+      case 'ping': {
+        const name = arg === 'goals' ? 'targets' : arg === 'baswara' ? 'you' : arg;
+        const ids = Object.keys(HOSTS), n = ids.indexOf(name);
+        if (n < 0) return print([`!ping: unknown host "${arg}". try: ${ids.filter(i => i !== 'you').map(i => i === 'targets' ? 'goals' : i).join(', ')}`]);
+        wrap.classList.add('peek'); emit(WORLD.ping, name);
+        print([`PING 10.0.0.${n + 1} (${arg}): 56 data bytes`], 'dim');
+        for (let k = 0; k < 4; k++) setTimeout(() => print([name === 'projects' ? `Request timeout for icmp_seq ${k} (filtered)` : `64 bytes from 10.0.0.${n + 1}: icmp_seq=${k} ttl=64 time=${(.3 + Math.random() * .5).toFixed(2)} ms`], name === 'projects' ? 'err' : 'ok'), 300 + k * 320);
+        setTimeout(() => { print([`--- ${arg} ping statistics: 4 sent, ${name === 'projects' ? '0 received, locked' : '4 received, 0% loss'}`], 'dim'); wrap.classList.remove('peek'); }, 1700);
         return;
       }
       case 'breach': print(['breaching the firewall ...'], 'ok'); emit(WORLD.breach); return go('network');
@@ -124,7 +134,7 @@ export function initTerminal(){
     else if (e.key === 'Tab'){
       e.preventDefault();
       const parts = input.value.split(' '), last = parts.pop() ?? '';
-      const pool = parts.length ? [...Object.keys(FILES), ...Object.keys(SECTIONS), 'su'] : COMMANDS;
+      const pool = parts.length ? [...Object.keys(FILES), ...Object.keys(SECTIONS), ...Object.keys(HOSTS), 'su'] : COMMANDS;
       const hit = pool.find(p => p.startsWith(last));
       if (hit) input.value = [...parts, hit].join(' ') + (parts.length ? '' : ' ');
     }

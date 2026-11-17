@@ -174,11 +174,14 @@ export async function initWorld(){
   const at = (id: string) => { const g = new THREE.Group(); g.position.fromArray(HOSTS[id]); g.scale.setScalar(.001); scene.add(g); props[id] = g; return g; };
 
   // progress: a crescent of pillars, one per semester, filled as far as I've got
+  const pillars: { m: THREE.Mesh; h: number }[] = [];
   const pg = at('progress'); const pillarGeo = new THREE.BoxGeometry(.3, 1, .3); pillarGeo.translate(0, .5, 0);
   data.sems.forEach((s, i) => {
     const a = (i / Math.max(1, data.sems.length - 1) - .5) * 2.2, h = 2.4 * (s.state === 'now' ? Math.max(.08, s.fill) : 1);
     const m = new THREE.Mesh(pillarGeo, s.state === 'future' ? ghost : lime);
     m.position.set(Math.sin(a) * 2.4, -1.4, -Math.cos(a) * 2.4 + 1.2); m.scale.y = h; pg.add(m);
+    m.userData.tip = `Year ${Math.floor(i / 2) + 1}, semester ${i % 2 + 1} · ${s.state === 'now' ? `in progress, ${(s.fill * 100).toFixed(0)}%` : s.state === 'done' ? 'done' : 'ahead'}`;
+    pillars.push({ m, h });
   });
   // now: one satellite per course on its own orbit
   const ng = at('now'); const sats: { m: THREE.Mesh; r: number; sp: number; tilt: number }[] = [];
@@ -225,10 +228,12 @@ export async function initWorld(){
     const m = new THREE.Mesh(new THREE.SphereGeometry(.06, 10, 10), new THREE.MeshBasicMaterial({ color: 0xffffff })); globe.add(m);
     bCurves.push({ c, o: l * .31, m });
   }
+  const jNodes: THREE.Mesh[] = [];
   graph.forEach((r, i) => {
     const merge = i === graph.length - 1;
     const d = new THREE.Mesh(merge ? new THREE.OctahedronGeometry(.2) : new THREE.SphereGeometry(.12, 14, 14), laneMats[r.lane]);
     d.position.copy(nodeAt(i)); globe.add(d);
+    d.userData.tip = `${r.hash} · ${r.item.title} · ${r.item.date}`; jNodes.push(d);
   });
   const headRing = new THREE.Mesh(new THREE.TorusGeometry(.36, .018, 8, 64), lime); headRing.position.copy(nodeAt(graph.length - 1)); globe.add(headRing);
   const flyer = new THREE.Mesh(new THREE.OctahedronGeometry(.13), new THREE.MeshBasicMaterial({ color: 0xffffff })); globe.add(flyer);
@@ -247,7 +252,7 @@ export async function initWorld(){
   });
 
   /* ---- theme ---------------------------------------------------------------------------------------------------- */
-  let P: Palette = readPalette();
+  let P: Palette = readPalette(), dayFog = false;
   const paint = () => {
     const dark = isDark(); P = readPalette();
     scene.background = P.bg; (scene.fog as THREE.Fog).color = P.bg;
@@ -265,6 +270,7 @@ export async function initWorld(){
     pulses.forEach(p => (p.material as THREE.MeshBasicMaterial).color.set(cssVar('--lime')));
     net.paint(P);
     fx.setTheme(dark);
+    dayFog = !dark;
   };
   paint();
   document.documentElement.addEventListener(THEME_EVENT, paint);
@@ -301,7 +307,7 @@ export async function initWorld(){
   /* ---- hover a host: it glows and answers like an nmap scan; click flies there ---------------------------------- */
   const hostTip = Object.assign(document.createElement('div'), { className: 'host-tip' }); hostTip.setAttribute('aria-hidden', 'true'); document.body.append(hostTip);
   const HOST_INFO: Record<string, string> = { progress: 'degree progress', now: 'courses this semester', targets: 'goals board', projects: 'locked, coming soon', journey: 'experience & education', contact: 'say hi' };
-  let hoverHost = '';
+  let hoverHost = '', hoverOther = '';
   addEventListener('click', e => {
     if (dragged || !hoverHost || (e.target as Element).closest?.(UI)) return;
     zones.find(z => z.dataset.stage === hoverHost)?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
@@ -453,8 +459,16 @@ export async function initWorld(){
 
   /* ---- shatter (click my name, or `breach`): the network blows apart and the swarm bursts, then both re-form --------- */
   let kickAt = -1e9, swarmKick = 0;
-  addEventListener(WORLD.shatter, () => { net.shatter(); kickAt = performance.now(); kick(.8); });
-  addEventListener(WORLD.breach, () => { net.shatter(); kickAt = performance.now(); kick(1); });
+  addEventListener(WORLD.shatter, () => { if (reducedMotion) return; net.shatter(); kickAt = performance.now(); kick(.8); });
+  addEventListener(WORLD.breach, () => { if (reducedMotion) return; net.shatter(); kickAt = performance.now(); kick(1); });
+
+  /* ---- arrival shockwave: a ring that rushes out from the host you just reached ------------------------------------- */
+  const shockMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
+  const shock = new THREE.Mesh(new THREE.RingGeometry(.94, 1, 96), shockMat); shock.visible = false; scene.add(shock);
+
+  /* ---- ping <host>: a burst of data down the stream to one host --------------------------------------------------- */
+  addEventListener('pinghost', e => { const id = (e as CustomEvent<string>).detail; net.pingBurst(id); if (HOSTS[id] && !reducedMotion){ shock.position.fromArray(HOSTS[id]); shock.visible = true; shockAt = performance.now(); } });
+  let shockAt = -1e9;
 
   /* ---- nmap: a scan sphere sweeps out from the core and every host it passes answers -------------------------------- */
   const scanMat = new THREE.MeshBasicMaterial({ wireframe: true, transparent: true, opacity: 0, depthWrite: false });
@@ -536,17 +550,20 @@ export async function initWorld(){
     for (let k = 0; k <= 96; k++){ const a = a0 + (a1 - a0) * k / 96; pts.push(V(Math.cos(a) * R, 0, Math.sin(a) * R)); }
     return new THREE.BufferGeometry().setFromPoints(pts);
   };
-  let nowArc: THREE.Line | null = null, arcFill = 0;
+  let nowArc: THREE.Line | null = null, arcFill = 0, nowIdx = 0;
+  const ringLines: THREE.Line[] = [];
   const courseList: { code: string; name: string; state: string; pos: THREE.Vector3 }[] = [];
   plan.forEach((sem, i) => {
     const R = 4.6 + i * 1.55;
-    degRings.add(new THREE.Line(ringArc(R, 0, Math.PI * 2), sem.state === 'done' ? ringDone : ringGhost));
-    if (sem.state === 'now'){ nowArc = new THREE.Line(ringArc(R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(.02, sem.fill)), ringDone); degRings.add(nowArc); }
+    const full = new THREE.Line(ringArc(R, 0, Math.PI * 2), sem.state === 'done' ? ringDone : ringGhost); degRings.add(full); ringLines.push(full);
+    if (sem.state === 'now'){ nowIdx = i; nowArc = new THREE.Line(ringArc(R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(.02, sem.fill)), ringDone); degRings.add(nowArc); }
     sem.courses.forEach((c, k) => {
       const a = (k + .5) / sem.courses.length * Math.PI * 2 + i * .45;
       courseList.push({ ...c, state: sem.state, pos: V(Math.cos(a) * R, 0, Math.sin(a) * R) });
     });
   });
+  // a bright bead rides the end of this semester's arc
+  const arcTip = new THREE.Mesh(new THREE.SphereGeometry(.16, 12, 12), new THREE.MeshBasicMaterial({ toneMapped: false })); degRings.add(arcTip);
   const courseMat = new THREE.MeshBasicMaterial({ toneMapped: false });
   const courseMesh = new THREE.InstancedMesh(new THREE.OctahedronGeometry(.17, 0), courseMat, Math.max(1, courseList.length));
   courseMesh.count = courseList.length; degRings.add(courseMesh);
@@ -604,6 +621,7 @@ export async function initWorld(){
   const pa = V(), la = V(), pb = V(), lb = V(), camPos = V(), camLook = V(), v = V(), e3 = new THREE.Euler();
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = V();
   const tmpOff = V(), tmpRight = V();
+  let pillarGrow = 0;
   let arrived = '', arriveAt = -1e9;
   let cam: THREE.Vector3 | null = null, look: THREE.Vector3 | null = null, side = sideOf(0), lastActive = '', prev = 0;
   const frame = (now: number) => {
@@ -621,12 +639,14 @@ export async function initWorld(){
     const next = Math.min(zones.length - 1, i + 1);
     const k = next === i ? 0 : smooth(clamp(1 - (tops[next] - y - h * .3) / (h * .6)));
     shot(i, t, pa, la); shot(next, t, pb, lb);
-    camPos.lerpVectors(pa, pb, k); camLook.lerpVectors(la, lb, k);
+    // reduced motion: no flying between sections, the camera cuts to each one
+    const kc = reducedMotion ? 0 : k;
+    camPos.lerpVectors(pa, pb, kc); camLook.lerpVectors(la, lb, kc);
     // tall, narrow screens: step back so the object still fits across
     const fit = clamp(1.3 / (w / h), 1, 2.1);
     camPos.sub(camLook).multiplyScalar(fit).add(camLook);
     // the fog steps back with the camera, or the whole network fades out on narrow screens
-    (scene.fog as THREE.Fog).near = 14 * fit; (scene.fog as THREE.Fog).far = 62 * fit;
+    const fogK = fit * (dayFog ? 1.7 : 1); (scene.fog as THREE.Fog).near = 14 * fogK; (scene.fog as THREE.Fog).far = 62 * fogK;
     // glide, don't jump (also when you click a nav link far down)
     const ease = reducedMotion ? 1 : 1 - Math.exp(-dt * 4.2);
     if (!cam){ cam = camPos.clone(); look = camLook.clone(); }
@@ -645,6 +665,7 @@ export async function initWorld(){
     if (k > .5) arrived = '';
     else if (k < .02 && stageNow !== arrived && cam.distanceTo(camPos) < .4){
       arrived = stageNow; arriveAt = now; net.ping(stageNow); emit(WORLD.arrive, zones[i]?.id);
+      if (HOSTS[stageNow] && !reducedMotion){ shock.position.fromArray(HOSTS[stageNow]); shock.visible = true; }
     }
     camera.lookAt(look!);
     // warp speed: how fast is the camera travelling?
@@ -721,11 +742,27 @@ export async function initWorld(){
     const active = zones[k > .5 ? next : i]?.dataset.stage ?? '';
     net.update(t, active);
     // hosts answer the cursor (not through the panels, and not on touch)
-    let hh = '';
+    let hh = '', other = '';
     if (net.group.visible && brk > .3 && !overUi && !drag?.moved && mouse.x < 5 && w >= 640){
       ray.setFromCamera(mouse, camera);
       hh = (ray.intersectObjects(net.hitTargets, false)[0]?.object.userData.host as string | undefined) ?? '';
+      if (!hh){
+        // section objects (semester pillars, journey commits), then the little relay nodes
+        const pool = [...(props.progress.visible ? pillars.map(p => p.m) : []), ...(props.journey.visible ? jNodes : [])];
+        const o = pool.length ? ray.intersectObjects(pool, false)[0]?.object : undefined;
+        if (o) other = o.userData.tip;
+        else {
+          const r = ray.intersectObject(net.minorMesh, false)[0];
+          if (r?.instanceId !== undefined) other = `relay 10.0.1.${r.instanceId + 10} · forwarding packets`;
+        }
+      }
     }
+    if (other !== hoverOther){
+      hoverOther = other; ringTip.classList.toggle('on', !!other || hoverCourse >= 0);
+      if (other) ringTip.textContent = other;
+      document.documentElement.classList.toggle('on-thing', !!other);
+    }
+    if (hoverOther) ringTip.style.transform = `translate(${((mouse.x + 1) / 2 * w).toFixed(0)}px, ${((1 - mouse.y) / 2 * h - 40).toFixed(0)}px)`;
     if (hh !== hoverHost){
       hoverHost = hh; net.hover(hh);
       document.documentElement.classList.toggle('on-host', !!hh);
@@ -733,6 +770,12 @@ export async function initWorld(){
       hostTip.classList.toggle('on', !!hh); hostTip.classList.toggle('deny', hh === 'projects');
     }
     if (hoverHost) hostTip.style.transform = `translate(${((mouse.x + 1) / 2 * w + 18).toFixed(0)}px, ${((1 - mouse.y) / 2 * h + 14).toFixed(0)}px)`;
+    // arrival shockwave
+    if (shock.visible){
+      const su2 = (now - Math.max(arriveAt, shockAt)) / 1000;
+      if (su2 > 1) shock.visible = false;
+      else { shock.scale.setScalar(.6 + smooth(su2) * 5.5); shockMat.opacity = (1 - su2) * .9; shockMat.color.copy(P.signal); shock.quaternion.copy(camera.quaternion); }
+    }
     // the nmap scan sphere
     const su = (now - scanAt) / 2400;
     scan.visible = su >= 0 && su < 1;
@@ -741,9 +784,24 @@ export async function initWorld(){
       scanMat.opacity = (1 - su) * .45; scanMat.color.copy(P.signal);
       for (const id of Object.keys(HOSTS)) if (!scanned.has(id) && v.fromArray(HOSTS[id]).length() < r){ scanned.add(id); net.ping(id); }
     }
-    // this semester's ring fills up whenever the degree is in view
-    arcFill += ((['network', 'root', 'progress'].includes(active) ? 1 : 0) - arcFill) * (1 - Math.exp(-dt * 1.4));
-    nowArc?.geometry.setDrawRange(0, Math.max(2, Math.round(97 * arcFill)));
+    // the degree rings draw themselves in, one semester after another, whenever the degree is in view;
+    // this semester's arc fills last and a bead rides its end
+    const degOn = ['network', 'root', 'progress'].includes(active) ? 1 : 0;
+    arcFill = reducedMotion ? degOn : clamp(arcFill + (degOn ? dt * .45 : -dt * 1.2));
+    const NR = ringLines.length + 1;
+    ringLines.forEach((l, n) => l.geometry.setDrawRange(0, Math.max(0, Math.round(97 * clamp(arcFill * NR - n * .8)))));
+    const nf = clamp(arcFill * NR - nowIdx * .8);
+    nowArc?.geometry.setDrawRange(0, Math.max(2, Math.round(97 * nf)));
+    const nowPlan = plan[nowIdx];
+    arcTip.visible = !!nowArc && nf > .02;
+    if (arcTip.visible && nowPlan){
+      const R = 4.6 + nowIdx * 1.55, a = -Math.PI / 2 + Math.PI * 2 * Math.max(.02, nowPlan.fill) * nf;
+      arcTip.position.set(Math.cos(a) * R, 0, Math.sin(a) * R); arcTip.scale.setScalar(1 + Math.sin(t * 5) * .25);
+      (arcTip.material as THREE.MeshBasicMaterial).color.copy(P.signal);
+    }
+    // the semester pillars grow up from the floor when you reach progress
+    pillarGrow = reducedMotion ? 1 : clamp(pillarGrow + (active === 'progress' ? dt * .9 : -dt * 2));
+    pillars.forEach((pl, n) => { pl.m.scale.y = Math.max(.001, pl.h * smooth(clamp(pillarGrow * 1.7 - n * .09))); });
     dust.rotation.y = t * .01;
     // the degree rings and the weather
     degRings.rotation.y = t * .02;
@@ -753,7 +811,7 @@ export async function initWorld(){
       courseMesh.setMatrixAt(n, m4.compose(c.pos, q.identity(), sc.set(s3, s3, s3)));
     });
     courseMesh.instanceMatrix.needsUpdate = true;
-    if (mouse.x < 5 && w >= 900){
+    if (mouse.x < 5 && w >= 900 && !hoverOther){
       ray.setFromCamera(mouse, camera);
       const hit2 = ray.intersectObject(courseMesh, false)[0];
       const hc = hit2?.instanceId ?? -1;
@@ -782,6 +840,7 @@ export async function initWorld(){
       flash.classList.remove('go', 'storm'); void flash.offsetWidth; flash.classList.add('go', 'storm');
     }
     // the swarm re-forms between the two sections you're between
+    swarm.visible = !reducedMotion; dust.visible = !reducedMotion; net.setCalm(reducedMotion);
     swarmKick = reducedMotion ? 0 : Math.sin(clamp((now - kickAt) / 1300) * Math.PI) * 2.6;
     updateSwarm(zones[i]?.dataset.stage ?? 'hero', zones[next]?.dataset.stage ?? 'hero', k, reducedMotion ? 0 : now / 1000);
     secrets.forEach(sx => { sx.m.rotation.set(t, t * 1.4, 0); });
@@ -793,8 +852,10 @@ export async function initWorld(){
       const base: number = g.userData.s ?? .001;
       const s0 = base + (Math.max(.001, smooth(pres)) - base) * (1 - Math.exp(-dt * 5)); g.userData.s = s0;
       const bu = id === arrived && !reducedMotion ? clamp(1 - (now - arriveAt) / 700) : 0;
-      const s = s0 * (1 + Math.sin(bu * Math.PI) * .14);
+      const s = s0 * (1 + Math.sin(bu * Math.PI) * .24);
       g.scale.setScalar(s); g.visible = s > .01;
+      // idle: every object floats a little
+      g.position.y = HOSTS[id][1] + Math.sin(t * .7 + HOSTS[id][0]) * .16;
     }
     if (props.progress.visible) props.progress.rotation.y = Math.sin(t * .3) * .25;
     sats.forEach((s, n) => {
@@ -840,9 +901,10 @@ export async function initWorld(){
     });
     if (w >= 900 && (frameNo++ & 1) === 0) drawRadar(t, active);
     fx.render(now / 1000, dt, rootOn && !reducedMotion ? .05 : 0);
+    fpsN++; if (now - fpsAt > 1000){ emit('worldfps', Math.round(fpsN * 1000 / (now - fpsAt))); fpsN = 0; fpsAt = now; }
     if (!readySent){ readySent = true; emit(WORLD.ready); }
   };
-  let readySent = false;
+  let readySent = false, fpsN = 0, fpsAt = performance.now();
   let frameNo = 0;
   requestAnimationFrame(frame);
 }

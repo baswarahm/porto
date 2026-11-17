@@ -21,6 +21,16 @@ import SectionHead from './SectionHead.astro';
       <p class="soon-t">Projects are being rebuilt.</p>
       <p class="soon-d">Locked while the projects are rebuilt. Coming soon. Until then, you can <a href="#contact">say hi</a>.</p>
     </div>
+    <ol class="redact" aria-label="Project slots, all locked for now">
+      {[0, 1, 2].map(i => (
+        <li style={`--i:${i}`}>
+          <span class="rd-k">slot 0{i + 1}</span>
+          <span class="rd-bar" aria-hidden="true"><i style={`--w:${[72, 54, 64][i]}%`}></i></span>
+          <span class="rd-bar short" aria-hidden="true"><i style={`--w:${[40, 58, 34][i]}%`}></i></span>
+          <span class="rd-s">encrypted · 403</span>
+        </li>
+      ))}
+    </ol>
     </div>
   </div>
 </section>

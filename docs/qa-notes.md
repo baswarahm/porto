@@ -111,3 +111,20 @@ Note: the weather is fetched by each visitor's browser from api.open-meteo.com (
 | Phone HUD | The weather part of the clock hides under 480px so the menu button fits | ok |
 
 Not done on purpose: glTF models (mentor said "later"); the existing nav + menu already cover the "traditional menu" point.
+
+## Round 8: teacher's checklist (committed locally, not pushed)
+| Priority | Item | What it does now | Status |
+|---|---|---|---|
+| High | Arrival + idle | Arriving at a section: its object pulses bigger, a ring shockwave rushes out from the host, the host flashes, the panel gets a scan sweep. Idle: every section object and every host floats, host shapes turn slowly | ok |
+| High | Data flow | Glowing data streams on arcs from me to every host (half flowing out, half coming back) and around the ring of hosts; the stream to the section you're on (or hover) runs fast and bright | ok |
+| High | Animated rings | The degree rings draw themselves in one semester after another when the degree is in view; this semester's arc fills last with a bead riding its end. The semester pillars grow up from the floor on arrival | ok |
+| High | Auto low on phones | Phones / touch screens / ≤4-core machines start on low; the fx panel says so and can switch | ok |
+| High | Light mode | Soft bloom in day (high threshold so the paper never glows), hosts and streams in dark ink and green, fog pushed back | ok |
+| Medium | Quality feedback | Switching quality: a scan sweep crosses the screen plus a toast saying what turned on/off; the fx panel shows a live fps meter | ok |
+| Medium | Raycast hovers | Hosts (nmap card), semester pillars (year, semester, state), journey commits in 3D (hash, title, date), relay nodes, course nodes | ok |
+| Medium | Projects placeholder | Vault + "coming soon" card + three locked, shimmering slots ("encrypted · 403"); no invented project names | ok |
+| Medium | Readability | Panels more opaque; fx panel option panels: glass / solid | ok |
+| Medium | Reduced motion | Camera cuts between sections instead of flying; swarm, dust, packets and data streams hidden; no shatter, glitch or shockwave | ok |
+| Later | Host models | Each host now has its own shape (pillar, knot, ring, cube, tetrahedron, antenna) instead of identical balls; real glTF models can replace them later | ok |
+| Later | Commands | `ping <host>` sends a data burst + shockwave to that host with ping replies; `breach` adds a red sweep with a stamp | ok |
+| Already there | x-ray wireframe, mini-map, boot, nmap | from round 7 | ok |
