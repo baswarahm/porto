@@ -4,7 +4,7 @@ import { targets, targetColumns } from '../data/targets';
 
 const labels = [...new Set(Object.values(targets).flat().map(t => t.label))];
 ---
-<section id="targets" aria-labelledby="targets-h">
+<section class="zone" id="targets" data-stage="targets" data-side="left" aria-labelledby="targets-h">
   <div class="wrap">
     <SectionHead n="03" title="Goals" note="doing now, next up, done · tap one for the steps" id="targets-h" />
     <div class="t-tools" id="tTools" role="group" aria-label="Filter by label">
@@ -24,6 +24,7 @@ const labels = [...new Set(Object.values(targets).flat().map(t => t.label))];
                   <span class="ttl">{t.title}</span>
                   <span class="meta"><span class="lab">{t.label}</span><span>{t.due}</span><span>{done}/{t.steps.length}</span></span>
                   <span class="mini" style={`--w:${w}%`}><span></span></span>
+                  <span class="gring" aria-hidden="true"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" pathLength="100" /><circle class="v" cx="18" cy="18" r="15" pathLength="100" style={`--w:${w}`} /></svg><b>{w}%</b></span>
                 </summary>
                 <ul>{t.steps.map(s => <li class:list={{ d: s.done }}>{s.text}</li>)}</ul>
               </details>

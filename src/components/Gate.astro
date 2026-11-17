@@ -1,0 +1,21 @@
+---
+/* Between the dossier and the sections: the firewall breaks, the camera
+   pulls back over the whole network and the scan lists every host. */
+import { pages } from '../data/profile';
+const hosts = [{ id: 'top', label: 'baswara', ip: '10.0.0.1' }, ...pages.map((p, i) => ({ id: p.id, label: p.label, ip: `10.0.0.${i + 2}`, soon: 'soon' in p && p.soon }))];
+---
+<section class="zone gate" id="network" data-stage="network" data-side="left" aria-labelledby="gate-h">
+  <div class="b-win">
+    <header class="b-bar"><span>scan.out</span><span class="b-state">running</span></header>
+    <div class="b-body">
+      <p class="b-k">&gt; breach --firewall &amp;&amp; nmap -sV 10.0.0.0/24</p>
+      <h2 id="gate-h" class="gate-title t3d">Firewall down. 7 hosts up.</h2>
+      <ul class="b-rows">
+        {hosts.map(h => (
+          <li><a href={`#${h.id}`}><span>{h.ip}</span><span>{h.label}</span><span class={'soon' in h && h.soon ? 'deny' : 'ok'}>{'soon' in h && h.soon ? 'filtered' : 'open'}</span></a></li>
+        ))}
+      </ul>
+      <p class="b-hint">keep scrolling, the camera visits each host</p>
+    </div>
+  </div>
+</section>

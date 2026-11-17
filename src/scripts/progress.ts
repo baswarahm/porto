@@ -39,6 +39,7 @@ export function initProgress(map: { open: (code: string) => void; focusSem: (i: 
   });
   if (buttons[p.current]) select(buttons[p.current]);
 
+
   const pct = (p.pct * 100).toFixed(1) + '%';
   const bar = $('[data-degree-bar]');
   if (bar) bar.innerHTML = `<span class="mono">${textBar(p.pct)}</span> <b>${pct}</b>`;
@@ -90,6 +91,9 @@ export function initGitLog(){
     log.classList.toggle('focus', !!lane);
     rows.forEach(r => r.classList.toggle('lit', !!lane && r.dataset.b === lane));
   };
+  // arriving from a course card on /now/ (?lane=…): show only that course
+  const lane = new URLSearchParams(location.search).get('lane');
+  if (lane && tools?.querySelector(`[data-f="${CSS.escape(lane)}"]`)) filter(lane);
   return { filter, focus };
 }
 
@@ -99,9 +103,11 @@ export function initCourses(git: ReturnType<typeof initGitLog>){
     const lane = card.dataset.lane!;
     card.addEventListener('pointerenter', () => git.focus(lane));
     card.addEventListener('pointerleave', () => git.focus(null));
-    card.querySelector('.go')?.addEventListener('click', () => {
+    card.querySelector('.go')?.addEventListener('click', e => {
+      if (!$('#gitlog')) return;           // on its own page: follow the link to /progress/
+      e.preventDefault();
       git.filter(lane);
-      $('#gitlog')?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' });
+      $('#gitlog')!.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' });
     });
   });
 }

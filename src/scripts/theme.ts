@@ -1,7 +1,7 @@
 /* Light/dark toggle. Follows the OS until the visitor picks, then remembers.
    Where View Transitions exist, the new theme grows as a circle from the
    point that triggered it. */
-import { $, isDark, reducedMotion, THEME_EVENT } from './env';
+import { isDark, reducedMotion, THEME_EVENT } from './env';
 
 let origin = { x: innerWidth - 40, y: 30 };
 
@@ -26,8 +26,12 @@ export function toggleTheme(){
 }
 
 export function initTheme(){
-  const btn = $('#themeBtn');
-  btn?.addEventListener('click', e => { origin = { x: e.clientX, y: e.clientY }; toggleTheme(); });
+  // every [data-theme-toggle] button flips day / night and shows the current mode
+  const btns = Array.from(document.querySelectorAll<HTMLElement>('[data-theme-toggle], #themeBtn'));
+  const label = () => btns.forEach(b => b.setAttribute('aria-pressed', String(!isDark())));
+  btns.forEach(b => b.addEventListener('click', e => { origin = { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY }; toggleTheme(); }));
+  document.documentElement.addEventListener(THEME_EVENT, label);
+  label();
   // OS switch while no explicit choice is saved
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (!document.documentElement.dataset.theme) document.documentElement.dispatchEvent(new Event(THEME_EVENT));

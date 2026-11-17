@@ -18,13 +18,19 @@ export const socials = [
   { label: 'instagram', handle: '@baswara.hm', icon: 'instagram', href: 'https://instagram.com/baswara.hm' },
 ] as const;
 
-/** Page sections in order. Drives the top nav, vim j/k navigation and `:<id>` commands. */
-export const sections = [
-  { id: 'top', label: 'top' },
-  { id: 'progress', label: 'progress' },
-  { id: 'now', label: 'now' },
-  { id: 'targets', label: 'targets' },
-  { id: 'projects', label: 'projects' },
-  { id: 'journey', label: 'journey' },
-  { id: 'contact', label: 'contact' },
+/** The site's sections in order, all on the one home page. Drives the top
+    nav, the menu, vim j/k and the `:<id>` commands. `id` is the section's
+    element id; the old /progress/-style URLs redirect to these anchors. */
+export const pages = [
+  { id: 'progress', label: 'progress', path: '/#progress', title: 'Degree progress', blurb: 'Where I am in the four-year plan, semester by semester.' },
+  { id: 'now', label: 'now', path: '/#now', title: 'Taking this semester', blurb: 'The courses I am in right now and what I have learned from them.' },
+  { id: 'targets', label: 'goals', path: '/#targets', title: 'Goals', blurb: 'What I am doing now, what is next and what is done.' },
+  { id: 'projects', label: 'projects', path: '/#projects', title: 'Projects', blurb: 'Being rebuilt. Back soon.', soon: true },
+  { id: 'journey', label: 'journey', path: '/#journey', title: 'Experience & education', blurb: 'School, university and the things I did along the way.' },
+  { id: 'contact', label: 'contact', path: '/#contact', title: 'Say hi', blurb: 'LinkedIn, Instagram or email.' },
 ] as const;
+
+export type Page = (typeof pages)[number];
+
+/** In-page sections, for j/k on the home page. */
+export const sections = [{ id: 'top', label: 'top' }, { id: 'menu', label: 'menu' }] as const;

@@ -1,21 +1,45 @@
 ---
+/* The whole site on one page: dossier, breach, then every section in turn.
+   One WebGL world (world.ts) sits behind it all; the camera flies to each
+   section's 3D object as you reach it. data-stage / data-side on each
+   section tell the world which object to visit and where the text sits. */
 import Base from '../layouts/Base.astro';
-import Hero from '../components/Hero.astro';
+import Dossier from '../components/Dossier.astro';
+import Gate from '../components/Gate.astro';
 import Progress from '../components/Progress.astro';
 import Courses from '../components/Courses.astro';
-import Skills from '../components/Skills.astro';
 import Targets from '../components/Targets.astro';
-import Projects from '../components/Projects.astro';
+import ComingSoon from '../components/ComingSoon.astro';
 import Journey from '../components/Journey.astro';
 import Contact from '../components/Contact.astro';
+import Outro from '../components/Outro.astro';
+import { degreeProgress } from '../lib/degree';
+import { courses } from '../data/courses';
+import { targets } from '../data/targets';
+import { skills } from '../data/skills';
+import { brandIcon } from '../lib/brand';
+
+const deg = degreeProgress();
+const world = {
+  sems: deg.semesters.map(s => ({ state: s.state, fill: +s.fill.toFixed(3) })),
+  courses: courses.length,
+  goals: [targets.doing.length, targets.next.length, targets.done.length],
+  // my stack, for the 3D ring around the hologram
+  skills: skills.map(s => ({ name: s.name, ...brandIcon(s.logo) })),
+};
 ---
 <Base>
-  <Hero />
-  <Skills />
+  <canvas id="world" data-world={JSON.stringify(world)} aria-hidden="true"></canvas>
+  <div class="world-labels" id="worldLabels" aria-hidden="true"></div>
+  <p class="skill-tip" id="skillTip" aria-hidden="true"></p>
+  <ul class="sr-only" aria-label="My stack">{skills.map(s => <li>{s.name}</li>)}</ul>
+  <Dossier />
+  <Gate />
   <Progress />
   <Courses />
   <Targets />
-  <Projects />
+  <ComingSoon />
   <Journey />
   <Contact />
+  <Outro />
 </Base>

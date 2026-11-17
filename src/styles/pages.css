@@ -1,0 +1,71 @@
+/* ==========================================================================
+   PAGES.CSS — the multi-page shell: top bar links, the home page menu,
+   prev/next links on sub-pages, the Projects placeholder, and the 3D page
+   turn between pages (cross-document view transitions, no JS).
+   ========================================================================== */
+
+/* ---- top bar --------------------------------------------------------------- */
+.home-link{ text-decoration:none; color:inherit; }
+.home-link:hover{ color:var(--signal); }
+.top nav a[aria-current="page"], .top nav a[aria-current="page"] span{ color:var(--signal); }
+.course a.go{ text-decoration:none; }
+
+/* on phones the page links become a scrollable second row instead of hiding */
+@media (max-width:860px){
+  .top{ flex-wrap:wrap; row-gap:10px; }
+  .top nav{ display:flex; order:3; flex:1 0 100%; gap:16px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
+  .top nav::-webkit-scrollbar{ display:none; }
+  .top nav a{ white-space:nowrap; }
+}
+
+/* ---- home menu --------------------------------------------------------------- */
+.menu-h{ font:600 clamp(1.8rem,3.4vw,2.6rem)/1.05 var(--sans); letter-spacing:-.03em; margin-bottom:28px; }
+.menu{ list-style:none; padding:0; margin:0; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; perspective:1100px; }
+.menu-card{ position:relative; display:grid; grid-template-rows:auto auto 1fr auto; gap:8px; height:100%; min-height:190px; padding:22px 22px 18px;
+  border:1px solid var(--rule); background:var(--paper-2); color:inherit; text-decoration:none;
+  transform-style:preserve-3d; transition:transform .45s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .45s; }
+.mc-n{ font:600 3rem/1 var(--sans); letter-spacing:-.04em; color:var(--ink-3); transition:transform .45s cubic-bezier(.2,.8,.2,1), color .25s; }
+.mc-t{ font:600 1.2rem/1.2 var(--sans); letter-spacing:-.01em; }
+.mc-d{ font-size:14px; color:var(--ink-2); }
+.mc-go{ font:12px var(--mono); color:var(--ink-3); transition:color .25s, transform .45s cubic-bezier(.2,.8,.2,1); }
+.menu-card.soon .mc-go{ color:var(--warn); }
+@media (hover:hover){
+  .menu-card:hover{ border-color:var(--signal); }
+  .menu-card:hover .mc-n{ color:var(--signal); transform:translateZ(46px); }
+  .menu-card:hover .mc-go{ color:var(--signal); transform:translateZ(24px); }
+}
+.menu-card:focus-visible{ outline:2px solid var(--signal); outline-offset:3px; }
+@media (max-width:860px){ .menu{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+@media (max-width:520px){ .menu{ grid-template-columns:minmax(0,1fr); } .menu-card{ min-height:0; } .mc-n{ font-size:2.2rem; } }
+
+/* ---- prev / home / next on sub-pages ------------------------------------------- */
+.page-nav{ display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:16px; padding-top:28px; padding-bottom:56px; border-top:1px solid var(--rule); }
+.pn{ display:grid; gap:2px; text-decoration:none; color:inherit; padding:14px 16px; border:1px solid var(--rule); transition:border-color .2s, color .2s; }
+.pn small{ font:12px var(--mono); color:var(--ink-3); }
+.pn b{ font:600 1.05rem var(--sans); }
+.pn:hover{ border-color:var(--signal); }
+.pn:hover b{ color:var(--signal); }
+.pn.next{ text-align:right; }
+.pn.home{ text-align:center; max-width:220px; justify-self:center; width:100%; }
+@media (max-width:640px){ .pn.home{ display:none; } }
+
+/* ---- projects placeholder -------------------------------------------------------- */
+.soon-card{ border:1px dashed var(--rule); background:var(--paper-2); padding:clamp(28px,6vw,64px); max-width:720px; }
+.soon-k{ font:12px var(--mono); letter-spacing:.2em; text-transform:uppercase; color:var(--warn); margin-bottom:14px; }
+.soon-t{ font:600 clamp(1.6rem,3.6vw,2.4rem)/1.1 var(--sans); letter-spacing:-.03em; margin-bottom:12px; }
+.soon-d{ color:var(--ink-2); max-width:52ch; }
+.soon-d a{ color:var(--signal); }
+
+/* ---- page turn ----------------------------------------------------------------- */
+/* the outgoing page falls back into the screen, the new one comes forward.
+   The top bar and the status line stay put. */
+@view-transition{ navigation:auto; }
+.top-wrap{ view-transition-name:topbar; }
+.status{ view-transition-name:statusline; }
+::view-transition-old(root){ animation:vt-out .38s cubic-bezier(.7,0,.84,0) both; }
+::view-transition-new(root){ animation:vt-in .5s cubic-bezier(.16,1,.3,1) .08s both; }
+@keyframes vt-out{ to{ opacity:0; transform:perspective(1400px) translateZ(-220px) rotateX(6deg); } }
+@keyframes vt-in{ from{ opacity:0; transform:perspective(1400px) translateZ(160px) rotateX(-4deg); } }
+@media (prefers-reduced-motion:reduce){
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){ animation:none !important; }
+}

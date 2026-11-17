@@ -1,0 +1,12 @@
+---
+/* Bottom of every sub-page: previous page, home, next page. */
+import { pages } from '../data/profile';
+interface Props { page: string }
+const i = pages.findIndex(p => p.id === Astro.props.page);
+const prev = i > 0 ? pages[i - 1] : null, next = i < pages.length - 1 ? pages[i + 1] : null;
+---
+<nav class="page-nav wrap" aria-label="More pages">
+  {prev ? <a href={prev.path} class="pn prev"><small>← previous</small><b>{prev.title}</b></a> : <a href="/" class="pn prev"><small>← back</small><b>Home</b></a>}
+  {prev && next && <a href="/" class="pn home"><small>all pages</small><b>Home</b></a>}
+  {next ? <a href={next.path} class="pn next"><small>next →</small><b>{next.title}</b></a> : <a href="/" class="pn next"><small>back to the start →</small><b>Home</b></a>}
+</nav>

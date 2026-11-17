@@ -21,13 +21,13 @@ export function initCourseMap(){
     col.querySelectorAll('.tile').forEach(t => { t.classList.remove('done', 'now', 'future'); t.classList.add(s); });
   });
 
-  // phones start with only the current semester; the rest is one tap away
+  // the map opens on the current semester only; the full plan is one click away
   const more = $<HTMLButtonElement>('#cmapMore');
   const expand = (on = true) => {
     map.classList.toggle('expanded', on);
     if (more){
       more.setAttribute('aria-expanded', String(on));
-      more.textContent = on ? 'show only this semester ↑' : 'show the full four-year roadmap ↓';
+      more.textContent = on ? '− this semester only' : '+ other semesters (7)';
     }
   };
   more?.addEventListener('click', () => {

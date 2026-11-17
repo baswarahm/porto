@@ -8,17 +8,27 @@ import { initTheme, toggleTheme } from './theme';
 import { initProgress, initGitLog, initCourses } from './progress';
 import { initCourseMap } from './coursemap';
 import { initHeroName, initNameSplit, initNameTilt, initCounters } from './hero';
-import { initDither } from './dither';
 import { initBinaryBackground } from './binarybg';
-import { initVim, command, key, keyHelp, setMode, goTo } from './vim';
+import { initVim, command, key, keyHelp, goTo } from './vim';
 import { initXray } from './xray';
 import { initShowcase } from './showcase';
+import { initMenu } from './menu';
+import { initText3d } from './text3d';
+import { initTilt } from './tilt';
+import { initSections3d } from './sections3d';
 import { initReveal, initPill, initTargets, initContact, initSections, initCheatSheet, initSudo, copyEmail, toast } from './ui';
 import { courses } from '../data/courses';
 import { skills } from '../data/skills';
 
 initOpening();
 initTheme();
+const menu = initMenu();
+// the home page's breach scene loads three.js only where it's needed
+// 3D type everywhere, cards that lean to the cursor, and the WebGL world behind the page
+initText3d();
+initTilt();
+initSections3d();
+if (document.getElementById('world')) import('./world').then(m => m.initWorld());
 const map = initCourseMap();
 initProgress(map);
 const git = initGitLog();
@@ -32,35 +42,34 @@ initSudo();
 const name = initHeroName();
 initNameTilt();
 const nameSplit = initNameSplit(() => toast('drag the letters around · reassemble when you are done'));
-const photo = initDither(opened);
 const xray = initXray();
 let bg: ReturnType<typeof initBinaryBackground> | null = null;
 
 // things that should happen as the page is revealed, not behind the opening
 opened.then(() => {
-  bg = initBinaryBackground();
   initReveal();
   initSections();
   name.decrypt();
   initCounters();
 });
 
+// the binary rain is off by default now; `b` (or the 0101 button) starts it
 const toggleBg = () => {
-  const on = bg ? bg.toggle() : false;
+  let on: boolean;
+  if (!bg){ bg = initBinaryBackground(); on = true; } else on = bg.toggle();
   $('#bgBtn')!.setAttribute('aria-pressed', String(on));
   return on;
 };
 $('#bgBtn')!.addEventListener('click', toggleBg);
 
 /* keys */
-key('p', () => { photo.develop(true); setMode('VISUAL'); }, () => { photo.develop(false); setMode('NORMAL'); });
 key('x', () => { xray.toggle(); });
 key('b', () => { toggleBg(); });
 key('t', () => { toast(`theme: ${toggleTheme()}`); });
 key('/', () => { map.focusSearch(); });
 key('n', () => { (document.getElementById('heroName')?.classList.contains('split') ? nameSplit.reset : nameSplit.split)(); goTo(0); });
 Object.assign(keyHelp, {
-  p: 'hold to develop the photo', x: 'x-ray: inspect any element', b: 'toggle the binary background',
+  x: 'x-ray: inspect any element', b: 'toggle the binary background',
   t: 'toggle light / dark', '/': 'search the course map', n: 'break / reassemble my name', '?': 'show all shortcuts',
 });
 
@@ -70,14 +79,15 @@ const sheet = initCheatSheet([
   ['G', 'jump to the bottom'],
   ['/', 'search the course map'],
   ['n', 'break apart / reassemble my name'],
-  ['p', 'hold to see the photo in colour'],
   ['x', 'x-ray: inspect any element'],
   ['t', 'toggle light / dark'],
   ['b', 'toggle the binary background'],
   [':', 'open the command line (try :help)'],
+  ['m', 'open the menu'],
   ['?', 'this sheet'],
 ]);
 key('?', sheet.toggle);
+key('m', menu.toggle);
 
 /* commands */
 command('courses', "list what I'm taking", () => courses.map(c => `${c.code.padEnd(8)}${c.name}`).join('\n'));

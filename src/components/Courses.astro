@@ -5,25 +5,33 @@ import { degreeProgress } from '../lib/degree';
 
 const { year, sem } = degreeProgress();
 ---
-<section id="now" aria-labelledby="now-h">
+<section class="zone" id="now" data-stage="now" data-side="right" aria-labelledby="now-h">
   <div class="wrap">
-    <SectionHead n="02" title="Taking this semester" note={`<span data-sem-label>year ${year}, semester ${sem}</span> · hover a course to light up its commits`} id="now-h" />
+    <SectionHead n="02" title="Taking this semester" note={`<span data-sem-label>year ${year}, semester ${sem}</span> · flip a card for what I learned`} id="now-h" />
     <div class="courses">
       {courses.map((c, idx) => (
-        <article class="course reveal anim-deal" data-lane={c.lane} style={`--i:${idx}`}>
-          <div class="code"><span class={`c${c.lane}`}>{c.code}</span><span class="wk">{c.week ? `week ${c.week}/${c.weeks}` : 'ongoing'}</span></div>
-          <h3>{c.name}</h3>
-          {c.week && c.weeks && (
-            <div class="weeks" style={`--n:${c.weeks}`} role="img" aria-label={`week ${c.week} of ${c.weeks}`}>
-              {Array.from({ length: c.weeks }, (_, i) => <i class={i + 1 < c.week! ? 'on' : i + 1 === c.week ? 'cur' : undefined} style={`--i:${i}`}></i>)}
+        <article class="course reveal anim-deal" id={`c-${c.code}`} data-lane={c.lane} style={`--i:${idx}`}>
+          <div class="flip">
+            <div class="face front">
+              <div class="code"><span class={`c${c.lane}`}>{c.code}</span><span class="wk">{c.week ? `week ${c.week}/${c.weeks}` : 'ongoing'}</span></div>
+              <h3>{c.name}</h3>
+              {c.week && c.weeks && (
+                <div class="weeks" style={`--n:${c.weeks}`} role="img" aria-label={`week ${c.week} of ${c.weeks}`}>
+                  {Array.from({ length: c.weeks }, (_, i) => <i class={i + 1 < c.week! ? 'on' : i + 1 === c.week ? 'cur' : undefined} style={`--i:${i}`}></i>)}
+                </div>
+              )}
+              <button type="button" class="flip-btn" aria-expanded="false">what I learned <span aria-hidden="true">↻</span></button>
             </div>
-          )}
-          <ul>
-            {c.learned.map(l => <li>{l}</li>)}
-            {c.doing.map(l => <li class="doing">{l}</li>)}
-          </ul>
-          <p class="stuck">stuck on: {c.stuck}</p>
-          <button type="button" class="go" data-lane={c.lane}>view commits ↑</button>
+            <div class="face back">
+              <div class="code"><span class={`c${c.lane}`}>{c.code}</span><span class="wk">notes</span></div>
+              <ul>
+                {c.learned.map(l => <li>{l}</li>)}
+                {c.doing.map(l => <li class="doing">{l}</li>)}
+              </ul>
+              <p class="stuck">stuck on: {c.stuck}</p>
+              <p class="back-row"><a class="go" href="#gitlog">view commits ↑</a><button type="button" class="flip-btn">back <span aria-hidden="true">↺</span></button></p>
+            </div>
+          </div>
         </article>
       ))}
     </div>

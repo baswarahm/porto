@@ -3,18 +3,18 @@
    the same way the page reads.
    ========================================================================== */
 :root{
-  --paper:#f3f0e8; --paper-2:#e9e5da; --ink:#16150f; --ink-2:#5b584d; --ink-3:#8f8b7d;
-  --rule:#d6d1c3; --signal:#e8461e; --on-signal:#fff; --usm:#5b2c90; --extrude:#d8d2c2; --ok:#1f7a4d; --warn:#b07a0a;
-  --b1:#e8461e; --b2:#2f5fd0; --b3:#1f7a4d; --b4:#9a3fb5;
+  --paper:#f1f1ec; --paper-2:#e6e6df; --ink:#0b0c0d; --ink-2:#4a4f54; --ink-3:#868b90;
+  --rule:#cfd0c8; --signal:#3f7000; --on-signal:#f1f1ec; --lime:#c6ff3d; --usm:#5b2c90; --extrude:#cfd0c8; --ok:#3f7000; --warn:#a8720a; --alert:#d6382d;
+  --b1:#3f7000; --b2:#0b7fa8; --b3:#a8720a; --b4:#b0457a;
   --mono:'IBM Plex Mono', ui-monospace, monospace;
   --sans:'IBM Plex Sans', system-ui, sans-serif;
 }
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
-  --paper:#0d0a14; --paper-2:#161026; --ink:#ede8f7; --ink-2:#a9a0c2; --ink-3:#6d6588; --rule:#271f3b;
-  --signal:#b38bff; --on-signal:#140c24; --usm:#6a35b8; --extrude:#3a2466; --ok:#4cc38a; --warn:#e0a83a; --b1:#b38bff; --b2:#7c9cff; --b3:#4cc38a; --b4:#f28fd0; } }
+  --paper:#07080a; --paper-2:#0f1113; --ink:#eef1f3; --ink-2:#9aa1a8; --ink-3:#5c636a; --rule:#1e2226;
+  --signal:#c6ff3d; --on-signal:#0a0b0c; --lime:#c6ff3d; --usm:#6a35b8; --extrude:#1e2226; --ok:#c6ff3d; --warn:#ffb02e; --alert:#ff4f3d; --b1:#c6ff3d; --b2:#46e3ff; --b3:#ffb02e; --b4:#ff6ad5; } }
 :root[data-theme="dark"]{
-  --paper:#0d0a14; --paper-2:#161026; --ink:#ede8f7; --ink-2:#a9a0c2; --ink-3:#6d6588; --rule:#271f3b;
-  --signal:#b38bff; --on-signal:#140c24; --usm:#6a35b8; --extrude:#3a2466; --ok:#4cc38a; --warn:#e0a83a; --b1:#b38bff; --b2:#7c9cff; --b3:#4cc38a; --b4:#f28fd0; }
+  --paper:#07080a; --paper-2:#0f1113; --ink:#eef1f3; --ink-2:#9aa1a8; --ink-3:#5c636a; --rule:#1e2226;
+  --signal:#c6ff3d; --on-signal:#0a0b0c; --lime:#c6ff3d; --usm:#6a35b8; --extrude:#1e2226; --ok:#c6ff3d; --warn:#ffb02e; --alert:#ff4f3d; --b1:#c6ff3d; --b2:#46e3ff; --b3:#ffb02e; --b4:#ff6ad5; }
 *{ box-sizing:border-box; margin:0; padding:0; }
 /* nothing may ever widen the page: entrance animations start elements off to
    the side, and on phones that used to zoom the whole page out until they landed.

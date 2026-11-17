@@ -3,12 +3,23 @@ import '../styles/global.css';
 import '../styles/interactions.css';
 import '../styles/sections.css';
 import '../styles/entrances.css';
-import '../styles/opening.css';
 import '../styles/showcase.css';
+import '../styles/pages.css';
+import '../styles/one.css';
+import '../styles/menu.css';
 import StatusLine from '../components/StatusLine.astro';
-import { profile, socials } from '../data/profile';
+import Menu from '../components/Menu.astro';
+import PageNav from '../components/PageNav.astro';
+import { profile, socials, pages } from '../data/profile';
 import { degree } from '../data/courses';
 
+interface Props { page?: string }
+const { page = 'home' } = Astro.props;
+const isHome = page === 'home';
+const current = pages.find(p => p.id === page);
+// sub-pages get their own title and lead the description with the page name
+const title = current ? `${current.title} · ${profile.name}` : profile.pageTitle;
+const description = current ? `${current.blurb} ${profile.description}` : profile.description;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(profile.photo, Astro.site);
 // schema.org Person, so search engines know whose page this is
@@ -33,19 +44,19 @@ const person = {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{profile.pageTitle}</title>
-<meta name="description" content={profile.description}>
+<title>{title}</title>
+<meta name="description" content={description}>
 <link rel="canonical" href={canonical}>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="sitemap" href="/sitemap.xml">
 <script type="application/ld+json" set:html={JSON.stringify(person)} />
-<meta name="theme-color" content="#f3f0e8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0d0a14" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f1f1ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#07080a" media="(prefers-color-scheme: dark)">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content={profile.pageTitle}>
+<meta property="og:title" content={title}>
 <meta property="og:site_name" content={profile.name}>
-<meta property="og:description" content={profile.description}>
+<meta property="og:description" content={description}>
 <meta property="og:url" content={canonical}>
 <meta property="og:image" content={ogImage}>
 <meta name="twitter:card" content="summary">
@@ -56,39 +67,17 @@ const person = {
 <script is:inline>
   // apply a saved theme before first paint so there's no flash
   try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
-  // the opening plays once per browser session, never under reduced motion
-  try {
-    var seen = sessionStorage.getItem('opened') === '1';
-    var calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.documentElement.classList.add(seen || calm ? 'no-opening' : 'opening-on');
-  } catch (e) { document.documentElement.classList.add('no-opening'); }
+  // the site opens straight in (no opening slides)
+  document.documentElement.classList.add('no-opening');
 </script>
 </head>
-<body>
-  <div class="opening" id="opening" aria-hidden="true">
-    <div class="op-slide s2">
-      <div>
-        <div class="op-sil"></div>
-        <p class="op-kicker">I'm</p>
-        <p class="op-big" data-chars><span class="ln">{profile.nameLines.slice(0, 2).join(' ')}</span><span class="ln"><em>{profile.nameLines[2]}</em></span></p>
-        <p class="op-sub">first-year computer science student</p>
-      </div>
-    </div>
-    <div class="op-slide s3">
-      <div>
-        <img src="/images/usm-crest.svg" alt="" width="150" height="160" decoding="async" id="opCrest">
-        <div>
-          <p class="op-kicker">studying at</p>
-          <p class="op-big"><span class="ln">Universiti Sains</span><span class="ln"><em>Malaysia</em></span></p>
-          <p class="op-sub">B.CS · Intelligent Computing</p>
-        </div>
-      </div>
-    </div>
-    <div class="op-dots" id="opDots"><i></i><i></i></div>
-    <p class="op-skip">click or press any key to skip</p>
-  </div>
-  <a class="skip" href="#progress">Skip to content</a>
-  <slot />
+<body data-page={page}>
+  <a class="skip" href="#main">Skip to content</a>
+  <Menu page={page} />
+  <main id="main">
+    <slot />
+  </main>
+  {!isHome && <PageNav page={page} />}
   <StatusLine />
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="pill" id="pill" aria-hidden="true">open ↓</div>

@@ -44,20 +44,7 @@ export function initReveal(){
   check();
 }
 
-/* ---- sections: rule draws in, heading decrypts, watermark drifts --------- */
-const GLYPHS = 'abcdefghijklmnopqrstuvwxyz<>/{}#';
-function decrypt(el: HTMLElement){
-  const final = el.textContent ?? '';
-  if (reducedMotion || !final) return;
-  const start = performance.now(), dur = 700;
-  const frame = (now: number) => {
-    const t = Math.min(1, (now - start) / dur), keep = Math.floor(t * final.length);
-    el.textContent = final.slice(0, keep) + [...final.slice(keep)].map(ch => ch === ' ' ? ' ' : GLYPHS[(Math.random() * GLYPHS.length) | 0]).join('');
-    if (t < 1) requestAnimationFrame(frame); else el.textContent = final;
-  };
-  requestAnimationFrame(frame);
-}
-
+/* ---- sections: rule draws in, watermark drifts, timeline fills --------- */
 export function initSections(){
   let unseen = Array.from(document.querySelectorAll<HTMLElement>('section'));
   const markSeen = () => {
@@ -70,12 +57,7 @@ export function initSections(){
   addEventListener('scroll', () => requestAnimationFrame(markSeen), { passive: true });
   markSeen();
 
-  const heads = new IntersectionObserver(entries => entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    decrypt(e.target as HTMLElement);
-    heads.unobserve(e.target);
-  }), { threshold: 1 });
-  document.querySelectorAll<HTMLElement>('.sec-head h2 .txt').forEach(h => heads.observe(h));
+  // headings flip in letter by letter in 3D (text3d.ts)
 
   if (reducedMotion) return;
   const marks = Array.from(document.querySelectorAll<HTMLElement>('.wm'));
@@ -133,10 +115,6 @@ export function initSudo(){
 }
 
 /** lights the top-nav link for the section in view */
-export function setActiveNav(id: string){
-  document.querySelectorAll<HTMLElement>('[data-nav]').forEach(a => a.setAttribute('aria-current', String(a.dataset.nav === id)));
-}
-
 export function initPill(){
   const pill = $('#pill');
   if (!pill || matchMedia('(hover: none)').matches) return;

@@ -1,0 +1,26 @@
+---
+/* Projects page placeholder while the section is rebuilt.
+   The real list (Projects.astro + Showcase.astro) is kept for later. */
+import SectionHead from './SectionHead.astro';
+---
+<section class="zone" id="projects" data-stage="projects" data-side="right" aria-labelledby="projects-h">
+  <div class="wrap">
+    <SectionHead n="04" title="Projects" id="projects-h" />
+    <div class="vault-row">
+    <div class="vault" aria-hidden="true">
+      <div class="vault-door">
+        <span class="v-ring r1"></span><span class="v-ring r2"></span>
+        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => <span class="v-bolt" style={`--a:${i * 45}deg`}></span>)}
+        <div class="v-dial">{Array.from({ length: 24 }, (_, i) => <i style={`--a:${i * 15}deg`}></i>)}<b></b></div>
+        <span class="v-handle"></span>
+        <span class="v-light"></span>
+      </div>
+    </div>
+    <div class="soon-card reveal anim-zoom">
+      <p class="soon-k">coming soon</p>
+      <p class="soon-t">Projects are being rebuilt.</p>
+      <p class="soon-d">Locked while the projects are rebuilt. Coming soon. Until then, you can <a href="#contact">say hi</a>.</p>
+    </div>
+    </div>
+  </div>
+</section>

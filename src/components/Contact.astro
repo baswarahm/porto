@@ -2,10 +2,13 @@
 import SectionHead from './SectionHead.astro';
 import Icon from './Icon.astro';
 import { profile, socials } from '../data/profile';
+// the email, twice round a turning cylinder
+const cyl = [...`${profile.email} · ${profile.email} · `];
 ---
-<section id="contact" aria-labelledby="contact-h">
+<section class="zone" id="contact" data-stage="contact" data-side="right" aria-labelledby="contact-h">
   <div class="wrap">
     <SectionHead n="06" title="Say hi" note='email works best · or press <span class="mono">:</span> and type <span class="mono">email</span>' id="contact-h" />
+    <div class="cyl" aria-hidden="true"><div class="cyl-in" style={`--n:${cyl.length}`}>{cyl.map((ch, i) => <span style={`--i:${i}`}>{ch}</span>)}</div></div>
     <div class="contact-card reveal anim-zoom">
       <div class="contact-main">
         <p class="avail" id="avail"><i aria-hidden="true"></i><span>checking Penang time…</span></p>

@@ -25,3 +25,10 @@ export function brandColor(slug: string){
   const hex = lookup(slug)?.hex;
   return hex && !['000000', '181717'].includes(hex) ? `#${hex}` : 'var(--ink)';
 }
+
+/** raw icon data for drawing a logo onto a canvas (the 3D skills ring);
+    `path` is null for VS Code, which is drawn from its initials instead */
+export function brandIcon(slug: string){
+  const icon = slug === 'vscode' ? null : lookup(slug);
+  return { path: icon?.path ?? null, color: brandColor(slug) };
+}

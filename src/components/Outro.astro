@@ -1,0 +1,19 @@
+---
+/* The end of the page: root access. The camera pulls back and orbits the
+   whole network; the picker jumps back to any section. */
+import { pages } from '../data/profile';
+---
+<section class="zone outro" id="root" data-stage="root" data-side="center" aria-labelledby="root-h">
+  <div class="outro-in">
+    <p class="b-k">root@baswara.hm:~#</p>
+    <h2 id="root-h" class="outro-title t3d">Access granted</h2>
+    <nav class="pick" aria-label="Jump to a section">
+      {pages.map((p, i) => (
+        <a href={`#${p.id}`} class:list={['pick-a', { locked: 'soon' in p && p.soon }]}>
+          <i>{String(i + 1).padStart(2, '0')}</i><b>/{p.label}</b><em>{'soon' in p && p.soon ? 'locked' : p.title}</em>
+        </a>
+      ))}
+    </nav>
+    <a class="key" href="#top"><span>back to the top ↑</span></a>
+  </div>
+</section>

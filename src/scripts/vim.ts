@@ -3,8 +3,7 @@
    Other modules plug in with key() and command().
    ========================================================================== */
 import { $, reducedMotion } from './env';
-import { sections } from '../data/profile';
-import { setActiveNav } from './ui';
+import { pages } from '../data/profile';
 
 type Cmd = () => string | void;
 const commands = new Map<string, { run: Cmd; help: string }>();
@@ -14,7 +13,15 @@ export const command = (name: string, help: string, run: Cmd) => commands.set(na
 export const key = (k: string, down: () => void, up?: () => void) => keys.set(k, { down, up });
 export const setMode = (m: string) => { $('#vMode')!.textContent = m; };
 
-const secEls = () => sections.map(s => document.getElementById(s.id)).filter((el): el is HTMLElement => !!el);
+/** the blocks j/k step through on this page: the hero, then each top-level section */
+const secEls = () => Array.from(document.querySelectorAll<HTMLElement>('#top, body > main > section, body > section'));
+
+/** where this page sits in the page order: -1 is home */
+const pageIndex = () => pages.findIndex(p => p.id === document.body.dataset.page);
+export const goPage = (i: number) => {
+  if (i < -1 || i >= pages.length) return;
+  location.href = i === -1 ? '/' : pages[i].path;
+};
 
 function currentIndex(){
   const els = secEls();
@@ -27,6 +34,8 @@ function currentIndex(){
 
 export function goTo(i: number){
   const els = secEls();
+  // stepping past either end of the page turns to the neighbouring page
+  if (i < 0 || i >= els.length){ goPage(pageIndex() + (i < 0 ? -1 : 1)); return; }
   const el = els[Math.max(0, Math.min(els.length - 1, i))];
   el.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
   el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
@@ -39,9 +48,8 @@ export function initVim(){
   const update = () => {
     const max = document.documentElement.scrollHeight - innerHeight || 1, p = scrollY / max;
     $('#vPct')!.textContent = p < .01 ? 'Top' : p > .99 ? 'Bot' : Math.round(p * 100) + '%';
-    const id = sections[currentIndex()].id;
+    const id = secEls()[currentIndex()]?.id || document.body.dataset.page || 'top';
     $('#vFile')!.textContent = `~/baswara/${id}.md`;
-    setActiveNav(id);
   };
   let ticking = false;
   addEventListener('scroll', () => { if (!ticking){ ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } }, { passive: true });
@@ -62,7 +70,7 @@ export function initVim(){
 
   command('help', 'show this', () => {
     const rows = [
-      'j / k       next / previous section',
+      'j / k       next / previous section (turns the page at the ends)',
       'gg / G      top / bottom',
       ...[...keys.keys()].filter(k => k.length === 1 && !'jkgG:'.includes(k)).map(k => `${k.padEnd(12)}${keyHelp[k] ?? ''}`),
       '',
@@ -71,7 +79,8 @@ export function initVim(){
     return rows.join('\n');
   });
   command('q', 'close this', () => { close(); });
-  sections.forEach((s, i) => command(s.id, `jump to ${s.label}`, () => { close(); goTo(i); }));
+  command('home', 'go to the home page', () => { close(); goPage(-1); });
+  pages.forEach((p, i) => command(p.label, `open ${p.label}`, () => { close(); goPage(i); }));
 
   $('#cmdForm')!.addEventListener('submit', e => {
     e.preventDefault();
@@ -85,7 +94,7 @@ export function initVim(){
   let lastG = 0;
   key('j', () => goTo(currentIndex() + 1));
   key('k', () => goTo(currentIndex() - 1));
-  key('G', () => goTo(sections.length - 1));
+  key('G', () => { const els = secEls(); els[els.length - 1]?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' }); });
   key('g', () => { if (Date.now() - lastG < 400) goTo(0); lastG = Date.now(); });
   key(':', open);
 

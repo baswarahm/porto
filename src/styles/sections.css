@@ -168,14 +168,8 @@ kbd{ font:11px var(--mono); border:1px solid var(--rule); padding:0 5px; }
 }
 @media (prefers-reduced-motion:reduce){ .ticker{ overflow-x:auto; } .ticker-track{ animation:none; } }
 
-/* ---- phones: course map opens on the current semester only ---------------- */
-.cmap-more{ display:none; width:100%; justify-content:center; border-top:0; }
-@media (max-width:640px){
-  .cmap-more{ display:flex; }
-  .cmap:not(.expanded){ grid-template-columns:1fr; }
-  .cmap:not(.expanded) .cmap-col:not(.now){ display:none; }
-  .cmap:not(.expanded) .cmap-col.now{ border-right:0; border-bottom:0; }
-  .cmap:not(.expanded) .tile{ padding:10px 12px; }
-  .cmap:not(.expanded) .tile .name{ font-size:14px; }
-  .cmap.expanded .cmap-col{ animation:fade .35s ease-out; }
-}
+/* ---- course map: opens on this semester only; a small button shows the rest -------- */
+.cmap:not(.expanded){ grid-template-columns:1fr; }
+.cmap:not(.expanded) .cmap-col:not(.now){ display:none; }
+.cmap:not(.expanded) .cmap-col.now{ border-right:0; border-bottom:0; }
+.cmap.expanded .cmap-col{ animation:fade .35s ease-out; }

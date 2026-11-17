@@ -56,19 +56,19 @@ export interface Course {
 
 export const courses: Course[] = [
   {
-    code: 'CCA101', name: 'Programming Fundamentals', lane: 1, week: 4, weeks: 14,
+    code: 'CCA101', name: 'Programming Fundamentals', lane: 1, week: 9, weeks: 14,
     learned: ['First C++ program that compiled first try', 'Loops, functions and scope'],
     doing: ['Pointers vs references'],
     stuck: 'a segfault that only happens sometimes',
   },
   {
-    code: 'CKC111', name: 'Discrete Structures', lane: 2, week: 4, weeks: 14,
+    code: 'CKC111', name: 'Discrete Structures', lane: 2, week: 9, weeks: 14,
     learned: ['Truth tables and logical equivalence', 'Proof by induction'],
     doing: ['Set theory and relations'],
     stuck: 'writing proofs that read like proofs',
   },
   {
-    code: 'CCA102', name: 'Computer Organisation', lane: 3, week: 4, weeks: 14,
+    code: 'CCA102', name: 'Computer Organisation', lane: 3, week: 9, weeks: 14,
     learned: ["Binary, hex and two's complement"],
     doing: ['Logic gates to adders'],
     stuck: 'nothing yet, ask me next week',

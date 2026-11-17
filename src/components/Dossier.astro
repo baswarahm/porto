@@ -1,0 +1,41 @@
+---
+/* The top of the one-page site: my profile as a "target dossier". The
+   WebGL world (world.ts) puts a hologram of me to the right of it, in
+   front of the hex firewall. Headings marked .t3d flip in letter by letter. */
+import { profile, socials } from '../data/profile';
+import { courses, commits } from '../data/courses';
+import { degreeProgress } from '../lib/degree';
+
+const deg = degreeProgress();
+---
+<section class="zone dossier" id="top" data-stage="hero" data-side="left" aria-labelledby="who">
+  <div class="b-win doss">
+    <header class="b-bar"><span>target.dossier</span><span class="b-state">public</span></header>
+    <div class="doss-body">
+      <figure class="doss-photo">
+        <img src={profile.photo} alt={profile.photoAlt} width="960" height="1280" decoding="async" fetchpriority="high">
+        <span class="doss-scan" aria-hidden="true"></span>
+        <figcaption>id · bhm-2026</figcaption>
+      </figure>
+      <div class="doss-main">
+        <p class="b-k">&gt; whois baswara.hm</p>
+        <h1 id="who" class="doss-name t3d">{profile.name}</h1>
+        <p class="doss-role">CS student · <b>Intelligent Computing</b> · Universiti Sains Malaysia</p>
+        <dl class="doss-facts">
+          <div><dt>from</dt><dd>Solo, ID</dd></div>
+          <div><dt>now</dt><dd>Penang, MY</dd></div>
+          <div><dt>degree</dt><dd data-degree-pct>{(deg.pct * 100).toFixed(1)}% done</dd></div>
+          <div><dt>courses</dt><dd data-count={courses.length}>{courses.length}</dd></div>
+          <div><dt>commits</dt><dd data-count={commits.length}>{commits.length}</dd></div>
+          <div><dt>clearance</dt><dd class="lv">student</dd></div>
+        </dl>
+      </div>
+    </div>
+    <p class="doss-intro">From Solo, now in Penang. Studying Intelligent Computing and writing down everything I learn on the way: progress, courses, and the goals I'm chasing.</p>
+    <footer class="doss-foot">
+      {socials.map(s => <a class="key" href={s.href} target="_blank" rel="noopener"><span>{s.label}</span></a>)}
+      <a class="key solid" href="#contact"><span>say hi</span></a>
+    </footer>
+  </div>
+  <p class="scroll-hint" aria-hidden="true">scroll to breach the firewall</p>
+</section>

@@ -1,0 +1,47 @@
+---
+/* The HUD frame on every page: system name (home), the section links,
+   Penang time and the DAY / NIGHT switch, plus four corner brackets that
+   frame the screen. On phones the links move into a full-screen menu. */
+import { pages } from '../data/profile';
+interface Props { page: string }
+const { page } = Astro.props;
+const links = [{ id: 'home', path: '/', label: 'root', note: '' }, ...pages.map(p => ({ id: p.id, path: p.path, label: p.label, note: 'soon' in p && p.soon ? 'locked' : '' }))];
+---
+<header class="hud">
+  <a class="hud-id" href="/" aria-label="Home">BASWARA<span>.HM</span></a>
+  <nav class="hud-nav" aria-label="Pages">
+    {pages.map((p, i) => (
+      <a href={p.path} aria-current={p.id === page ? 'page' : undefined} class:list={{ locked: 'soon' in p && p.soon }}>
+        <i>{String(i + 1).padStart(2, '0')}</i><span class="roll" data-t={p.label}>{p.label}</span>
+      </a>
+    ))}
+  </nav>
+  <div class="hud-r">
+    <span class="hud-clock" id="hudClock" aria-label="Time in Penang">PNG --:--</span>
+    <button type="button" class="hud-mode" data-theme-toggle aria-label="Switch day / night"><span>day</span><span>night</span></button>
+    <button type="button" class="hud-menu" id="menuBtn" aria-haspopup="dialog" aria-controls="menu3d">menu</button>
+  </div>
+</header>
+<span class="corner tl" aria-hidden="true"></span><span class="corner tr" aria-hidden="true"></span>
+<span class="corner bl" aria-hidden="true"></span><span class="corner br" aria-hidden="true"></span>
+
+<dialog class="m3d" id="menu3d" aria-label="Menu">
+  <div class="m3d-in">
+    <header class="m3d-top">
+      <span>$ ls ~/baswara</span>
+      <button type="button" class="m3d-x" id="menuClose" aria-label="Close menu">esc</button>
+    </header>
+    <nav class="m3d-list" aria-label="Pages">
+      {links.map((l, i) => (
+        <a href={l.path} style={`--i:${i}`} aria-current={l.id === page ? 'page' : undefined} class:list={{ locked: l.note === 'locked' }}>
+          <span class="m3d-n">{String(i).padStart(2, '0')}</span>
+          <span class="m3d-t">/{l.label}</span>
+          <span class="m3d-note">{l.note}</span>
+        </a>
+      ))}
+    </nav>
+    <footer class="m3d-foot">
+      <button type="button" class="hud-mode" data-theme-toggle aria-label="Switch day / night"><span>day</span><span>night</span></button>
+    </footer>
+  </div>
+</dialog>
