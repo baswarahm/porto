@@ -484,3 +484,8 @@ html.root body{ box-shadow:inset 0 0 120px rgba(255,40,30,.35); }
 
 /* storm: a white lightning flash (world.ts) */
 .warp-flash.storm{ background:radial-gradient(circle at 50% 10%, rgba(255,255,255,.75), transparent 70%); }
+
+/* commit log: older commits wait behind "load more" (progress.ts) */
+.gitlog .gl-row.more, .gitlog .gl-diff.more{ display:none !important; }
+.gl-more{ margin-top:14px; }
+.gl-more[hidden]{ display:none; }

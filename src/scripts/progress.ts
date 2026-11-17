@@ -83,7 +83,7 @@ export function initGitLog(){
   };
   tools?.addEventListener('click', e => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.chip');
-    if (btn) filter(btn.dataset.f!);
+    if (btn) filterPaged(btn.dataset.f!);
   });
 
   // dim every other branch while a course card is hovered
@@ -91,10 +91,31 @@ export function initGitLog(){
     log.classList.toggle('focus', !!lane);
     rows.forEach(r => r.classList.toggle('lit', !!lane && r.dataset.b === lane));
   };
+  // newest 5 commits first; "load more" shows 5 older at a time (a course filter shows all of its commits)
+  const PAGE = 5, commits = log.querySelectorAll('button.gl-row').length;
+  let shown = PAGE, filtered = false;
+  const more = document.createElement('button');
+  more.type = 'button'; more.className = 'key gl-more';
+  log.after(more);
+  const paginate = () => {
+    let n = 0;
+    log.querySelectorAll<HTMLElement>('.gl-row, .gl-diff').forEach(r => {
+      if (r.matches('button.gl-row')) n++;
+      r.classList.toggle('more', !filtered && n > shown);
+    });
+    const left = commits - shown;
+    more.hidden = filtered || left <= 0;
+    more.innerHTML = `<span>load more · ${Math.min(PAGE, left)} older (${left} left)</span>`;
+  };
+  more.addEventListener('click', () => { shown += PAGE; paginate(); });
+  paginate();
+  const filterAll = filter;
+  const filterPaged = (f: string) => { filtered = f !== 'all'; filterAll(f); paginate(); };
+
   // arriving from a course card on /now/ (?lane=…): show only that course
   const lane = new URLSearchParams(location.search).get('lane');
-  if (lane && tools?.querySelector(`[data-f="${CSS.escape(lane)}"]`)) filter(lane);
-  return { filter, focus };
+  if (lane && tools?.querySelector(`[data-f="${CSS.escape(lane)}"]`)) filterPaged(lane);
+  return { filter: filterPaged, focus };
 }
 
 /* ---- course cards talk to the git log ------------------------------------- */
