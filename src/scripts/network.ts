@@ -18,6 +18,35 @@ export const readPalette = (): Palette => ({
   ink: new THREE.Color(cssVar('--ink')), ink3: new THREE.Color(cssVar('--ink-3')), bg: new THREE.Color(cssVar('--paper')),
 });
 
+const CORE_VERT = `varying vec3 vPos; void main(){ vPos = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+const CORE_FRAG = `
+uniform vec3 uCam, uColor, uHot; uniform float uTime, uMorph, uDark; varying vec3 vPos;
+float smin(float a, float b, float k){ float h = clamp(.5 + .5 * (b - a) / k, 0., 1.); return mix(b, a, h) - k * h * (1. - h); }
+float map(vec3 p){
+  float t = uTime * .7;
+  float d = length(p) - .5 - .05 * sin(p.x * 7. + t * 2.) * sin(p.y * 6. + t) * sin(p.z * 8. - t);
+  for (int i = 0; i < 4; i++){
+    float fi = float(i);
+    vec3 c = vec3(sin(t * (.7 + fi * .31) + fi * 2.1), cos(t * (.9 + fi * .23) + fi), sin(t * (.5 + fi * .37) + fi * 3.)) * (.42 + uMorph * .38);
+    d = smin(d, length(p - c) - (.2 + .05 * fi), .38);
+  }
+  return d;
+}
+vec3 nrm(vec3 p){ vec2 e = vec2(.002, 0.); return normalize(vec3(map(p + e.xyy) - map(p - e.xyy), map(p + e.yxy) - map(p - e.yxy), map(p + e.yyx) - map(p - e.yyx))); }
+void main(){
+  vec3 rd = normalize(vPos - uCam), p = vPos; bool hit = false;
+  for (int i = 0; i < 72; i++){ float d = map(p); if (d < .0015){ hit = true; break; } p += rd * d * .9; if (length(p) > 1.3) break; }
+  if (!hit) discard;
+  vec3 n = nrm(p), r = reflect(rd, n);
+  float fres = pow(1. - max(dot(n, -rd), 0.), 3.);
+  // liquid metal: a fake studio environment (dark floor, bright sky band, one hot key light)
+  vec3 env = mix(uDark > .5 ? vec3(.015) : vec3(.55), uColor, smoothstep(-.25, .7, r.y));
+  env += uHot * pow(max(0., dot(r, normalize(vec3(.4, .85, .3)))), 28.) * 2.2;
+  env += uColor * pow(max(0., dot(r, normalize(vec3(-.7, -.2, .6)))), 6.) * .6;
+  vec3 col = env * .85 + uColor * fres * (1.2 + uMorph);
+  gl_FragColor = vec4(col, 1.);
+}`;
+
 const SHAPES: Record<string, () => THREE.BufferGeometry> = {
   progress: () => new THREE.CylinderGeometry(.26, .3, .62, 6),            // a semester pillar
   now: () => new THREE.TorusKnotGeometry(.2, .065, 72, 8),                 // courses, all tangled up
@@ -88,8 +117,14 @@ export async function createNetwork(){
   const ringA = new THREE.Mesh(new THREE.TorusGeometry(1.25, .012, 8, 96), ringMat);
   const ringB = new THREE.Mesh(new THREE.TorusGeometry(1.5, .008, 8, 96), ringMat);
   ringA.rotation.x = Math.PI / 2.4; ringB.rotation.y = Math.PI / 2.6;
-  const coreMat = new THREE.MeshStandardMaterial({ metalness: .2, roughness: .25, emissiveIntensity: .7, flatShading: true });
-  const core = new THREE.Mesh(new THREE.OctahedronGeometry(.55, 0), coreMat);
+  // the core is a raymarched liquid-metal blob: four metaballs melting into one another inside a sphere proxy.
+  // It morphs harder when you hover it or arrive somewhere new.
+  const coreU = { uCam: { value: new THREE.Vector3() }, uTime: { value: 0 }, uMorph: { value: 0 }, uColor: { value: new THREE.Color() }, uHot: { value: new THREE.Color() }, uDark: { value: 1 } };
+  const coreMat = new THREE.ShaderMaterial({ uniforms: coreU, vertexShader: CORE_VERT, fragmentShader: CORE_FRAG });
+  const core = new THREE.Mesh(new THREE.SphereGeometry(1.25, 32, 24), coreMat);
+  const coreHit = new THREE.Mesh(new THREE.SphereGeometry(1.1, 10, 10), new THREE.MeshBasicMaterial({ visible: false }));
+  coreHit.userData.host = 'you'; group.add(coreHit);
+  let morph = 0, lastActive = '', morphKick = 0;
   const coreShell = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(.95, 1)), new THREE.LineBasicMaterial({ transparent: true, opacity: .5 }));
   group.add(ringA, ringB, core, coreShell);
 
@@ -128,8 +163,9 @@ export async function createNetwork(){
     P = pal;
     majorLineMat.color.copy(pal.ink); minorLineMat.color.copy(pal.ink3);
     minorMat.color.copy(pal.ink3); packetMat.color.copy(pal.signal); ringMat.color.copy(pal.signal);
-    coreMat.color.copy(pal.signal); coreMat.emissive.copy(pal.signal);
-    const dark = pal.bg.getHSL({ h: 0, s: 0, l: 0 }).l < .5; isDarkPal = dark;
+    coreU.uColor.value.copy(pal.signal); coreU.uHot.value.copy(pal.ink);
+    const dark = pal.bg.getHSL({ h: 0, s: 0, l: 0 }).l < .5; isDarkPal = dark; coreU.uDark.value = dark ? 1 : 0;
+    if (dark) coreU.uHot.value.set('#ffffff');
     minorMat.color.copy(dark ? pal.ink3 : pal.ink).lerp(pal.bg, dark ? 0 : .35);
     streamMat.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; streamMat.size = dark ? .16 : .12; streamMat.needsUpdate = true;
     cHot.copy(dark ? new THREE.Color('#ffffff').lerp(pal.signal, .35) : pal.signal); cDim.copy(dark ? pal.signal : pal.signal.clone().lerp(pal.ink, .25)); (coreShell.material as THREE.LineBasicMaterial).color.copy(pal.ink);
@@ -146,7 +182,13 @@ export async function createNetwork(){
   const SHATTER_MS = 1500;
 
   /** advance one frame; `active` is the host to light up (or 'you' / '' for none) */
-  const update = (t: number, active: string) => {
+  const update = (t: number, active: string, camera?: THREE.Camera) => {
+    // liquid core: follows the camera (for the raymarch), morphs on hover and on every new section
+    if (camera){ core.updateWorldMatrix(true, false); coreU.uCam.value.copy(camera.position); core.worldToLocal(coreU.uCam.value); }
+    if (active !== lastActive){ lastActive = active; morphKick = 1; }
+    morphKick = Math.max(0, morphKick - .012);
+    morph += ((hovered === 'you' ? 1 : 0) + morphKick * .8 - morph) * .06;
+    coreU.uTime.value = t; coreU.uMorph.value = morph;
     if (!P) return;
     const now = performance.now();
     // shatter: minor nodes fly out and come back, the links blink out meanwhile
@@ -171,7 +213,7 @@ export async function createNetwork(){
       hst.shell.rotation.y = t * (on ? .9 : .25); hst.shell.rotation.x = t * .15;
     });
     ringA.rotation.z = t * .5; ringB.rotation.z = -t * .35;
-    core.rotation.set(t * .4, t * .6, 0); coreShell.rotation.set(-t * .15, -t * .25, 0);
+    coreShell.rotation.set(-t * .15, -t * .25, 0);
     flows.forEach((f, i) => {
       let p = (t * f.speed + f.off) % 1; if (f.back) p = 1 - p;
       v.lerpVectors(f.e[0], f.e[1], p);
@@ -205,7 +247,7 @@ export async function createNetwork(){
     });
     streamGeo.attributes.position.needsUpdate = true; streamGeo.attributes.color.needsUpdate = true;
   };
-  const hitTargets = hosts.map(h => h.hit);
+  const hitTargets = [coreHit, ...hosts.map(h => h.hit)];
   const hover = (id: string) => { hovered = id; };
 
   /** reduced motion: the moving data (packets, streams) stays hidden */

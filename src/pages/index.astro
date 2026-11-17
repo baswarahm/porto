@@ -25,7 +25,7 @@ const world = {
   courses: courses.length,
   goals: [targets.doing.length, targets.next.length, targets.done.length],
   // the degree as rings: one per semester, every course a node
-  plan: deg.semesters.map((sm, i) => ({ state: sm.state, fill: +sm.fill.toFixed(3), courses: curriculum[i].map(c => ({ code: c.code, name: c.name })) })),
+  plan: deg.semesters.map((sm, i) => ({ state: sm.state, fill: +sm.fill.toFixed(3), courses: curriculum[i].map(c => ({ code: c.code, name: c.name, track: c.track, credits: c.credits })) })),
   // my stack, for the 3D ring around the hologram
   skills: skills.map(s => ({ name: s.name, ...brandIcon(s.logo) })),
 };

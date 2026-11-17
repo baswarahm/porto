@@ -170,6 +170,13 @@ export function initUx(){
   addEventListener('click', e => { if (!pop.hidden && !pop.contains(e.target as Node)) closePop(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden){ e.stopPropagation(); closePop(); } }, true);
 
+  /* ---- 3D rooms: the skill tree and the code city load on demand ------------------------------------------------- */
+  const openTreeRoom = () => import('./tree').then(m => m.openTree());
+  const openCityRoom = () => import('./city').then(m => m.openCity());
+  document.querySelectorAll('[data-tree]').forEach(b => b.addEventListener('click', openTreeRoom));
+  document.querySelectorAll('[data-city]').forEach(b => b.addEventListener('click', openCityRoom));
+  addEventListener('openroom', e => { const r = (e as CustomEvent<string>).detail; if (r === 'tree') openTreeRoom(); else if (r === 'city') openCityRoom(); });
+
   /* ---- breach: a red sweep crosses the screen ------------------------------------------------------------------ */
   addEventListener(WORLD.breach, () => {
     if (reducedMotion) return;

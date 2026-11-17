@@ -17,11 +17,18 @@ const CRT = {
   uniforms: {
     tDiffuse: { value: null }, uTime: { value: 0 }, uAberr: { value: .0016 }, uGlitch: { value: 0 },
     uScan: { value: .05 }, uGrain: { value: .045 }, uVig: { value: .45 }, uRes: { value: new THREE.Vector2(1, 1) },
+    tPortal: { value: null }, uPortalOn: { value: 0 }, uPortalC: { value: new THREE.Vector2(.5, .5) }, uPortalR: { value: 0 }, uAspect: { value: 1 },
+    uRim: { value: new THREE.Color('#c6ff3d') }, uExposure: { value: 1 },
+    uSun: { value: new THREE.Vector3(.5, .5, 0) }, uSunCol: { value: new THREE.Color('#ffe2b0') },
   },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
   fragmentShader: `
-uniform sampler2D tDiffuse; uniform float uTime, uAberr, uGlitch, uScan, uGrain, uVig; uniform vec2 uRes; varying vec2 vUv;
+uniform sampler2D tDiffuse, tPortal; uniform float uTime, uAberr, uGlitch, uScan, uGrain, uVig, uPortalOn, uPortalR, uAspect, uExposure;
+uniform vec2 uRes, uPortalC; uniform vec3 uRim, uSun, uSunCol; varying vec2 vUv;
 float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898, 78.233))) * 43758.5453); }
+// the portal view is a raw (linear, HDR) render: tone map + sRGB it like the output pass does
+vec3 aces(vec3 x){ x *= uExposure * .6; return clamp((x * (2.51 * x + .03)) / (x * (2.43 * x + .59) + .14), 0., 1.); }
+vec3 toSRGB(vec3 c){ return mix(c * 12.92, 1.055 * pow(c, vec3(1. / 2.4)) - .055, step(.0031308, c)); }
 void main(){
   vec2 uv = vUv;
   // glitch: some horizontal bands tear sideways for a frame or two
@@ -34,6 +41,24 @@ void main(){
   float ab = uAberr * (1.0 + r2 * 5.0) + uGlitch * .01;
   vec3 c = vec3(texture2D(tDiffuse, uv + d * ab).r, texture2D(tDiffuse, uv).g, texture2D(tDiffuse, uv - d * ab).b);
   c += tear * uGlitch * .08 * vec3(.4, 1.0, .2);
+  // portal dive: the next section shows through a growing circle with a glowing rim; the edge bends light like a lens
+  if (uPortalOn > .5){
+    vec2 q = (vUv - uPortalC) * vec2(uAspect, 1.); float pd = length(q), e = pd - uPortalR;
+    float inside = 1. - smoothstep(-.004, .004, e);
+    float lens = smoothstep(uPortalR * .55, uPortalR, pd) * inside;
+    vec2 puv = vUv - (vUv - uPortalC) * lens * .22;
+    vec3 pc = toSRGB(aces(texture2D(tPortal, puv).rgb));
+    pc += uRim * lens * lens * .25;
+    c = mix(c, pc, inside);
+    float rim = exp(-e * e * 2400.);
+    c += uRim * (rim * 1.4 + exp(-max(e, 0.) * 12.) * .22 * (1. - inside) * step(.001, uPortalR));
+  }
+  // god rays: march toward the sun and gather the bright pixels on the way (screen-space light shafts)
+  if (uSun.z > 0.){
+    vec2 dl = (vUv - uSun.xy) / 32.; vec2 su = vUv; float acc = 0., dec = 1.;
+    for (int i = 0; i < 32; i++){ su -= dl; vec3 sm = texture2D(tDiffuse, su).rgb; acc += max(0., dot(sm, vec3(.299, .587, .114)) - .8) * dec; dec *= .955; }
+    c += uSunCol * acc * uSun.z * .35;
+  }
   // scanlines (about every 3 device pixels), grain, vignette
   c *= 1.0 - uScan * (.5 + .5 * sin(vUv.y * uRes.y * 2.094));
   c += (rand(vUv * uRes + fract(uTime * 7.31)) - .5) * uGrain;
@@ -50,12 +75,16 @@ export function createFx(renderer: THREE.WebGLRenderer, scene: THREE.Scene, came
   composer.addPass(new OutputPass());
   const crt = new ShaderPass(CRT);
   composer.addPass(crt);
-  let on = true, glitch = 0, dark = true;
+  let on = true, glitch = 0, dark = true, ratio = 1;
+  const portalRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
+  crt.uniforms.tPortal.value = portalRT.texture;
+  let portalCam: THREE.Camera | null = null;
 
   return {
-    setSize(w: number, h: number, ratio: number){
-      composer.setPixelRatio(ratio); composer.setSize(w, h);
-      crt.uniforms.uRes.value.set(w * ratio, h * ratio);
+    setSize(w: number, h: number, r: number){ ratio = r;
+      composer.setPixelRatio(r); composer.setSize(w, h);
+      portalRT.setSize(Math.round(w * r * .6), Math.round(h * r * .6));
+      crt.uniforms.uRes.value.set(w * r, h * r);
     },
     setEnabled(v: boolean){ on = v; },
     setTheme(isDark: boolean){
@@ -66,6 +95,16 @@ export function createFx(renderer: THREE.WebGLRenderer, scene: THREE.Scene, came
       crt.uniforms.uGrain.value = isDark ? .045 : .03;
       crt.uniforms.uVig.value = isDark ? .45 : .14;
     },
+    /** open a portal to what `cam` sees, centred at (cx, cy) in 0..1 screen space, radius in screen heights; null closes it */
+    setPortal(cam: THREE.Camera | null, cx = .5, cy = .5, r = 0, aspect = 1, rim?: THREE.Color){
+      portalCam = on ? cam : null;
+      crt.uniforms.uPortalOn.value = portalCam ? 1 : 0;
+      crt.uniforms.uPortalC.value.set(cx, cy); crt.uniforms.uPortalR.value = r; crt.uniforms.uAspect.value = aspect;
+      if (rim) crt.uniforms.uRim.value.copy(rim);
+      crt.uniforms.uExposure.value = renderer.toneMappingExposure;
+    },
+    /** where the sun is on screen (0..1) and how strong its rays are (0 = none) */
+    setSun(x: number, y: number, strength: number){ crt.uniforms.uSun.value.set(x, y, strength); },
     /** a glitch spike, 0..1; it fades by itself */
     kick(v: number){ glitch = Math.max(glitch, v); },
     render(t: number, dt: number, extraGlitch = 0){
@@ -74,6 +113,7 @@ export function createFx(renderer: THREE.WebGLRenderer, scene: THREE.Scene, came
       crt.uniforms.uTime.value = t;
       crt.uniforms.uGlitch.value = Math.min(1, glitch + extraGlitch);
       bloom.strength = (dark ? .45 : .32) + glitch * .5;
+      if (portalCam){ renderer.setRenderTarget(portalRT); renderer.render(scene, portalCam); renderer.setRenderTarget(null); }
       composer.render(dt);
     },
   };

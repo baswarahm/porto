@@ -690,3 +690,45 @@ html.root body{ box-shadow:inset 0 0 120px rgba(255,40,30,.35); }
 .rd-s{ font:11px var(--mono); color:var(--alert); }
 @media (max-width:900px){ .redact{ grid-template-columns:1fr; } }
 @media (prefers-reduced-motion:reduce){ .redact li::after{ animation:none; } }
+
+/* ==========================================================================
+   3D rooms (overlay3d.ts): the skill tree and the code city
+   ========================================================================== */
+:root.room-open, :root.room-open body{ overflow:hidden; }
+.room{ position:fixed; inset:0; z-index:110; background:var(--paper); animation:roomIn .5s cubic-bezier(.2,1,.3,1); }
+.room.out{ opacity:0; transform:scale(1.03); transition:opacity .3s, transform .3s; }
+@keyframes roomIn{ from{ opacity:0; transform:scale(.96); clip-path:circle(0% at 50% 50%); } to{ clip-path:circle(150% at 50% 50%); } }
+.room canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.room-bar{ position:absolute; left:0; right:0; top:0; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding:20px 24px; pointer-events:none; }
+.room-bar > *{ pointer-events:auto; }
+.room-bar h2{ margin:4px 0 0; font:600 clamp(1.6rem, 3vw, 2.4rem)/1 var(--sans); letter-spacing:-.03em; color:var(--ink); text-shadow:0 0 24px color-mix(in srgb, var(--lime) 35%, transparent); }
+.room-k{ margin:0; font:11px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--signal); }
+.room-legend{ position:absolute; left:24px; bottom:22px; display:flex; flex-wrap:wrap; gap:6px 16px; max-width:min(720px, calc(100% - 48px)); margin:0; padding:0; list-style:none; font:11px var(--mono); color:var(--ink-2); text-transform:uppercase; letter-spacing:.06em; }
+.room-legend i{ display:inline-block; width:14px; height:3px; margin-right:6px; vertical-align:middle; background:var(--c, var(--ink-3)); box-shadow:0 0 6px var(--c, transparent); }
+.room-legend .st i.done{ background:var(--signal); } .room-legend .st i.now{ background:var(--lime); box-shadow:0 0 8px var(--lime); } .room-legend .st i.lock{ background:none; border:1px dashed var(--ink-3); height:6px; }
+.room-card{ position:absolute; right:24px; top:96px; width:min(320px, calc(100% - 48px)); padding:16px 18px; display:grid; gap:8px; font:14px/1.5 var(--sans); color:var(--ink-2);
+  background:color-mix(in srgb, var(--paper-2) 88%, transparent); border:1px solid var(--lime); box-shadow:0 0 30px -14px var(--lime); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); animation:drop .3s ease-out; }
+.room-card[hidden]{ display:none; }
+.room-card h3{ margin:0; font:600 1.2rem/1.2 var(--sans); color:var(--ink); }
+.room-card p{ margin:0; }
+.room-card .st{ font:12px var(--mono); } .room-card .st.done{ color:var(--signal); } .room-card .st.now{ color:var(--lime); } .room-card .st.future{ color:var(--ink-3); }
+.room-card .key{ justify-self:start; margin-top:4px; }
+.room-tip{ position:fixed; left:0; top:0; margin:0; padding:4px 10px; pointer-events:none; white-space:nowrap; font:500 12px var(--mono); color:#0a0b0c; background:var(--lime); opacity:0; transition:opacity .15s; z-index:2; }
+.room-tip.on{ opacity:1; }
+.room-hint{ position:absolute; right:24px; bottom:22px; margin:0; font:11px var(--mono); color:var(--ink-3); letter-spacing:.06em; }
+.cmap-acts{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.soon-card .room-open{ margin-top:12px; }
+@media (max-width:640px){
+  .room-card{ top:auto; bottom:64px; right:16px; left:16px; width:auto; }
+  .room-hint{ display:none; }
+  .room-legend{ left:16px; bottom:16px; }
+  .room-bar{ padding:16px; }
+}
+/* how many people are here right now (ghosts.ts) */
+.hud-ghosts{ display:inline-flex; align-items:center; gap:7px; font:11px var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2);
+  padding:5px 10px; border:1px solid var(--rule); border-radius:999px; background:color-mix(in srgb, var(--paper-2) 80%, transparent); }
+.hud-ghosts[hidden]{ display:none; }
+.hud-ghosts i{ width:7px; height:7px; border-radius:50%; background:var(--lime); box-shadow:0 0 8px var(--lime); animation:blink 1.6s steps(1) infinite; }
+@media (max-width:640px){ .hud-ghosts{ display:none; } }
+.hud-clock{ white-space:nowrap; }
+@media (max-width:1400px){ .hud-ghosts span{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); } }

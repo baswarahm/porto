@@ -14,6 +14,7 @@ import { degreeProgress, textBar } from '../lib/degree';
 import { isRoot, setRoot } from './root';
 import { HOSTS } from './network';
 import { WORLD, emit } from './env';
+import { sunPosition, moonPosition } from './sky';
 
 const FILES: Record<string, () => string[]> = {
   'progress.log': () => {
@@ -27,7 +28,7 @@ const FILES: Record<string, () => string[]> = {
   'projects/': () => ['!permission denied: projects/ is locked while it is rebuilt. coming soon.'],
 };
 const SECTIONS: Record<string, string> = { top: 'top', home: 'top', network: 'network', root: 'root', ...Object.fromEntries(pages.map(p => [p.label, p.id])) };
-const COMMANDS = ['help', 'whoami', 'ls', 'cat', 'open', 'cd', 'nmap', 'ping', 'breach', 'date', 'theme', 'matrix', 'tour', 'sudo', 'exit', 'clear'];
+const COMMANDS = ['help', 'whoami', 'ls', 'cat', 'open', 'cd', 'nmap', 'ping', 'sky', 'tree', 'city', 'breach', 'date', 'theme', 'matrix', 'tour', 'sudo', 'exit', 'clear'];
 
 export function initTerminal(){
   const wrap = document.createElement('div');
@@ -73,7 +74,7 @@ export function initTerminal(){
       case 'help': return print([
         'whoami            who I am', 'ls                list my files', 'cat <file>        read one, e.g. cat goals.txt',
         'open <section>    fly there: progress, now, goals, projects, journey, contact', 'date              the time in Penang',
-        'nmap              scan my network (watch the 3D world)', 'ping <host>       send a burst of data to a host, e.g. ping journey', 'breach            blow the network apart and fly in',
+        'nmap              scan my network (watch the 3D world)', 'tree              my curriculum as a 3D skill tree', 'city              my GitHub repos as a 3D city', 'sky               where the sun and moon are over Penang right now', 'ping <host>       send a burst of data to a host, e.g. ping journey', 'breach            blow the network apart and fly in',
         'theme             switch day / night', 'matrix            binary rain on / off', 'tour              replay the quick tour',
         'sudo su           ...', 'clear · exit']);
       case 'whoami': return print([profile.name, 'first-year CS student · Intelligent Computing · Universiti Sains Malaysia', 'from Solo, Indonesia · now in Penang, Malaysia']);
@@ -94,6 +95,16 @@ export function initTerminal(){
         Object.keys(HOSTS).forEach((id, i) => setTimeout(() => print([`10.0.0.${i + 1}`.padEnd(12) + (id === 'you' ? 'baswara' : id === 'targets' ? 'goals' : id).padEnd(11) + '443/tcp   ' + (id === 'projects' ? 'filtered' : 'open')], id === 'projects' ? 'err' : 'ok'), 280 + i * 260));
         setTimeout(() => { print([`Nmap done: ${Object.keys(HOSTS).length} hosts up · try "open journey"`], 'dim'); wrap.classList.remove('peek'); }, 2600);
         return;
+      }
+      case 'tree': case 'city': print([`opening the ${cmd === 'tree' ? 'skill tree' : 'code city'} ...`], 'ok'); close(); emit('openroom', cmd); return;
+      case 'sky': {
+        const deg = (r: number) => Math.round(r * 180 / Math.PI), dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        const compass = (az: number) => dirs[Math.round(((deg(az) % 360) + 360) % 360 / 45) % 8];
+        const s = sunPosition(), m = moonPosition();
+        return print([
+          `sun   alt ${String(deg(s.alt)).padStart(4)}°  az ${String((deg(s.az) + 360) % 360).padStart(3)}° ${compass(s.az).padEnd(2)}  ${s.alt > 0 ? 'up' : s.alt > -.1 ? 'just below the horizon' : 'down'}`,
+          `moon  alt ${String(deg(m.alt)).padStart(4)}°  az ${String((deg(m.az) + 360) % 360).padStart(3)}° ${compass(m.az).padEnd(2)}  ${Math.round(m.lit * 100)}% lit, ${m.waxing ? 'waxing' : 'waning'}`,
+          'over Penang (5.41°N 100.33°E). The 3D sky shows the same.']);
       }
       case 'ping': {
         const name = arg === 'goals' ? 'targets' : arg === 'baswara' ? 'you' : arg;

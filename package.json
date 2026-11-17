@@ -8,6 +8,8 @@
     "preview": "astro preview"
   },
   "dependencies": {
+    "@dimforge/rapier3d-compat": "0.21.0",
+    "@supabase/realtime-js": "2.118.0",
     "@tabler/icons": "^3.49.0",
     "@types/three": "^0.170.0",
     "astro": "^5.18.2",

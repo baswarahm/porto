@@ -19,6 +19,11 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { cssVar, isDark, reducedMotion, THEME_EVENT, quality, QUALITY_EVENT, WORLD, emit } from './env';
 import { createFx } from './fx';
+import { createFluid } from './fluid';
+import { createPhysics } from './physics';
+import { createSky } from './sky';
+import { createTitles } from './titles';
+import { GHOST_EVENT, type Ghost } from './ghosts';
 import { HOSTS, createNetwork, readPalette, type Palette } from './network';
 import { penangWeather, penangHour, type Weather } from './weather';
 import { graph } from '../data/journey-graph';
@@ -49,9 +54,10 @@ void main(){
   float aN = min(min(texture2D(uMap, uv + vec2(e, 0.)).a, texture2D(uMap, uv - vec2(e, 0.)).a),
                  min(texture2D(uMap, uv + vec2(0., e * .45)).a, texture2D(uMap, uv - vec2(0., e * .45)).a));
   float edge = clamp((a - aN) * 2.6, 0., 1.);
-  vec3 col = uBody + uTint * edge * 1.5;
+  // kept under the bloom threshold, so the glow never floods the black body
+  vec3 col = uBody + uTint * edge * .78;
   col += uTint * .06 * step(.55, fract(uv.y * 160.0));
-  col += uTint * step(.986, fract(uv.y * 2.5 - uTime * .3)) * .55;
+  col += uTint * step(.986, fract(uv.y * 2.5 - uTime * .3)) * .3;
   col += uTint * g * .6;
   float n = rand(floor(vUv * vec2(70., 170.)));
   float keep = step(uDissolve, n);
@@ -86,6 +92,9 @@ export async function initWorld(){
   // bloom + CRT (fx.ts); a glitch spike is skipped when motion is reduced
   const fx = createFx(renderer, scene, camera);
   const kick = (v: number) => { if (!reducedMotion) fx.kick(v); };
+  // the real sky over Penang (sky.ts)
+  const sky = createSky(); scene.add(sky.group);
+  const sunFar = new THREE.Vector3();
 
   /* ---- background: particle field + grid floor ------------------------------------------------- */
   const N = phone ? 1400 : 3200;
@@ -130,6 +139,8 @@ export async function initWorld(){
   }
   const beamMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: .07, side: THREE.DoubleSide, depthWrite: false });
   const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.5, 4.8, 48, 1, true), beamMat); beam.position.y = 2.4; holo.add(beam);
+  // the beam (and the particle halo) draw before the hologram, so the black body always covers them
+  beam.renderOrder = -2;
   const padMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: .9 });
   const pad = new THREE.Mesh(new THREE.TorusGeometry(1.5, .025, 8, 96), padMat); pad.rotation.x = Math.PI / 2; holo.add(pad);
   const pad2 = new THREE.Mesh(new THREE.TorusGeometry(1.2, .012, 8, 96), padMat); pad2.rotation.x = Math.PI / 2; pad2.position.y = .05; holo.add(pad2);
@@ -243,6 +254,16 @@ export async function initWorld(){
   const cg = at('contact'); const pulses: THREE.Mesh[] = [];
   for (let i = 0; i < 4; i++){ const p = new THREE.Mesh(new THREE.TorusGeometry(1, .015, 8, 96), new THREE.MeshBasicMaterial({ transparent: true })); cg.add(p); pulses.push(p); }
 
+  /* ---- section titles as point-cloud holograms floating above each host (titles.ts) ------------------------------ */
+  await document.fonts?.ready;
+  const titles = createTitles(zones.filter(z => HOSTS[z.dataset.stage ?? '']).map(z => {
+    const h2 = z.querySelector('.sec-head h2 .txt');
+    const text = (h2?.querySelector('.sr-only')?.textContent ?? h2?.textContent ?? z.id).trim();
+    const st = z.dataset.stage!;
+    return { stage: st, text, at: V(...HOSTS[st]).add(V(0, st === 'journey' ? 3.9 : 3.3, 0)) };
+  }));
+  scene.add(titles.group);
+
   /* ---- labels for the hosts (shown over the whole-network views) --------------------------------------------- */
   const labelBox = document.getElementById('worldLabels');
   const labels = Object.keys(HOSTS).map((id, i) => {
@@ -270,6 +291,8 @@ export async function initWorld(){
     pulses.forEach(p => (p.material as THREE.MeshBasicMaterial).color.set(cssVar('--lime')));
     net.paint(P);
     fx.setTheme(dark);
+    sky.paint(dark, P.bg);
+    titles.paint(dark ? new THREE.Color(cssVar('--lime')) : P.ink.clone(), dark ? P.signal.clone().multiplyScalar(.35) : P.signal.clone(), dark);
     dayFog = !dark;
   };
   paint();
@@ -306,7 +329,7 @@ export async function initWorld(){
 
   /* ---- hover a host: it glows and answers like an nmap scan; click flies there ---------------------------------- */
   const hostTip = Object.assign(document.createElement('div'), { className: 'host-tip' }); hostTip.setAttribute('aria-hidden', 'true'); document.body.append(hostTip);
-  const HOST_INFO: Record<string, string> = { progress: 'degree progress', now: 'courses this semester', targets: 'goals board', projects: 'locked, coming soon', journey: 'experience & education', contact: 'say hi' };
+  const HOST_INFO: Record<string, string> = { you: 'me, the core of it all', progress: 'degree progress', now: 'courses this semester', targets: 'goals board', projects: 'locked, coming soon', journey: 'experience & education', contact: 'say hi' };
   let hoverHost = '', hoverOther = '';
   addEventListener('click', e => {
     if (dragged || !hoverHost || (e.target as Element).closest?.(UI)) return;
@@ -318,6 +341,21 @@ export async function initWorld(){
   /* ---- break the firewall yourself: click (or tap) the wall around the dossier --------------------------------- */
   const counter = document.getElementById('breachCount');
   let broken = 0;
+  // Rapier loads in the background once the world is up (desktop, high quality, full motion)
+  // the debris lands on its own glowing floor just under the hologram's pad, where the hero camera can see the pile
+  const FLOOR_Y = -4.3;
+  const debrisFloor = new THREE.GridHelper(40, 40); debrisFloor.position.set(0, FLOOR_Y, 10);
+  const dfMat = debrisFloor.material as THREE.LineBasicMaterial; dfMat.transparent = true; dfMat.opacity = 0; dfMat.depthWrite = false; dfMat.vertexColors = false;
+  debrisFloor.visible = false; scene.add(debrisFloor);
+  let phys: Awaited<ReturnType<typeof createPhysics>> | null = null;
+  const pv = V(), pv2 = V(), pImp = V(), pSpin = V(), pq = new THREE.Quaternion(), sweep = V(), lastSweep = V(), sweepHit = V();
+  let sweepOk = false;
+  const loadPhysics = () => {
+    if (phys || phone || reducedMotion || quality !== 'high') return;
+    const go = () => createPhysics(cells, R, DEPTH, FLOOR_Y).then(p => { phys = p; }).catch(err => console.warn('physics unavailable', err));
+    ('requestIdleCallback' in window) ? requestIdleCallback(go, { timeout: 3000 }) : setTimeout(go, 1200);
+  };
+  addEventListener(WORLD.ready, loadPhysics, { once: true });
   addEventListener('click', e => {
     if (dragged || scrollY > h * .05) return;
     if ((e.target as Element).closest('.b-win, a, button, input, summary, label, .hud, .m3d')) return;
@@ -326,7 +364,24 @@ export async function initWorld(){
     const hitCell = ray.intersectObject(wall, false)[0];
     if (hitCell?.instanceId === undefined) return;
     const c0 = cells[hitCell.instanceId].base, stamp = performance.now();
-    cells.forEach(c => {
+    if (phys){
+      // real physics: the struck cell and its neighbours come loose, spinning
+      const at0 = hitCell.point;
+      cells.forEach((c, n) => {
+        const live = phys!.isLive(n);
+        if (live) phys!.pose(n, pv, pq); else pv.copy(c.base);
+        const d = pv.distanceTo(at0);
+        if (d > 1.7 || pv.y < FLOOR_Y + .6) return;
+        if (!live){ c.hit = stamp; broken++; }
+        const f = (1 - d / 1.7);
+        // they burst out toward you, a little apart from the impact, and fall onto the floor in front
+        pImp.copy(ray.ray.direction).multiplyScalar(-(2.4 * f + .5)).add(pv2.copy(pv).sub(at0).normalize().multiplyScalar(1.1 * f));
+        pImp.y += 1.4 * f;
+        pSpin.set((rnd() - .5) * .5, (rnd() - .5) * .5, (rnd() - .5) * .3);
+        phys!.knock(n, pImp, pSpin);
+      });
+      wall.boundingSphere = null;
+    } else cells.forEach(c => {
       // the struck cell and the ones around it go, a little later the further out they are
       const d = c.base.distanceTo(c0);
       if (c.hit < 0 && d < 1.6){ c.hit = stamp + d * 140; broken++; }
@@ -377,8 +432,10 @@ export async function initWorld(){
     rc.beginPath(); rc.moveTo(C, C - 9); rc.lineTo(C - 6, C + 6); rc.lineTo(C + 6, C + 6); rc.closePath(); rc.fill();
   };
 
-  /* ---- the swarm: ~12,000 particles that explode and re-form into each section's object ---------------- */
-  const NS = phone ? 4500 : 12000;
+  /* ---- the swarm: a GPU fluid of ~200,000 particles (fluid.ts) that melts from one section's shape into the next;
+          without WebGL2 it falls back to 12,000 particles moved on the CPU ---------------------------------------- */
+  const FS = phone ? 256 : 448, GPU_OK = true;   // three r170 is WebGL2-only; a failed GPGPU init still falls back
+  const NS = GPU_OK ? FS * FS : (phone ? 4500 : 12000);
   const swarmPos = new Float32Array(NS * 3), scat = new Float32Array(NS * 3), phase = new Float32Array(NS);
   for (let n = 0; n < NS; n++){
     const u = V(rnd() * 2 - 1, rnd() * 2 - 1, rnd() * 2 - 1).normalize().multiplyScalar(2 + rnd() * 4);
@@ -398,14 +455,21 @@ export async function initWorld(){
     const c = document.createElement('canvas'); c.width = cw; c.height = chh;
     const g = c.getContext('2d', { willReadFrequently: true })!; g.drawImage(img, 0, 0, cw, chh);
     const d = g.getImageData(0, 0, cw, chh).data;
-    for (let yy = 0; yy < chh; yy++) for (let xx = 0; xx < cw; xx++) if (d[(yy * cw + xx) * 4 + 3] > 140) sil.push(xx / cw, yy / chh);
+    // only the outline: the particles make a halo around the black silhouette, never fill it in
+    const A = (xx: number, yy: number) => xx < 0 || yy < 0 || xx >= cw || yy >= chh ? 0 : d[(yy * cw + xx) * 4 + 3];
+    for (let yy = 0; yy < chh; yy++) for (let xx = 0; xx < cw; xx++){
+      if (A(xx, yy) <= 140) continue;
+      if (A(xx - 2, yy) <= 140 || A(xx + 2, yy) <= 140 || A(xx, yy - 2) <= 140 || A(xx, yy + 2) <= 140) sil.push(xx / cw, yy / chh);
+    }
   }
   const silN = sil.length / 2;
   const shapes: Record<string, Float32Array> = {
     hero: shape((_, o) => {
       if (!silN){ o.set(0, 0, 11); return; }
       const q2 = ((rnd() * silN) | 0) * 2;
-      o.set((sil[q2] - .5) * silW * 1.1 + (rnd() - .5) * .06, -2.4 + (1 - sil[q2 + 1]) * SILH * 1.03, 11.2 + (rnd() - .5) * .7);
+      // a soft halo just behind the body (the hologram hides whatever lands on it)
+      const sp = .03 + Math.pow(rnd(), 3) * .22, a2 = rnd() * 6.283;
+      o.set((sil[q2] - .5) * silW * 1.03 + Math.cos(a2) * sp, -2.4 + (1 - sil[q2 + 1]) * SILH * 1.02 + Math.sin(a2) * sp, 10.75 + (rnd() - .5) * .3);
     }),
     network: shape((_, o) => { const r = 3 + Math.pow(rnd(), .55) * 16, a = rnd() * 6.283 + r * .32; o.set(Math.cos(a) * r, (rnd() - .5) * (1.2 + r * .1), Math.sin(a) * r); }),
     progress: shape((n, o) => {
@@ -436,12 +500,20 @@ export async function initWorld(){
   })();
   const swarmMat = new THREE.PointsMaterial({ size: .07, map: dotTex, transparent: true, depthWrite: false, opacity: .9 });
   const swarmGeo = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(swarmPos, 3));
-  const swarm = new THREE.Points(swarmGeo, swarmMat); swarm.frustumCulled = false; scene.add(swarm);
+  const swarm = new THREE.Points(swarmGeo, swarmMat); swarm.frustumCulled = false; swarm.renderOrder = -2; scene.add(swarm);
   swarmPos.set(shapes.hero);
+  let fluid: ReturnType<typeof createFluid> | null = null;
+  if (GPU_OK){
+    try { fluid = createFluid(renderer, FS, shapes, 'hero'); fluid.points.renderOrder = -2; scene.add(fluid.points); swarm.visible = false; }
+    catch (e){ console.warn('GPU fluid unavailable, using the CPU swarm', e); }
+  }
+  const cpuN = fluid ? 0 : Math.min(NS, phone ? 4500 : 12000);
+  swarmGeo.setDrawRange(0, cpuN);
+  const fluidPlane = new THREE.Plane(), fluidMouse = V(), camDir = V();
   const updateSwarm = (a: string, b: string, kk: number, rt: number) => {
     const A = shapes[a] ?? shapes.network, B = shapes[b] ?? shapes.network;
     const s2 = kk * kk * (3 - 2 * kk), burst = Math.sin(kk * Math.PI) * 3.2 + swarmKick, wob = reducedMotion ? 0 : .045;
-    for (let n = 0, j = 0; n < NS; n++, j += 3){
+    for (let n = 0, j = 0; n < cpuN; n++, j += 3){
       const ph = phase[n];
       swarmPos[j] = A[j] + (B[j] - A[j]) * s2 + scat[j] * burst + Math.sin(rt * 1.3 + ph) * wob;
       swarmPos[j + 1] = A[j + 1] + (B[j + 1] - A[j + 1]) * s2 + scat[j + 1] * burst + Math.cos(rt * 1.1 + ph) * wob;
@@ -453,7 +525,7 @@ export async function initWorld(){
   /* ---- quality: low skips bloom/CRT, renders at pixel ratio 1 and thins the swarm ------------------------------------ */
   const applyQuality = () => {
     const hi = quality === 'high';
-    fx.setEnabled(hi); renderer.setPixelRatio(ratio()); swarmGeo.setDrawRange(0, hi ? NS : Math.round(NS * .4)); resize();
+    fx.setEnabled(hi); renderer.setPixelRatio(ratio()); if (fluid) fluid.setFraction(hi ? 1 : .35); else swarmGeo.setDrawRange(0, hi ? cpuN : Math.round(cpuN * .4)); resize();
   };
   document.documentElement.addEventListener(QUALITY_EVENT, applyQuality); applyQuality();
 
@@ -461,6 +533,36 @@ export async function initWorld(){
   let kickAt = -1e9, swarmKick = 0;
   addEventListener(WORLD.shatter, () => { if (reducedMotion) return; net.shatter(); kickAt = performance.now(); kick(.8); });
   addEventListener(WORLD.breach, () => { if (reducedMotion) return; net.shatter(); kickAt = performance.now(); kick(1); });
+
+  /* ---- ghosts: other visitors, live (ghosts.ts) — a glowing packet each, orbiting the section they're reading -------- */
+  type GhostView = { m: THREE.Mesh; trail: THREE.Points; tpos: Float32Array; stage: string; a: number; seen: boolean; fade: number };
+  const ghosts = new Map<string, GhostView>();
+  const ghostMat = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, transparent: true });
+  const ghostTrailMat = new THREE.PointsMaterial({ size: .1, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+  const ghostSpot = (st: string, a: number, t: number, out: THREE.Vector3) => {
+    const base = HOSTS[st] ?? (st === 'hero' ? [0, 1, 9] : [0, 0, 0]);
+    const r = HOSTS[st] && st !== 'you' ? 1.8 : 3.4, ang = a + t * .5;
+    return out.set(base[0] + Math.cos(ang) * r, base[1] + Math.sin(t * .9 + a) * .5 + .6, base[2] + Math.sin(ang) * r);
+  };
+  addEventListener(GHOST_EVENT, e => {
+    const list = (e as CustomEvent<Ghost[]>).detail;
+    ghosts.forEach(g => { g.seen = false; });
+    list.forEach(gh => {
+      let g = ghosts.get(gh.id);
+      if (!g){
+        const m = new THREE.Mesh(new THREE.OctahedronGeometry(.2), ghostMat); scene.add(m);
+        const tpos = new Float32Array(14 * 3);
+        const trail = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(tpos, 3)), ghostTrailMat); trail.frustumCulled = false; scene.add(trail);
+        let hsh = 0; for (const ch of gh.id) hsh = (hsh * 31 + ch.charCodeAt(0)) % 1000;
+        g = { m, trail, tpos, stage: gh.stage, a: hsh / 1000 * 6.283, seen: true, fade: 0 };
+        ghostSpot(gh.stage, g.a, 0, m.position); for (let k = 0; k < 14; k++) m.position.toArray(tpos, k * 3);
+        m.userData.tip = ''; ghosts.set(gh.id, g);
+      }
+      g.stage = gh.stage; g.seen = true;
+      g.m.userData.tip = `another visitor · reading ${gh.stage === 'targets' ? 'goals' : gh.stage === 'hero' ? 'the profile' : gh.stage}`;
+    });
+  });
+  const ghostTo = V();
 
   /* ---- arrival shockwave: a ring that rushes out from the host you just reached ------------------------------------- */
   const shockMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
@@ -526,6 +628,7 @@ export async function initWorld(){
     const dark = isDark(), lime = cssVar('--lime');
     swarmMat.color.set(dark ? lime : cssVar('--signal'));
     swarmMat.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; swarmMat.opacity = dark ? .85 : .7; swarmMat.needsUpdate = true;
+    fluid?.setLook(new THREE.Color(dark ? lime : cssVar('--signal')), new THREE.Color(dark ? '#ffffff' : cssVar('--ink')), dark);
     warpRings.forEach(r => { const m = r.material as THREE.MeshBasicMaterial; m.color.set(lime); m.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; m.needsUpdate = true; });
     streakMat.color.set(dark ? lime : cssVar('--ink'));
   };
@@ -535,7 +638,7 @@ export async function initWorld(){
     rootOn = !!(e as CustomEvent).detail; kick(1);
     secretGroup.visible = rootOn;
     if (rootOn){
-      cells.forEach(c => { c.hit = -1; }); broken = 0;
+      cells.forEach(c => { c.hit = -1; }); broken = 0; phys?.reset(); wall.boundingSphere = null;
       if (counter){ counter.textContent = 'root mode: the firewall rebuilt itself'; counter.classList.add('on'); }
     }
   });
@@ -621,12 +724,13 @@ export async function initWorld(){
   const pa = V(), la = V(), pb = V(), lb = V(), camPos = V(), camLook = V(), v = V(), e3 = new THREE.Euler();
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = V();
   const tmpOff = V(), tmpRight = V();
+  const portalCam = new THREE.PerspectiveCamera(42, 1, .1, 220); let wasPortal = false;
   let pillarGrow = 0;
   let arrived = '', arriveAt = -1e9;
   let cam: THREE.Vector3 | null = null, look: THREE.Vector3 | null = null, side = sideOf(0), lastActive = '', prev = 0;
   const frame = (now: number) => {
     requestAnimationFrame(frame);
-    if (document.hidden) return;
+    if (document.hidden || worldPaused) return;
     // reduced motion: the decorative spin and drift stand still; scrolling still moves the camera
     const t = reducedMotion ? 0 : now / 1000, y = scrollY;
     // easing by elapsed time, so a slow machine arrives as fast as a quick one
@@ -639,12 +743,17 @@ export async function initWorld(){
     const next = Math.min(zones.length - 1, i + 1);
     const k = next === i ? 0 : smooth(clamp(1 - (tops[next] - y - h * .3) / (h * .6)));
     shot(i, t, pa, la); shot(next, t, pb, lb);
-    // reduced motion: no flying between sections, the camera cuts to each one
-    const kc = reducedMotion ? 0 : k;
+    // portal dive (high quality): between two sections the next one opens as a portal you fall through,
+    // instead of the camera gliding across. Reduced motion: no flying at all, the camera cuts to each section.
+    const portalOn = !reducedMotion && quality === 'high' && next !== i && k > .015 && k < .985;
+    const kc = reducedMotion || portalOn ? 0 : k;
     camPos.lerpVectors(pa, pb, kc); camLook.lerpVectors(la, lb, kc);
+    if (portalOn) camPos.lerp(camLook, k * .4);   // lean in toward the portal
     // tall, narrow screens: step back so the object still fits across
     const fit = clamp(1.3 / (w / h), 1, 2.1);
     camPos.sub(camLook).multiplyScalar(fit).add(camLook);
+    let snapped = false;
+    if (portalOn !== wasPortal){ wasPortal = portalOn; if (cam){ cam.copy(camPos); look!.copy(camLook); snapped = true; } }
     // the fog steps back with the camera, or the whole network fades out on narrow screens
     const fogK = fit * (dayFog ? 1.7 : 1); (scene.fog as THREE.Fog).near = 14 * fogK; (scene.fog as THREE.Fog).far = 62 * fogK;
     // glide, don't jump (also when you click a nav link far down)
@@ -669,6 +778,7 @@ export async function initWorld(){
     }
     camera.lookAt(look!);
     // warp speed: how fast is the camera travelling?
+    if (snapped) prevCam = null;
     const speed = prevCam ? camera.position.distanceTo(prevCam) / Math.max(dt, .001) : 0;
     prevCam = (prevCam ?? V()).copy(camera.position);
     const wT = reducedMotion ? 0 : clamp((speed - 10) / 26);
@@ -686,11 +796,26 @@ export async function initWorld(){
       (r.material as THREE.MeshBasicMaterial).opacity = warp * (1 - d / 70) * .9;
     });
     streaks.visible = warp > .02; streakMat.opacity = warp * .85; streaks.scale.z = 1 + warp * 16;
-    const targetSide = sideOf(i) * (1 - k) + sideOf(next) * k;
-    side += (targetSide - side) * ease;
+    const targetSide = portalOn ? sideOf(i) : sideOf(i) * (1 - k) + sideOf(next) * k;
+    side = snapped ? targetSide : side + (targetSide - side) * ease;
     if (w >= 900) camera.setViewOffset(w, h, side * w * .25, 0, w, h);   // text on the left → scene shifts right, and back
     else camera.setViewOffset(w, h, 0, h * .2, w, h);   // phones: the object sits in the top half, above the panel
     camera.updateProjectionMatrix();
+    if (portalOn){
+      // the portal looks from the next section's own camera, framed for its side of the screen
+      portalCam.position.copy(pb).sub(lb).multiplyScalar(fit).add(lb); portalCam.lookAt(lb);
+      portalCam.aspect = w / h;
+      if (w >= 900) portalCam.setViewOffset(w, h, sideOf(next) * w * .25, 0, w, h); else portalCam.setViewOffset(w, h, 0, h * .2, w, h);
+      portalCam.updateProjectionMatrix();
+      // it opens where the next host sits on screen, drifting to the centre as it grows to fill the view
+      camera.updateMatrixWorld();
+      const hp = HOSTS[zones[next]?.dataset.stage ?? ''];
+      let cx = .5, cy = .5;
+      if (hp){ v.fromArray(hp).project(camera); if (v.z < 1){ cx = clamp((v.x + 1) / 2, .2, .8); cy = clamp((v.y + 1) / 2, .25, .75); } }
+      const g = smooth(clamp((k - .03) / .9));
+      cx += (.5 - cx) * g; cy += (.5 - cy) * g;
+      fx.setPortal(portalCam, cx, cy, Math.pow(g, 1.6) * (Math.hypot(w / h, 1) * .55 + .05), w / h, P.signal);
+    } else fx.setPortal(null);
 
     // the firewall shatters and the hologram dissolves as you scroll off the dossier
     const brk = clamp(y / (h * .95));
@@ -698,7 +823,27 @@ export async function initWorld(){
     if (wall.visible){
       let hx = 99, hy = 99;
       if (brk < .05){ ray.setFromCamera(mouse, camera); if (ray.ray.intersectPlane(wallPlane, hit)){ hx = hit.x; hy = hit.y; } }
+      debrisFloor.visible = !!phys?.liveCount;
+      if (debrisFloor.visible){ dfMat.opacity += ((1 - brk * 3) * .35 - dfMat.opacity) * .08; dfMat.color.copy(P.signal); }
+      if (phys && phys.liveCount){
+        phys.step(dt);
+        // the cursor shoves fallen cells along the way it moves
+        if (mouse.x < 5){
+          ray.setFromCamera(mouse, camera);
+          if (ray.ray.intersectPlane(wallPlane, sweepHit)){
+            if (sweepOk){ sweep.copy(sweepHit).sub(lastSweep).divideScalar(Math.max(dt, .001)); phys.push(ray.ray.origin, ray.ray.direction, sweep); }
+            lastSweep.copy(sweepHit); sweepOk = true;
+          }
+        }
+        wall.boundingSphere = null;
+      }
       cells.forEach((c, n) => {
+        if (phys?.isLive(n)){
+          phys.pose(n, v, q);
+          wall.setMatrixAt(n, m4.compose(v, q, sc.set(1, 1, 1)));
+          wall.setColorAt(n, tmpC.copy(hexA).lerp(hexB, .75));
+          return;
+        }
         const d = Math.hypot(c.base.x - hx, c.base.y - hy);
         c.push += (Math.max(0, 1 - d / 2.6) - c.push) * .14;
         // a cell breaks when the scroll reaches it, or when you've hit it yourself
@@ -740,7 +885,7 @@ export async function initWorld(){
     // the network and its hosts
     net.group.visible = brk > .08;
     const active = zones[k > .5 ? next : i]?.dataset.stage ?? '';
-    net.update(t, active);
+    net.update(t, active, camera);
     // hosts answer the cursor (not through the panels, and not on touch)
     let hh = '', other = '';
     if (net.group.visible && brk > .3 && !overUi && !drag?.moved && mouse.x < 5 && w >= 640){
@@ -748,7 +893,7 @@ export async function initWorld(){
       hh = (ray.intersectObjects(net.hitTargets, false)[0]?.object.userData.host as string | undefined) ?? '';
       if (!hh){
         // section objects (semester pillars, journey commits), then the little relay nodes
-        const pool = [...(props.progress.visible ? pillars.map(p => p.m) : []), ...(props.journey.visible ? jNodes : [])];
+        const pool = [...[...ghosts.values()].map(g => g.m), ...(props.progress.visible ? pillars.map(p => p.m) : []), ...(props.journey.visible ? jNodes : [])];
         const o = pool.length ? ray.intersectObjects(pool, false)[0]?.object : undefined;
         if (o) other = o.userData.tip;
         else {
@@ -766,7 +911,7 @@ export async function initWorld(){
     if (hh !== hoverHost){
       hoverHost = hh; net.hover(hh);
       document.documentElement.classList.toggle('on-host', !!hh);
-      if (hh) hostTip.innerHTML = `<span>$ nmap 10.0.0.${Object.keys(HOSTS).indexOf(hh) + 1}</span><b>${hh === 'targets' ? 'goals' : hh}</b><span>443/tcp ${hh === 'projects' ? 'filtered' : 'open'} · ${HOST_INFO[hh] ?? ''}</span><i>click to fly there</i>`;
+      if (hh) hostTip.innerHTML = `<span>$ nmap 10.0.0.${Object.keys(HOSTS).indexOf(hh) + 1}</span><b>${hh === 'targets' ? 'goals' : hh === 'you' ? 'baswara' : hh}</b><span>443/tcp ${hh === 'projects' ? 'filtered' : 'open'} · ${HOST_INFO[hh] ?? ''}</span><i>click to fly there</i>`;
       hostTip.classList.toggle('on', !!hh); hostTip.classList.toggle('deny', hh === 'projects');
     }
     if (hoverHost) hostTip.style.transform = `translate(${((mouse.x + 1) / 2 * w + 18).toFixed(0)}px, ${((1 - mouse.y) / 2 * h + 14).toFixed(0)}px)`;
@@ -840,9 +985,21 @@ export async function initWorld(){
       flash.classList.remove('go', 'storm'); void flash.offsetWidth; flash.classList.add('go', 'storm');
     }
     // the swarm re-forms between the two sections you're between
-    swarm.visible = !reducedMotion; dust.visible = !reducedMotion; net.setCalm(reducedMotion);
+    swarm.visible = !fluid && !reducedMotion; if (fluid) fluid.points.visible = !reducedMotion; dust.visible = !reducedMotion; net.setCalm(reducedMotion);
     swarmKick = reducedMotion ? 0 : Math.sin(clamp((now - kickAt) / 1300) * Math.PI) * 2.6;
-    updateSwarm(zones[i]?.dataset.stage ?? 'hero', zones[next]?.dataset.stage ?? 'hero', k, reducedMotion ? 0 : now / 1000);
+    if (fluid){
+      if (!reducedMotion){
+        // the cursor pushes through the fluid, on a plane through what the camera looks at
+        let m: THREE.Vector3 | null = null;
+        if (!overUi && mouse.x < 5){
+          camera.getWorldDirection(camDir); fluidPlane.setFromNormalAndCoplanarPoint(camDir, look!);
+          ray.setFromCamera(mouse, camera); m = ray.ray.intersectPlane(fluidPlane, fluidMouse);
+        }
+        const fog = scene.fog as THREE.Fog;
+        fluid.setView(h * renderer.getPixelRatio(), fog.near, fog.far);
+        fluid.update(zones[i]?.dataset.stage ?? 'hero', zones[next]?.dataset.stage ?? 'hero', k, dt, now / 1000, swarmKick, m);
+      }
+    } else updateSwarm(zones[i]?.dataset.stage ?? 'hero', zones[next]?.dataset.stage ?? 'hero', k, reducedMotion ? 0 : now / 1000);
     secrets.forEach(sx => { sx.m.rotation.set(t, t * 1.4, 0); });
 
     // section objects grow in when their section is close, shrink away after
@@ -900,10 +1057,32 @@ export async function initWorld(){
       if (vis) el.style.transform = `translate(${((v.x + 1) / 2 * w).toFixed(1)}px, ${((1 - v.y) / 2 * h).toFixed(1)}px)`;
     });
     if (w >= 900 && (frameNo++ & 1) === 0) drawRadar(t, active);
+    // ghosts glide along an arc to the section their visitor is reading, trailing light
+    ghosts.forEach((g, gid) => {
+      g.fade = clamp(g.fade + (g.seen ? dt : -dt) * 1.5);
+      if (!g.seen && g.fade <= 0){ scene.remove(g.m, g.trail); ghosts.delete(gid); return; }
+      ghostSpot(g.stage, g.a, t, ghostTo);
+      const dist = g.m.position.distanceTo(ghostTo);
+      g.m.position.lerp(ghostTo, 1 - Math.exp(-dt * 1.4)); g.m.position.y += Math.min(dist, 12) * dt * .5;
+      g.m.rotation.set(t * 2, t * 3, 0); g.m.scale.setScalar(g.fade * (1 + Math.sin(t * 5 + g.a) * .15));
+      g.tpos.copyWithin(3, 0, 13 * 3); g.m.position.toArray(g.tpos, 0); g.trail.geometry.attributes.position.needsUpdate = true;
+    });
+    ghostMat.color.copy(dayFog ? P.ink : P.signal).lerp(new THREE.Color(dayFog ? 0x000000 : 0xffffff), .4); ghostTrailMat.color.copy(P.signal);
+    ghostTrailMat.blending = dayFog ? THREE.NormalBlending : THREE.AdditiveBlending;
+    titles.update(arrived, camera, look!, now / 1000, dt, h * renderer.getPixelRatio() * .045, reducedMotion);
+    // the sky follows the camera; when the sun is on screen it throws god rays
+    sky.update(camera, Date.now());
+    sunFar.copy(camera.position).addScaledVector(sky.sunDir, 150).project(camera);
+    const sunUp = Math.sin(sky.sun.alt);
+    if (sunUp > -.04 && sunFar.z < 1 && Math.abs(sunFar.x) < 1.3 && Math.abs(sunFar.y) < 1.3)
+      fx.setSun((sunFar.x + 1) / 2, (sunFar.y + 1) / 2, clamp(sunUp * 5 + .3) * (dayFog ? .5 : 1));
+    else fx.setSun(.5, .5, 0);
     fx.render(now / 1000, dt, rootOn && !reducedMotion ? .05 : 0);
     fpsN++; if (now - fpsAt > 1000){ emit('worldfps', Math.round(fpsN * 1000 / (now - fpsAt))); fpsN = 0; fpsAt = now; }
     if (!readySent){ readySent = true; emit(WORLD.ready); }
   };
+  let worldPaused = false;
+  addEventListener('worldpause', e => { worldPaused = !!(e as CustomEvent<boolean>).detail; prev = 0; });
   let readySent = false, fpsN = 0, fpsAt = performance.now();
   let frameNo = 0;
   requestAnimationFrame(frame);
