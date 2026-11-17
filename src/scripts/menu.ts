@@ -17,7 +17,9 @@ export function initMenu(){
   if (clock){
     const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kuala_Lumpur', hour: '2-digit', minute: '2-digit', hour12: false });
     let wx: Weather | null = null;
-    const tick = () => { clock.textContent = `PNG ${fmt.format(new Date())}${wx ? ` · ${wx.temp}° ${wx.label}` : ''}`; };
+    const time = document.createElement('span'), weather = document.createElement('span');
+    weather.className = 'hud-wx'; clock.replaceChildren(time, weather);
+    const tick = () => { time.textContent = `PNG ${fmt.format(new Date())}`; weather.textContent = wx ? ` · ${wx.temp}° ${wx.label}` : ''; };
     tick(); setInterval(tick, 20_000);
     penangWeather().then(x => { wx = x; tick(); });
   }

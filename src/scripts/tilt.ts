@@ -2,7 +2,7 @@
    Mouse only; nothing under reduced motion. */
 import { reducedMotion } from './env';
 
-const CARDS = '.course, .issue, .tl-item, .sem, .contact-card, .soon-card, .pick-a, .gate .b-win, .cmap-stats';
+const CARDS = '.course, .issue, .sem, .contact-card, .soon-card, .pick-a, .gate .b-win, .cmap-stats';
 
 export function initTilt(){
   // the old one-off entrances are replaced by the 3D scroll rise (one.css)

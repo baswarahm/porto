@@ -1,41 +1,57 @@
 ---
 import SectionHead from './SectionHead.astro';
-import { experience, education, type TimelineItem } from '../data/experience';
+import { graph, BRANCHES } from '../data/journey-graph';
 import { degreeProgress } from '../lib/degree';
 
 const { pct } = degreeProgress();
-const columns: { id: string; title: string; items: TimelineItem[] }[] = [
-  { id: 'exp', title: 'experience', items: experience },
-  { id: 'edu', title: 'education', items: education },
-];
+// lane geometry (px): lane l sits at x(l); the dot sits DOT px below the row top
+const x = (l: number) => 12 + l * 20, DOT = 26, W = x(BRANCHES.length - 1) + 12;
+const path = ([a, b]: [number, number]) => a === b ? `M${x(a)} 0V${DOT}` : `M${x(a)} 0C${x(a)} ${DOT * .62} ${x(b)} ${DOT * .38} ${x(b)} ${DOT}`;
+const merged = (r: (typeof graph)[number]) => r.top.filter(([a, b]) => a !== b && b < a).map(([a]) => BRANCHES[a]);
 ---
 <section class="zone" id="journey" data-stage="journey" data-side="left" aria-labelledby="journey-h">
   <div class="wrap">
-    <SectionHead n="05" title="Experience & education" note="tap an entry for details" id="journey-h" />
-    <div class="journey">
-      {columns.map(col => (
-        <div class={`tl reveal ${col.id === 'exp' ? 'anim-left' : 'anim-right'}`} data-tl={col.id}>
-          <h3 class="tl-head"><span>{col.title}</span><span>{col.items.length}</span></h3>
-          <div class="tl-line" aria-hidden="true"><span></span></div>
-          {col.items.map((it, i) => (
-            <details class="tl-item" style={`--i:${i}`} data-pill>
+    <SectionHead n="05" title="Experience & education" note="tap a commit for details" id="journey-h" />
+    <div class="ggraph" data-gg style={`--gw:${W}px`}>
+      <p class="gg-cmd" aria-hidden="true"><span>$</span> git log --graph --reverse --all</p>
+      <div class="gg-track">
+      <span class="gg-head" aria-hidden="true"><i></i></span>
+      <ol class="gg-rows" aria-label="Experience and education, oldest first">
+        {graph.map((r, i) => (
+          <li class="gg-row" data-l={r.lane} data-merge={merged(r).length ? '' : undefined} style={`--i:${i}; --c:var(--b${r.lane + 1})`}>
+            <div class="gg-cell" aria-hidden="true">
+              <svg class="gg-top" width={W} height={DOT} viewBox={`0 0 ${W} ${DOT}`}>
+                {r.top.map(seg => <path d={path(seg)} data-l={seg[0] === 0 ? seg[1] : seg[0]} style={`--c:var(--b${(seg[0] === 0 ? seg[1] : seg[0]) + 1})`} />)}
+              </svg>
+              {r.below.map(l => <span class="gg-ln" data-l={l} style={`--x:${x(l)}px; --c:var(--b${l + 1})`}></span>)}
+              <span class="gg-dot" style={`--x:${x(r.lane)}px`}></span>
+            </div>
+            <details class="gg-card" data-pill>
               <summary>
-                <span class="tl-dot" aria-hidden="true"></span>
-                <span class="tl-date">{it.ongoing && it.date.endsWith('now') ? <>{it.date.slice(0, -3)}<span class="live-now"><i aria-hidden="true"></i>now</span></> : it.date}</span>
-                <span class="tl-title">{it.title}</span>
-                <span class="tl-org">{it.org}</span>
-                <span class="tl-tag">{it.tag}</span>
+                <span class="gg-meta">
+                  <code class="gg-hash">{r.hash}</code>
+                  {r.ref && <span class={`gg-ref${r.ref.startsWith('HEAD') ? ' head' : ''}`}>{r.ref}</span>}
+                  <span class="gg-date">{r.item.ongoing && r.item.date.endsWith('now') ? <>{r.item.date.slice(0, -3)}<span class="live-now"><i aria-hidden="true"></i>now</span></> : r.item.date}</span>
+                </span>
+                <span class="gg-title">{r.item.title}</span>
+                <span class="gg-org">{r.item.org}</span>
+                <span class="gg-tag">{r.item.tag}</span>
               </summary>
-              <div class="tl-body">
-                <p>{it.body}</p>
-                {it.ongoing && (
+              <div class="gg-body">
+                <p>{r.item.body}</p>
+                {merged(r).length > 0 && <p class="gg-merge">merged {merged(r).join(', ')} into main</p>}
+                {r.item.ongoing && (
                   <p class="tl-live"><span class="bar"><span data-degree-fill style={`width:${(pct * 100).toFixed(1)}%`}></span></span><span data-degree-pct-short>{(pct * 100).toFixed(1)}%</span> of the degree done</p>
                 )}
               </div>
             </details>
-          ))}
-        </div>
-      ))}
+          </li>
+        ))}
+      </ol>
+      </div>
+      <ul class="gg-legend" aria-label="Branches">
+        {BRANCHES.map((b, l) => <li data-l={l} style={`--c:var(--b${l + 1})`}><i aria-hidden="true"></i>{b === 'main' ? 'main · school' : b}</li>)}
+      </ul>
     </div>
   </div>
 </section>

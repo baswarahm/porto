@@ -73,9 +73,24 @@ const person = {
   try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   // the site opens straight in (no opening slides)
   document.documentElement.classList.add('no-opening');
+  // a short terminal boot while the 3D world loads, once per visit
+  try { if (location.pathname === '/' && !sessionStorage.getItem('bhm-boot')) document.documentElement.classList.add('booting'); } catch (e) {}
+  // reduced motion chosen in the fx panel
+  try { if (localStorage.getItem('bhm-motion') === 'reduced') document.documentElement.classList.add('rm'); } catch (e) {}
 </script>
 </head>
 <body data-page={page}>
+  {isHome && (
+    <div class="boot" aria-hidden="true">
+      <pre><span style="--d:0">baswara.hm bios · build 2026.11</span>
+<span style="--d:1"><b>[ ok ]</b> mounting /dev/world</span>
+<span style="--d:2"><b>[ ok ]</b> loading three.js · bloom · crt</span>
+<span style="--d:3"><b>[ ok ]</b> linking 7 hosts on 10.0.0.0/24</span>
+<span style="--d:4"><b>[ ok ]</b> reading the weather in Penang</span>
+<span style="--d:5" class="boot-wait"><b>[ .. ]</b> waiting for the gpu<i></i></span></pre>
+      <p>press any key to skip</p>
+    </div>
+  )}
   <a class="skip" href="#main">Skip to content</a>
   <Menu page={page} />
   <main id="main">

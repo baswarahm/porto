@@ -94,3 +94,20 @@ Checked in the browser on 1440×900 desktop, 375×812 phone, NIGHT and DAY. Buil
 Note: the weather is fetched by each visitor's browser from api.open-meteo.com (Penang's coordinates only; nothing about the visitor is sent beyond the normal request).
 
 - The algorithm lab was tried and then removed at Baswara's request (degree rings and live weather stay).
+
+## Round 7: journey as a git graph + mentor's list (not pushed, waiting for review)
+| Item | What it does | Status |
+|---|---|---|
+| Journey git graph | Experience & education as `git log --graph --reverse`: main = SMP → SMA → USM; council, acp and research branches fork off and merge into the degree (HEAD -> main). A HEAD marker rides main as you scroll and lights each commit; hovering a commit lights its whole branch; tap for details. The 3D world shows the same graph as a rail with branches in 3D, HEAD riding it and the camera following | ok |
+| Bloom + CRT | `fx.ts`: UnrealBloom (night only), then chromatic aberration, faint scanlines, grain and a vignette. Glitch tears on firewall hits, breach, root mode, x-ray | ok |
+| Camera | Slow handheld drift while idle; drag empty space (mouse) to look around, it springs back; on arrival the host and its 3D object pulse, a scan line sweeps the panel and the note types itself out (first time) | ok |
+| Living network | nmap scan sphere lights hosts as it passes; clicking my name (or `breach`) blows the network apart and the swarm bursts, then both re-form; this semester's ring fills up whenever the degree is in view | ok |
+| Interactivity | Hover a host: it glows and an nmap-style card shows (IP, port, open/filtered); click it to fly there. Terminal: `nmap` (terminal goes see-through to watch the scan), `breach`, `tour`. `x` x-ray now also turns the 3D world to wireframe | ok |
+| Quality / motion | `fx` key in the HUD (in the menu on phones): quality high/low (low = no bloom/CRT, pixel ratio 1, 40% particles; defaults to low on ≤4-core machines) and motion full/reduced (overrides the OS setting), saved per browser | ok |
+| Onboarding | 4 skippable cards on the first visit (scroll, look, keys, map); Esc / skip / arrows; `tour` replays | ok |
+| Mini-map | Rail of all 9 sections on the right (a pill of dots at the bottom on phones), current one lit, click to jump | ok |
+| Boot | Short terminal boot while three.js loads, once per visit, any key skips, gone as soon as the world is ready (max 3s) | ok |
+| Panels | Glass blur behind every panel, lime glow when focus is inside | ok |
+| Phone HUD | The weather part of the clock hides under 480px so the menu button fits | ok |
+
+Not done on purpose: glTF models (mentor said "later"); the existing nav + menu already cover the "traditional menu" point.

@@ -9,7 +9,7 @@
    ========================================================================== */
 import { reducedMotion } from './env';
 
-const GROUPS = '.cmap, .sem-track, .courses, .targets, .journey, .socials, .cmap-stats, .gauge, .vault, .cyl';
+const GROUPS = '.cmap, .sem-track, .courses, .targets, .ggraph, .socials, .cmap-stats, .gauge, .vault, .cyl';
 
 export function initSections3d(){
   const groups = Array.from(document.querySelectorAll<HTMLElement>(GROUPS));

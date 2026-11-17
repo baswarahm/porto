@@ -53,7 +53,12 @@ export async function createNetwork(){
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), v = new THREE.Vector3();
   const minorMat = new THREE.MeshStandardMaterial({ metalness: .3, roughness: .5 });
   const minorMesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.09, 0), minorMat, minors.length);
-  minors.forEach((p, i) => { const s = .6 + rnd() * 1.2; minorMesh.setMatrixAt(i, m4.compose(p, q, sc.set(s, s, s))); });
+  const minorScale = minors.map(() => .6 + rnd() * 1.2);
+  const placeMinors = (blow: number) => {
+    minors.forEach((p, i) => { const s = minorScale[i]; v.copy(p).multiplyScalar(1 + blow * (.25 + (i % 7) * .06)); minorMesh.setMatrixAt(i, m4.compose(v, q.identity(), sc.set(s, s, s))); });
+    minorMesh.instanceMatrix.needsUpdate = true;
+  };
+  placeMinors(0);
   group.add(minorMesh);
 
   // hosts: a solid core inside a slowly turning wire shell
@@ -61,8 +66,11 @@ export async function createNetwork(){
     const g = new THREE.Group(); g.position.copy(hostPos[i + 1]);
     const core = new THREE.Mesh(new THREE.IcosahedronGeometry(.34, 1), new THREE.MeshStandardMaterial({ metalness: .4, roughness: .3 }));
     const shell = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(.75, 1)), new THREE.LineBasicMaterial({ transparent: true, opacity: .55 }));
-    g.add(core, shell); group.add(g);
-    return { id, g, core, shell };
+    // a bigger invisible ball, so the host is easy to hover
+    const hit = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 10), new THREE.MeshBasicMaterial({ visible: false }));
+    hit.userData.host = id;
+    g.add(core, shell, hit); group.add(g);
+    return { id, g, core, shell, hit, flash: -1e9 };
   });
 
   // the core (me): a glowing crystal inside a wire shell and two rings, no photo
@@ -95,14 +103,23 @@ export async function createNetwork(){
     hosts.forEach(h => (h.shell.material as THREE.LineBasicMaterial).color.copy(h.id === 'projects' ? pal.alert : pal.ink));
   };
 
+  let hovered = '', shatterAt = -1e9;
+  /** light a host up for a moment (arrival, an nmap scan passing it) */
+  const ping = (id: string) => { const h = hosts.find(x => x.id === id); if (h) h.flash = performance.now(); };
+  /** blow the network apart and let it fall back together */
+  const shatter = () => { shatterAt = performance.now(); };
+  const SHATTER_MS = 1500;
+
   /** advance one frame; `active` is the host to light up (or 'you' / '' for none) */
   const update = (t: number, active: string) => {
     if (!P) return;
+    const now = performance.now();
     hosts.forEach(hst => {
-      const on = hst.id === active, col = hst.id === 'projects' ? P!.alert : on ? P!.signal : P!.ink3;
+      const fl = Math.max(0, 1 - (now - hst.flash) / 700);
+      const on = hst.id === active || hst.id === hovered || fl > 0, col = hst.id === 'projects' ? P!.alert : on ? P!.signal : P!.ink3;
       const mat = hst.core.material as THREE.MeshStandardMaterial;
-      mat.color.copy(col); mat.emissive.copy(col); mat.emissiveIntensity += ((on ? .9 : .05) - mat.emissiveIntensity) * .1;
-      const target = on ? 1.3 : 1;
+      mat.color.copy(col); mat.emissive.copy(col); mat.emissiveIntensity += ((on ? .9 + fl * 1.5 : .05) - mat.emissiveIntensity) * .1;
+      const target = (hst.id === active ? 1.3 : hst.id === hovered ? 1.45 : 1) + fl * .5;
       hst.g.scale.setScalar(hst.g.scale.x + (target - hst.g.scale.x) * .1);
       hst.shell.rotation.y = t * (on ? .9 : .25); hst.shell.rotation.x = t * .15;
     });
@@ -115,7 +132,18 @@ export async function createNetwork(){
       packets.setMatrixAt(i, m4.compose(v, q.identity(), sc.set(s3, s3, s3)));
     });
     packets.instanceMatrix.needsUpdate = true;
+    // shatter: minor nodes fly out and come back, the links blink out meanwhile
+    const u = (now - shatterAt) / SHATTER_MS;
+    if (u >= 0 && u <= 1.05){
+      const blow = Math.sin(Math.min(1, u) * Math.PI) * (1 - Math.min(1, u) * .3);
+      placeMinors(u > 1 ? 0 : blow);
+      majorLineMat.opacity = .7 * (1 - blow * .9); minorLineMat.opacity = .26 * (1 - blow);
+      packets.visible = blow < .3;
+      hosts.forEach((h, i) => h.g.position.copy(hostPos[i + 1]).multiplyScalar(1 + blow * .35));
+    }
   };
+  const hitTargets = hosts.map(h => h.hit);
+  const hover = (id: string) => { hovered = id; };
 
-  return { group, paint, update };
+  return { group, paint, update, ping, shatter, hover, hitTargets };
 }

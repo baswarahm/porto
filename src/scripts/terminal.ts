@@ -12,6 +12,8 @@ import { targets } from '../data/targets';
 import { experience, education } from '../data/experience';
 import { degreeProgress, textBar } from '../lib/degree';
 import { isRoot, setRoot } from './root';
+import { HOSTS } from './network';
+import { WORLD, emit } from './env';
 
 const FILES: Record<string, () => string[]> = {
   'progress.log': () => {
@@ -25,7 +27,7 @@ const FILES: Record<string, () => string[]> = {
   'projects/': () => ['!permission denied: projects/ is locked while it is rebuilt. coming soon.'],
 };
 const SECTIONS: Record<string, string> = { top: 'top', home: 'top', network: 'network', root: 'root', ...Object.fromEntries(pages.map(p => [p.label, p.id])) };
-const COMMANDS = ['help', 'whoami', 'ls', 'cat', 'open', 'cd', 'date', 'theme', 'matrix', 'breach', 'sudo', 'exit', 'clear'];
+const COMMANDS = ['help', 'whoami', 'ls', 'cat', 'open', 'cd', 'nmap', 'breach', 'date', 'theme', 'matrix', 'tour', 'sudo', 'exit', 'clear'];
 
 export function initTerminal(){
   const wrap = document.createElement('div');
@@ -71,7 +73,8 @@ export function initTerminal(){
       case 'help': return print([
         'whoami            who I am', 'ls                list my files', 'cat <file>        read one, e.g. cat goals.txt',
         'open <section>    fly there: progress, now, goals, projects, journey, contact', 'date              the time in Penang',
-        'theme             switch day / night', 'matrix            binary rain on / off', 'breach            jump to the network',
+        'nmap              scan my network (watch the 3D world)', 'breach            blow the network apart and fly in',
+        'theme             switch day / night', 'matrix            binary rain on / off', 'tour              replay the quick tour',
         'sudo su           ...', 'clear · exit']);
       case 'whoami': return print([profile.name, 'first-year CS student · Intelligent Computing · Universiti Sains Malaysia', 'from Solo, Indonesia · now in Penang, Malaysia']);
       case 'ls': return print([Object.keys(FILES).map(f => f === 'projects/' ? `${f} (locked)` : f).join('   ')]);
@@ -84,7 +87,16 @@ export function initTerminal(){
         if (!id) return print([`!open: unknown section "${arg}". try: ${Object.keys(SECTIONS).join(', ')}`]);
         print([`flying to /${arg} ...`], 'ok'); return go(id);
       }
-      case 'breach': print(['breaching the firewall ...'], 'ok'); return go('network');
+      case 'nmap': {
+        // the terminal goes see-through so the scan sphere is visible behind it
+        wrap.classList.add('peek'); emit(WORLD.nmap);
+        print(['Starting Nmap scan on 10.0.0.0/24 ...', 'HOST        NAME       PORT      STATE'], 'dim');
+        Object.keys(HOSTS).forEach((id, i) => setTimeout(() => print([`10.0.0.${i + 1}`.padEnd(12) + (id === 'you' ? 'baswara' : id === 'targets' ? 'goals' : id).padEnd(11) + '443/tcp   ' + (id === 'projects' ? 'filtered' : 'open')], id === 'projects' ? 'err' : 'ok'), 280 + i * 260));
+        setTimeout(() => { print([`Nmap done: ${Object.keys(HOSTS).length} hosts up · try "open journey"`], 'dim'); wrap.classList.remove('peek'); }, 2600);
+        return;
+      }
+      case 'breach': print(['breaching the firewall ...'], 'ok'); emit(WORLD.breach); return go('network');
+      case 'tour': close(); emit('tour'); return;
       case 'date': return print([new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kuala_Lumpur', dateStyle: 'full', timeStyle: 'short' }).format(new Date()) + ' · Penang']);
       case 'theme': document.querySelector<HTMLElement>('[data-theme-toggle]')?.click(); return print(['theme switched'], 'ok');
       case 'matrix': document.getElementById('bgBtn')?.click(); return print(['binary rain toggled'], 'ok');
