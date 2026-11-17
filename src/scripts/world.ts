@@ -625,6 +625,8 @@ export async function initWorld(){
     // tall, narrow screens: step back so the object still fits across
     const fit = clamp(1.3 / (w / h), 1, 2.1);
     camPos.sub(camLook).multiplyScalar(fit).add(camLook);
+    // the fog steps back with the camera, or the whole network fades out on narrow screens
+    (scene.fog as THREE.Fog).near = 14 * fit; (scene.fog as THREE.Fog).far = 62 * fit;
     // glide, don't jump (also when you click a nav link far down)
     const ease = reducedMotion ? 1 : 1 - Math.exp(-dt * 4.2);
     if (!cam){ cam = camPos.clone(); look = camLook.clone(); }
