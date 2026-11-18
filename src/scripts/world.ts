@@ -1323,11 +1323,17 @@ export async function initWorld(){
     if (reducedMotion || flying || shooting || gaming){
       if (meltState.size){ meltState.forEach((_, n) => wrapOf(n) && melt.show(wrapOf(n)!)); meltState.clear(); }
     } else {
-      const wi = wrapOf(i), wn = next !== i ? wrapOf(next) : null, si = meltState.get(i) ?? 'shown';
-      if (wi && k > .14 && si === 'shown'){ melt.leave(wi, hostScreen(i)); meltState.set(i, 'gone'); }
-      else if (wi && k < .1 && si === 'gone'){ melt.form(wi, hostScreen(i)); meltState.set(i, 'shown'); }
-      if (wn && k > .14 && (meltState.get(next) ?? 'shown') === 'shown'){ melt.hide(wn); meltState.set(next, 'gone'); }
-    }    // the nav marks the section you're in
+      // decided by how much of each panel is really on screen, so text you can see is never melted away:
+      // a panel breaks up only once it has almost left the screen, and assembles as soon as it comes in
+      zones.forEach((_, n) => {
+        const wr = wrapOf(n); if (!wr) return;
+        const r = wr.getBoundingClientRect(), seen = Math.max(0, Math.min(h, r.bottom) - Math.max(0, r.top)) / Math.max(1, Math.min(h, r.height));
+        const s = meltState.get(n) ?? 'shown';
+        if (s === 'shown' && seen < .12){ if (seen > 0) melt.leave(wr, hostScreen(n)); else melt.hide(wr); meltState.set(n, 'gone'); }
+        else if (s === 'gone' && seen > .2){ melt.form(wr, hostScreen(n)); meltState.set(n, 'shown'); }
+      });
+    }
+    // the nav marks the section you're in
     const cur = zones[i]?.id ?? '';
     if (cur !== lastActive){
       lastActive = cur;

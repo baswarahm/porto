@@ -70,7 +70,7 @@ export function createMelt(){
         g.globalAlpha = alpha; g.fillStyle = p.c; g.fillRect(x - s / 2, y - s / 2, s, s);
       }
       // assembling: the real panel fades in under the particles near the end
-      if (j.kind === 'in' && u > .6 && !j.done){ j.done = true; j.el.classList.remove('melt-hide'); }
+      if (j.kind === 'in' && u > .35 && !j.done){ j.done = true; j.el.classList.remove('melt-hide'); }
     }
     g.globalAlpha = 1;
     jobs = jobs.filter(j => now - j.t0 < j.dur + 80);
@@ -100,7 +100,7 @@ export function createMelt(){
     form(el: HTMLElement, from: { x: number; y: number }){
       const pts = sample(el);
       if (!pts.length){ el.classList.remove('melt-hide'); return; }
-      run({ kind: 'in', el, t0: performance.now(), dur: 1000, done: false, ps: pts.map(p => {
+      run({ kind: 'in', el, t0: performance.now(), dur: 850, done: false, ps: pts.map(p => {
         const fx = from.x + (Math.random() - .5) * 30, fy = from.y + (Math.random() - .5) * 30;
         return { fx, fy, tx: p.x, ty: p.y, ...ctrl(fx, fy, p.x, p.y), c: p.c, d: Math.random() * .3, s: 2.4 };
       }) });
