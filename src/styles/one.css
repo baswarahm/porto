@@ -945,3 +945,26 @@ html.gaming body{ cursor:crosshair; }
 .def-over div{ display:flex; justify-content:center; gap:10px; margin-top:6px; }
 .def-help{ position:absolute; left:50%; bottom:130px; translate:-50% 0; margin:0; font:11px var(--mono); color:var(--ink-3); white-space:nowrap; }
 @media (max-width:640px){ .def-help{ display:none; } .def-int i{ width:60px; } }
+/* ---- responsive pass ----------------------------------------------------------------------------------------- */
+/* the music deck is fixed to the bottom: every section keeps clear of it, so nothing ends up under the bar */
+html.deck-on .zone{ padding-bottom:max(14vh, 150px) !important; }
+/* short desktop screens (laptops, a browser with toolbars): the dossier sits higher and the photo shrinks
+   (still uncropped) so the whole card, links included, fits above the deck on the first screen */
+@media (min-width:901px) and (max-height:900px){
+  .dossier{ padding-top:calc(var(--hdr) + 2.5vh) !important; justify-content:flex-start; }
+  .doss-photo{ justify-self:center; width:auto; height:min(calc(100vh - 430px), 420px); max-width:100%; }
+}
+/* the goals board: three columns only when each gets a readable width; otherwise one column, stacked */
+#targets > .wrap{ container-type:inline-size; }
+@container (max-width:620px){
+  .targets{ grid-template-columns:1fr !important; }
+  .targets .col{ border-right:0; border-bottom:1px solid var(--ink); }
+  .targets .col:last-child{ border-bottom:0; }
+  .targets .col .issue{ margin:12px 14px 14px; }
+}
+/* the projects vault: dial beside the card only when the card still gets a readable width */
+#projects > .wrap{ container-type:inline-size; }
+@container (max-width:600px){
+  .vault-row{ grid-template-columns:1fr; gap:18px; }
+  .vault{ width:min(200px, 55%); margin:0 auto; }
+}
