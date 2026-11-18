@@ -274,7 +274,7 @@ body[data-page="home"] main{ padding-top:0; }
 .gauge .seg{ stroke:var(--rule); stroke-width:14; stroke-dasharray:41 319; stroke-dashoffset:var(--o); }
 .gauge .seg.done{ stroke:var(--lime); }
 .gauge .seg-fill{ stroke:var(--lime); stroke-width:14; stroke-dasharray:var(--len) 360; stroke-dashoffset:var(--o); filter:drop-shadow(0 0 8px color-mix(in srgb, var(--lime) 70%, transparent)); }
-.gauge:not(.on3d) .seg-fill, .gauge:not(.on3d) .seg.done{ stroke-dasharray:0 360; }
+.gauge.replay .seg-fill, .gauge.replay .seg.done{ stroke-dasharray:0 360; transition:none; }   /* the true fill is the resting state; .replay resets it for a moment so it can draw in again */
 .gauge .seg-fill, .gauge .seg{ transition:stroke-dasharray 1.2s calc(.3s + var(--i) * 80ms) cubic-bezier(.2,.8,.2,1); }
 .gauge .core-ring{ stroke:var(--rule); stroke-width:1; stroke-dasharray:2 5; animation:spinr 30s linear infinite; transform-origin:100px 100px; }
 /* the rings are alive: a glint of light runs along every filled semester, a radar sweep circles the outside,
@@ -285,10 +285,11 @@ body[data-page="home"] main{ padding-top:0; }
 .gauge .sweep{ stroke:var(--lime); stroke-width:1.5; stroke-dasharray:28 332; opacity:.0; transform-origin:100px 100px; transition:opacity .6s 1.4s; filter:drop-shadow(0 0 4px var(--lime)); }
 .gauge.on3d .sweep{ opacity:.7; animation:spinr 4.5s linear infinite; }
 .gauge .tick{ stroke:var(--rule); stroke-width:2; transition:stroke .4s calc(.5s + var(--i, 0) * 80ms); }
-.gauge.on3d .tick.done, .gauge.on3d .tick.now{ stroke:var(--lime); }
-.gauge .seg-tip{ fill:var(--lime); opacity:0; transition:opacity .4s calc(1.5s + var(--i) * 80ms); }
+.gauge .tick.done, .gauge .tick.now{ stroke:var(--lime); }
+.gauge.replay .tick{ stroke:var(--rule); transition:none; }
+.gauge .seg-tip{ fill:var(--lime); transition:opacity .4s calc(1.5s + var(--i) * 80ms); }
+.gauge.replay .seg-tip{ opacity:0; transition:none; }
 .gauge .seg-tip .halo{ fill:none; stroke:var(--lime); stroke-width:1.5; transform-box:fill-box; transform-origin:center; }
-.gauge.on3d .seg-tip{ opacity:1; }
 .gauge.on3d .seg-tip .halo{ animation:tipPing 1.6s ease-out infinite; }
 @keyframes tipPing{ from{ transform:scale(.5); opacity:1; } to{ transform:scale(2.2); opacity:0; } }
 .gauge .seg-fill, .gauge .seg{ transition-property:stroke-dasharray, stroke-width, filter; }

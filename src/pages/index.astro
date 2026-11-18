@@ -20,6 +20,19 @@ import { skills } from '../data/skills';
 import { brandIcon } from '../lib/brand';
 
 const deg = degreeProgress();
+const pctTxt = (deg.pct * 100).toFixed(1) + '%';
+// a text alternative for the WebGL world (the canvas itself is aria-hidden): what each host shows,
+// read by screen readers and anything that reads the page as text; world.ts announces each arrival
+const scene3d: [string, string][] = [
+  ['hero', `a hologram of me in front of a hex firewall, with my stack (${skills.length} tools) orbiting it as logo badges`],
+  ['network', 'the firewall breaks open into my network: a liquid-metal core and six section hosts, each idling in its own way, with data packets streaming along the links between them'],
+  ['progress', `my degree as rings, one per semester with every course a node, drawn in to ${pctTxt} done`],
+  ['now', `the ${courses.length} things I am taking this semester as satellites round their host`],
+  ['targets', `my goals as ${targets.doing.length + targets.next.length + targets.done.length} targets on spinning rings`],
+  ['projects', 'a host locked behind a padlock and a hex force field; trying to open it is refused while the projects are rebuilt'],
+  ['journey', 'my life as a 3D git graph with HEAD riding the main branch, and hologram crests for my schools (SMP, SMA, USM)'],
+  ['contact', 'a beacon sending out rings'],
+];
 const world = {
   sems: deg.semesters.map(s => ({ state: s.state, fill: +s.fill.toFixed(3) })),
   courses: courses.length,
@@ -35,6 +48,11 @@ const world = {
   <div class="world-labels" id="worldLabels" aria-hidden="true"></div>
   <p class="skill-tip" id="skillTip" aria-hidden="true"></p>
   <ul class="sr-only" aria-label="My stack">{skills.map(s => <li>{s.name}</li>)}</ul>
+  <section class="sr-only" id="scene3d" aria-label="The 3D world, described">
+    <p>Behind the page is one 3D world. Scrolling flies the camera from host to host; each host lands with a pulse.</p>
+    <ul>{scene3d.map(([stage, text]) => <li data-stage={stage}>{text}</li>)}</ul>
+    <p id="worldStatus" role="status" aria-live="polite"></p>
+  </section>
   <Dossier />
   <Gate />
   <Progress />

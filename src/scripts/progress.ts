@@ -59,7 +59,8 @@ export function initProgress(map: { open: (code: string) => void; focusSem: (i: 
     }
     const em = gauge?.querySelector('figcaption em'); if (em) em.textContent = p.semesters[p.current].label;
     const pct = (p.pct * 100).toFixed(1) + '%';
-    if (pctEl && !first) pctEl.textContent = pct;
+    // always today's (or the time machine's) value, never the build-time one; the replay below only animates it
+    if (pctEl){ pctEl.textContent = pct; pctEl.dataset.gaugePct = (p.pct * 100).toFixed(1); }
     const bar = $('[data-degree-bar]');
     if (bar) bar.innerHTML = `<span class="mono">${textBar(p.pct)}</span> <b>${pct}</b>`;
     const fact = $('[data-degree-pct]');
@@ -81,27 +82,29 @@ export function initProgress(map: { open: (code: string) => void; focusSem: (i: 
     el.addEventListener('pointerenter', () => hot(i)); el.addEventListener('pointerleave', () => hot(-1));
     el.addEventListener('focus', () => hot(i)); el.addEventListener('blur', () => hot(-1));
   });
-  // ...and its percentage counts up as the rings fill in
-  if (gauge && pctEl){
-    const goal = p.pct * 100;
-    if (reducedMotion) pctEl.textContent = goal.toFixed(1) + '%';
-    else {
-      const run = () => {
-        const t0 = performance.now();
-        const step = (n: number) => {
-          const u = Math.min(1, Math.max(0, (n - t0 - 300) / 1500)), e = 1 - Math.pow(1 - u, 4);
-          pctEl.textContent = (goal * e).toFixed(1) + '%';
-          if (u < 1) requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
+  // ...and the rings replay their fill, with the percentage counting up alongside.
+  // The real value is the resting state: the page always says the true percentage (to a reader, a
+  // full-page screenshot, a crawler, a tab that never scrolls). The replay only starts from zero for a
+  // moment, just before the gauge scrolls into view, and always lands back on the real number.
+  if (gauge && pctEl && !reducedMotion){
+    const replay = () => {
+      const goal = p.pct * 100;   // today, or the day the time machine is on
+      gauge.classList.add('replay'); void gauge.getBoundingClientRect(); gauge.classList.remove('replay');
+      const t0 = performance.now();
+      const step = (n: number) => {
+        const u = Math.min(1, Math.max(0, (n - t0 - 300) / 1500)), e = 1 - Math.pow(1 - u, 4);
+        pctEl.textContent = (goal * e).toFixed(1) + '%';
+        if (u < 1) requestAnimationFrame(step);
       };
-      if (gauge.classList.contains('on3d')) run();
-      else {
-        pctEl.textContent = '0.0%';
-        const mo = new MutationObserver(() => { if (gauge.classList.contains('on3d')){ mo.disconnect(); run(); } });
-        mo.observe(gauge, { attributes: true, attributeFilter: ['class'] });
-      }
-    }
+      requestAnimationFrame(step);
+      setTimeout(() => { pctEl.textContent = goal.toFixed(1) + '%'; }, 2200);   // even if frames stall
+    };
+    let played = false;
+    new IntersectionObserver(es => {
+      if (played || !es.some(e => e.isIntersecting)) return;
+      // only when you scroll to it: a gauge already on screen at load just stays put
+      if (performance.now() > 600) { played = true; replay(); }
+    }, { rootMargin: '0px 0px 8% 0px' }).observe(gauge);
   }
 }
 /* ---- git log -------------------------------------------------------------- */

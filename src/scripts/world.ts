@@ -446,6 +446,16 @@ export async function initWorld(){
     const hitP = pray.intersectObjects(focusables, false)[0];
     if (hitP) photo.focused(hitP.distance, e.clientX, e.clientY);
   });
+  /* ---- the text alternative (index.astro #scene3d): say where the camera landed and what's there ---- */
+  const status = document.getElementById('worldStatus');
+  const announce = (stage: string, n: number) => {
+    const what = document.querySelector(`#scene3d li[data-stage="${stage}"]`)?.textContent;
+    if (!status || !what) return;
+    const name = stage === 'hero' ? 'the start' : (zones[n]?.querySelector('h2 .sr-only') ?? zones[n]?.querySelector('h2'))?.textContent?.trim().replace(/\s+/g, ' ');
+    // the rings say what the gauge says (the time machine can move both)
+    const pct = stage === 'progress' ? (document.querySelector<HTMLElement>('[data-gauge-pct]')?.dataset.gaugePct ?? '') + '%' : null;
+    status.textContent = `3D view: arrived at ${name || stage}. ${pct ? what.replace(/[\d.]+% done/, `${pct} done`) : what}.`;
+  };
   /* ---- panels melt into particles (melt.ts): leaving a section, its panel streams into its host; the next one assembles out of its own ---- */
   const melt = createMelt(), meltState = new Map<number, 'shown' | 'gone'>();
   const wrapOf = (n: number) => zones[n]?.querySelector<HTMLElement>('.wrap') ?? null;
@@ -982,6 +992,7 @@ export async function initWorld(){
     if (k > .5) arrived = '';
     else if (k < .02 && stageNow !== arrived && cam.distanceTo(camPos) < .4){
       arrived = stageNow; arriveAt = now; net.ping(stageNow); emit(WORLD.arrive, zones[i]?.id);
+      announce(stageNow, i);
       if (!reducedMotion) net.arrive(stageNow);
       if (stageNow === 'projects') lockHit = now;
       if (HOSTS[stageNow] && !reducedMotion){ shock.position.fromArray(HOSTS[stageNow]); shock.visible = true; }
