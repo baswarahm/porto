@@ -7,10 +7,34 @@
    behind it while it plays, and the visualizer is 3D bars driven by the real
    audio (Web Audio analyser). The same analysis is shared with the 3D world
    (`music` below), so the network moves with the song.
+   Search + queue: the list button opens a panel above the bar. Type any song
+   and it's looked up with Apple's public iTunes Search API, which plays the
+   official 30-second preview (nothing is hosted here). Below the search,
+   "up next" is a short list of songs with the same vibe as Hannah Montana,
+   looked up the same way; next / prev / shuffle walk that queue.
    ========================================================================== */
 import { reducedMotion, emit } from './env';
 
-const TRACK = { title: 'Hannah Montana', artist: 'Rex Orange County', src: '/music/hannah-montana.mp3', cover: '/music/hannah-montana-cover.jpg' };
+type Track = { title: string; artist: string; src: string; cover: string; preview?: boolean; link?: string };
+const HOME: Track = { title: 'Hannah Montana', artist: 'Rex Orange County', src: '/music/hannah-montana.mp3', cover: '/music/hannah-montana-cover.jpg' };
+/** same vibe as Hannah Montana: warm, jazzy bedroom pop / indie soul */
+const VIBES: [string, string][] = [
+  ['Pluto Projector', 'Rex Orange County'], ['Dark Red', 'Steve Lacy'], ['Bad Habit', 'Steve Lacy'],
+  ['3 Nights', 'Dominic Fike'], ['Everytime', 'boy pablo'], ['Sofia', 'Clairo'], ['Rearrange My World', 'Daniel Caesar'],
+];
+const ITUNES = 'https://itunes.apple.com/search?media=music&entity=song';
+const NOT_STUDIO = new RegExp('\\b(live|remix|instrumental|acoustic|sped|slowed|karaoke)\\b', 'i');
+type ItunesSong = { trackName: string; artistName: string; previewUrl?: string; artworkUrl100?: string; trackViewUrl?: string };
+const toTrack = (r: ItunesSong): Track | null => r.previewUrl ? {
+  title: r.trackName, artist: r.artistName, src: r.previewUrl, preview: true, link: r.trackViewUrl,
+  cover: (r.artworkUrl100 ?? '').replace('100x100bb', '600x600bb') || HOME.cover,
+} : null;
+const lookup = async (term: string, limit: number): Promise<ItunesSong[]> => {
+  const r = await fetch(`${ITUNES}&limit=${limit}&term=${encodeURIComponent(term)}`);
+  if (!r.ok) throw new Error(String(r.status));
+  return (await r.json()).results ?? [];
+};
+const esc = (t: string) => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 export const MUSIC_EVENT = 'music';
 
 /** live analysis of what's playing, read by the 3D world every frame */
@@ -26,6 +50,7 @@ const I = {
   plus: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
   check: '<circle cx="12" cy="12" r="9" fill="currentColor"/><path d="m8 12.5 2.7 2.7L16.5 9.5" stroke="#000"/>',
   vol: '<path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/>',
+  list: '<path d="M4 6h11M4 11h11M4 16h7"/><circle cx="17.5" cy="15.5" r="3"/><path d="m19.7 17.7 2 2"/>',
   mute: '<path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="m16 10 4 4M20 10l-4 4"/>',
 };
 const svg = (p: string) => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
@@ -33,8 +58,15 @@ const mmss = (s: number) => !isFinite(s) ? '0:00' : `${Math.floor(s / 60)}:${Str
 
 export function initMusic(){
   if (!document.getElementById('world')) return;   // the home page only
-  let liked = false;
-  try { liked = localStorage.getItem('bhm-liked') === '1'; } catch { /* fine */ }
+  // liked songs, by "title|artist" (the old single flag was for Hannah Montana)
+  const likes = new Set<string>();
+  try {
+    (JSON.parse(localStorage.getItem('bhm-liked-songs') ?? '[]') as string[]).forEach(k => likes.add(k));
+    if (localStorage.getItem('bhm-liked') === '1') likes.add(`${HOME.title}|${HOME.artist}`);
+  } catch { /* fine */ }
+  const keyOf = (t: Track) => `${t.title}|${t.artist}`;
+  let liked = likes.has(keyOf(HOME));
+  const TRACK = HOME;
   const el = document.createElement('section');
   el.className = 'deck'; el.setAttribute('aria-label', 'Music player');
   el.innerHTML = `
@@ -43,6 +75,7 @@ export function initMusic(){
       <div class="deck-art" aria-hidden="true"><span class="deck-vinyl"><img src="${TRACK.cover}" alt=""></span><img class="deck-cover" src="${TRACK.cover}" alt=""></div>
       <div class="deck-meta"><p class="deck-t">${TRACK.title}</p><p class="deck-a">${TRACK.artist}</p></div>
       <button type="button" class="deck-ic deck-like" aria-pressed="${liked}" aria-label="Save to your liked songs">${svg(liked ? I.check : I.plus)}</button>
+      <button type="button" class="deck-ic deck-q" aria-expanded="false" aria-controls="deckPanel" aria-label="Search songs and see what's up next" title="Search · up next">${svg(I.list)}</button>
     </div>
     <div class="deck-mid">
       <div class="deck-ctrl">
@@ -60,7 +93,15 @@ export function initMusic(){
       <input class="deck-vol" type="range" min="0" max="100" value="70" aria-label="Volume">
     </div>
   </div>
-  <audio preload="metadata" src="${TRACK.src}"></audio>`;
+  <div class="deck-panel" id="deckPanel" role="dialog" aria-label="Search songs and up next" hidden>
+    <label class="dp-search"><span class="sr-only">Search any song</span>${svg(I.list)}<input type="search" placeholder="search any song or artist" autocomplete="off" spellcheck="false"></label>
+    <p class="dp-h dp-rh" hidden>results</p>
+    <ul class="dp-list dp-results" aria-live="polite"></ul>
+    <p class="dp-h">up next · hannah montana vibes</p>
+    <ol class="dp-list dp-queue"></ol>
+    <p class="dp-foot">search + 30-second previews from Apple iTunes · Hannah Montana plays in full</p>
+  </div>
+  <audio preload="metadata" crossorigin="anonymous" src="${TRACK.src}"></audio>`;
   document.body.append(el);
   document.documentElement.classList.add('deck-on');
 
@@ -75,7 +116,7 @@ export function initMusic(){
     const on = !audio.paused;
     music.playing = on; el.classList.toggle('playing', on);
     play.innerHTML = svg(on ? I.pause : I.play);
-    play.setAttribute('aria-label', `${on ? 'Pause' : 'Play'} ${TRACK.title} by ${TRACK.artist}`);
+    play.setAttribute('aria-label', `${on ? 'Pause' : 'Play'} ${cur.title} by ${cur.artist}`);
     emit(MUSIC_EVENT, on);
   };
   let ctx: AudioContext | null = null, an: AnalyserNode | null = null, bins: Uint8Array<ArrayBuffer> | null = null;
@@ -89,24 +130,115 @@ export function initMusic(){
       bins = new Uint8Array(an.frequencyBinCount);
     } catch { ctx = null; an = null; }
   };
+  // ---- the queue: Hannah Montana first (in full), then the vibe list, plus anything picked from search
+  let queue: Track[] = [HOME], at = 0, cur: Track = HOME, shuffle = false, vibesLoaded = false;
+  const meta = $<HTMLElement>('.deck-meta'), covers = el.querySelectorAll<HTMLImageElement>('.deck-art img');
+  const paintMeta = () => {
+    meta.innerHTML = `<p class="deck-t">${esc(cur.title)}</p><p class="deck-a">${esc(cur.artist)}${cur.preview ? ' <span class="deck-pv">30s preview</span>' : ''}</p>`;
+    covers.forEach(i => { i.src = cur.cover; });
+    liked = likes.has(keyOf(cur)); like.setAttribute('aria-pressed', String(liked)); like.innerHTML = svg(liked ? I.check : I.plus);
+    like.setAttribute('aria-label', liked ? 'Remove from your liked songs' : 'Save to your liked songs');
+    if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: cur.title, artist: cur.artist, artwork: [{ src: cur.cover, sizes: '600x600', type: 'image/jpeg' }] });
+    paintQueue();
+  };
+  const load = (i: number, autoplay: boolean) => {
+    at = (i + queue.length) % queue.length; cur = queue[at];
+    audio.src = cur.src; audio.load(); paintMeta(); paintTime();
+    if (autoplay){ wireAudio(); audio.play().catch(() => {}); }
+  };
+  const step = (dir: 1 | -1) => {
+    if (dir < 0 && audio.currentTime > 3){ audio.currentTime = 0; return; }   // like every player: back = restart first
+    if (queue.length < 2){ audio.currentTime = 0; return; }
+    const i = shuffle && dir > 0 ? (at + 1 + Math.floor(Math.random() * (queue.length - 1))) % queue.length : at + dir;
+    load(i, !audio.paused || dir > 0);
+  };
+  const loadVibes = async () => {
+    if (vibesLoaded) return; vibesLoaded = true;
+    let found: Track[] = [];
+    try { found = JSON.parse(sessionStorage.getItem('bhm-vibes-3') ?? '[]'); } catch { /* fine */ }
+    if (!found.length){
+      const res = await Promise.all(VIBES.map(async ([t, a]) => {
+        try {
+          // the studio version by that artist: exact title first, then "title (feat. …)", never live / remix / instrumental takes
+          const hits = (await lookup(`${t} ${a}`, 20)).filter(h => h.previewUrl && h.artistName.toLowerCase().includes(a.toLowerCase()) && !NOT_STUDIO.test(h.trackName));
+          const name = (h: ItunesSong) => h.trackName.toLowerCase();
+          const hit = hits.find(h => name(h) === t.toLowerCase()) ?? hits.find(h => name(h).startsWith(t.toLowerCase()));
+          return hit ? toTrack(hit) : null;
+        } catch { return null; }
+      }));
+      found = res.filter((x): x is Track => !!x);
+      try { if (found.length) sessionStorage.setItem('bhm-vibes-3', JSON.stringify(found)); } catch { /* fine */ }
+    }
+    const have = new Set(queue.map(keyOf));
+    queue.push(...found.filter(t => !have.has(keyOf(t))));
+    if (!found.length) vibesLoaded = false;   // offline: try again next time
+    paintQueue();
+  };
   play.addEventListener('click', () => { wireAudio(); if (audio.paused) audio.play().catch(() => {}); else audio.pause(); });
   audio.addEventListener('play', paintPlay); audio.addEventListener('pause', paintPlay);
-  audio.addEventListener('ended', () => { if (!audio.loop){ audio.currentTime = 0; paintPlay(); } });
-  $<HTMLButtonElement>('.deck-prev').addEventListener('click', () => { audio.currentTime = 0; });
-  $<HTMLButtonElement>('.deck-next').addEventListener('click', () => { audio.currentTime = 0; if (!audio.paused && !audio.loop) audio.pause(); });
-  rep.addEventListener('click', () => { audio.loop = !audio.loop; rep.setAttribute('aria-pressed', String(audio.loop)); });
-  shuf.addEventListener('click', () => { const on = shuf.getAttribute('aria-pressed') !== 'true'; shuf.setAttribute('aria-pressed', String(on)); shuf.title = on ? 'Shuffle on (one song in the queue for now)' : 'Shuffle'; });
-  like.addEventListener('click', () => {
-    liked = !liked; like.setAttribute('aria-pressed', String(liked)); like.innerHTML = svg(liked ? I.check : I.plus);
-    like.setAttribute('aria-label', liked ? 'Remove from your liked songs' : 'Save to your liked songs');
-    try { localStorage.setItem('bhm-liked', liked ? '1' : '0'); } catch { /* fine */ }
+  audio.addEventListener('ended', async () => {
+    if (audio.loop) return;
+    await loadVibes();
+    if (queue.length > 1) load(at + 1, true); else { audio.currentTime = 0; paintPlay(); }
   });
+  $<HTMLButtonElement>('.deck-prev').addEventListener('click', () => step(-1));
+  $<HTMLButtonElement>('.deck-next').addEventListener('click', async () => { await loadVibes(); step(1); });
+  rep.addEventListener('click', () => { audio.loop = !audio.loop; rep.setAttribute('aria-pressed', String(audio.loop)); });
+  shuf.addEventListener('click', () => { shuffle = !shuffle; shuf.setAttribute('aria-pressed', String(shuffle)); shuf.title = shuffle ? 'Shuffle on' : 'Shuffle'; loadVibes(); });
+  like.addEventListener('click', () => {
+    liked = !liked; if (liked) likes.add(keyOf(cur)); else likes.delete(keyOf(cur));
+    like.setAttribute('aria-pressed', String(liked)); like.innerHTML = svg(liked ? I.check : I.plus);
+    like.setAttribute('aria-label', liked ? 'Remove from your liked songs' : 'Save to your liked songs');
+    try { localStorage.setItem('bhm-liked-songs', JSON.stringify([...likes])); localStorage.removeItem('bhm-liked'); } catch { /* fine */ }
+  });
+
+  // ---- the panel: search any song (iTunes) + the queue
+  const qBtn = $<HTMLButtonElement>('.deck-q'), panel = $<HTMLElement>('.deck-panel'), input = $<HTMLInputElement>('.dp-search input');
+  const results = $<HTMLElement>('.dp-results'), rh = $<HTMLElement>('.dp-rh'), qList = $<HTMLElement>('.dp-queue');
+  let found: Track[] = [];
+  const row = (t: Track, i: number, kind: 'q' | 'r') => `<li><button type="button" class="dp-row${kind === 'q' && i === at ? ' on' : ''}" data-${kind}="${i}">
+    <img src="${esc(t.cover.replace('600x600bb', '100x100bb'))}" alt="" loading="lazy"><span class="dp-tt"><b>${esc(t.title)}</b><i>${esc(t.artist)}</i></span>
+    <em>${kind === 'q' && i === at ? (audio.paused ? 'paused' : 'playing') : t.preview ? '30s' : 'full'}</em></button>${t.link ? `<a class="dp-out" href="${esc(t.link)}" target="_blank" rel="noopener" aria-label="${esc(t.title)} on Apple Music">↗</a>` : ''}</li>`;
+  function paintQueue(){ qList.innerHTML = queue.map((t, i) => row(t, i, 'q')).join('') || ''; }
+  const open = (on: boolean) => {
+    panel.hidden = !on; qBtn.setAttribute('aria-expanded', String(on)); el.classList.toggle('panel-on', on);
+    if (on){ loadVibes(); paintQueue(); setTimeout(() => input.focus(), 30); }
+  };
+  qBtn.addEventListener('click', () => open(panel.hidden));
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden){ open(false); qBtn.focus(); } });
+  addEventListener('pointerdown', e => { if (!panel.hidden && !el.contains(e.target as Node)) open(false); });
+  let timer = 0, ask = 0;
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 2){ results.innerHTML = ''; rh.hidden = true; return; }
+    timer = window.setTimeout(async () => {
+      const mine = ++ask; rh.hidden = false; rh.textContent = 'searching…';
+      try {
+        const hits = (await lookup(q, 8)).map(toTrack).filter((x): x is Track => !!x);
+        if (mine !== ask) return;
+        found = hits; rh.textContent = hits.length ? `results · ${hits.length}` : 'no songs found';
+        results.innerHTML = hits.map((t, i) => row(t, i, 'r')).join('');
+      } catch { if (mine === ask){ rh.textContent = 'search is offline right now'; results.innerHTML = ''; } }
+    }, 320);
+  });
+  panel.addEventListener('click', e => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button.dp-row'); if (!b) return;
+    if (b.dataset.q !== undefined){ const i = +b.dataset.q; if (i === at){ play.click(); paintQueue(); } else load(i, true); return; }
+    const t = found[+b.dataset.r!]; if (!t) return;
+    // a searched song plays now and joins the queue right after the current one
+    const have = queue.findIndex(x => keyOf(x) === keyOf(t));
+    if (have >= 0) return load(have, true);
+    queue.splice(at + 1, 0, t); load(at + 1, true);
+  });
+  audio.addEventListener('play', paintQueue); audio.addEventListener('pause', paintQueue);
+
   // ---- time + seeking
   let dragging = false;
   const paintTime = () => {
     const d = audio.duration || 0, c = audio.currentTime;
     if (!dragging) seek.value = String(d ? Math.round(c / d * 1000) : 0);
-    now.textContent = mmss(dragging ? +seek.value / 1000 * d : c); len.textContent = mmss(d || 213);
+    now.textContent = mmss(dragging ? +seek.value / 1000 * d : c); len.textContent = mmss(d || (cur.preview ? 30 : 213));
     el.style.setProperty('--p', String(+seek.value / 1000));
   };
   audio.addEventListener('timeupdate', paintTime); audio.addEventListener('loadedmetadata', paintTime);
@@ -124,10 +256,11 @@ export function initMusic(){
   paintVol(); paintTime();
   // the OS media controls (lock screen, keyboard media keys) show the song and its cover
   if ('mediaSession' in navigator){
-    navigator.mediaSession.metadata = new MediaMetadata({ title: TRACK.title, artist: TRACK.artist, artwork: [{ src: TRACK.cover, sizes: '640x640', type: 'image/jpeg' }] });
+    navigator.mediaSession.metadata = new MediaMetadata({ title: HOME.title, artist: HOME.artist, artwork: [{ src: HOME.cover, sizes: '640x640', type: 'image/jpeg' }] });
     navigator.mediaSession.setActionHandler('play', () => { wireAudio(); audio.play(); });
     navigator.mediaSession.setActionHandler('pause', () => audio.pause());
-    navigator.mediaSession.setActionHandler('previoustrack', () => { audio.currentTime = 0; });
+    navigator.mediaSession.setActionHandler('previoustrack', () => step(-1));
+    navigator.mediaSession.setActionHandler('nexttrack', async () => { await loadVibes(); step(1); });
   }
 
   // ---- 3D: the slab leans toward the cursor while you're near it

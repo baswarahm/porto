@@ -25,8 +25,12 @@ export function initSections3d(){
   // course cards flip over
   document.querySelectorAll<HTMLElement>('.course').forEach(card => {
     const btns = Array.from(card.querySelectorAll<HTMLButtonElement>('.flip-btn'));
+    // the card is as tall as the face you're looking at (not the taller of the two), and grows or shrinks as it flips
+    const flip = card.querySelector<HTMLElement>('.flip'), front = card.querySelector<HTMLElement>('.face.front'), back = card.querySelector<HTMLElement>('.face.back');
+    const fit = () => { if (flip && front && back) flip.style.height = `${(card.classList.contains('flipped') ? back : front).offsetHeight}px`; };
+    if (front && back){ fit(); new ResizeObserver(fit).observe(front); new ResizeObserver(fit).observe(back); }
     const set = (on: boolean) => {
-      card.classList.toggle('flipped', on);
+      card.classList.toggle('flipped', on); fit();
       btns[0]?.setAttribute('aria-expanded', String(on));
       (on ? btns[1] : btns[0])?.focus({ preventScroll: true });
     };
