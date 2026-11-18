@@ -80,9 +80,10 @@ export const courses: Course[] = [
     next: ['CPU, control unit, I/O', 'Memory, cache and virtual memory'],
   },
   {
-    code: 'SELF', name: 'Self-study: Git + web', lane: 4,
+    code: 'SELF', name: 'Self-study: web + blockchain', lane: 4,
     learned: ['Rebuilt this site in Astro + TypeScript', 'three.js and WebGL for the 3D world', 'Git branching'],
-    doing: ['Keeping this site up to date every semester'],
+    doing: ['Avalanche Fundamentals (Avalanche Builder Hub): consensus, multi-chain architecture, VMs', 'Keeping this site up to date every semester'],
+    next: ['Then a build track: L1 development, interoperability, VM customization or applications'],
   },
 ];
 

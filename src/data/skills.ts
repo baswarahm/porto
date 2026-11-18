@@ -1,7 +1,8 @@
 /* Skills for the "my skills" logo strip and the :skills command.
    `logo` is a simple-icons slug, or 'vscode' (drawn from Tabler, since
-   simple-icons no longer ships the VS Code mark). */
-export type SkillGroup = 'languages' | 'web & design' | 'frameworks & tools' | 'systems & deploy';
+   simple-icons no longer ships the VS Code mark), or 'grok' / 'claudecode'
+   (from Lobe Icons, see src/lib/brand.ts). */
+export type SkillGroup = 'languages' | 'web & design' | 'frameworks & tools' | 'systems & deploy' | 'ai tools';
 
 export interface Skill {
   name: string;
@@ -34,4 +35,8 @@ export const skills: Skill[] = [
   { name: 'Docker', logo: 'docker', group: 'systems & deploy', usedIn: 'containers, still learning', learning: true },
   { name: 'Kali Linux', logo: 'kalilinux', group: 'systems & deploy', usedIn: 'security basics, still learning', learning: true },
   { name: 'Vercel', logo: 'vercel', group: 'systems & deploy', usedIn: 'deploying Split Bill' },
+
+  { name: 'Claude', logo: 'claude', group: 'ai tools', usedIn: 'AI assistant' },
+  { name: 'Claude Code', logo: 'claudecode', group: 'ai tools', usedIn: 'building this portfolio' },
+  { name: 'Grok', logo: 'grok', group: 'ai tools', usedIn: 'AI assistant' },
 ];
