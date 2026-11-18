@@ -39,5 +39,6 @@ export function initSections3d(){
   const lock = document.querySelector<HTMLElement>('.vault-row');
   lock?.addEventListener('pointerenter', () => {
     lock.classList.remove('deny'); void lock.offsetWidth; lock.classList.add('deny');
+    dispatchEvent(new CustomEvent('vaulttry'));   // the padlock in the 3D world refuses too
   });
 }

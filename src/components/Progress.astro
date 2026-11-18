@@ -16,11 +16,18 @@ const laneClass = (l: number | null) => (l ? `c${l}` : undefined);
       <div class="deg-top">
         <figure class="gauge" aria-hidden="true">
           <svg viewBox="0 0 200 200">
-            {semesters.map(s => <circle class={`seg ${s.state}`} cx="100" cy="100" r="82" pathLength="360" style={`--o:${-(s.index * 45 + 2)};--i:${s.index}`} />)}
-            {semesters.map(s => s.state !== 'future' && <circle class="seg-fill" cx="100" cy="100" r="82" pathLength="360" style={`--o:${-(s.index * 45 + 2)};--len:${(41 * s.fill).toFixed(2)};--i:${s.index}`} />)}
+            {semesters.map(s => <circle class={`seg ${s.state}`} data-seg={s.index} cx="100" cy="100" r="82" pathLength="360" style={`--o:${-(s.index * 45 + 2)};--i:${s.index}`} />)}
+            {semesters.map(s => s.state !== 'future' && <circle class="seg-fill" data-seg={s.index} cx="100" cy="100" r="82" pathLength="360" style={`--o:${-(s.index * 45 + 2)};--len:${(41 * s.fill).toFixed(2)};--i:${s.index}`} />)}
+            {semesters.map(s => s.state !== 'future' && <circle class="seg-glint" cx="100" cy="100" r="82" pathLength="360" style={`--o:${-(s.index * 45 + 2)};--len:${(41 * s.fill).toFixed(2)};--i:${s.index}`} />)}
+            {semesters.map(s => <line class={`tick ${s.state}`} x1={100 + 95 * Math.cos(s.index * Math.PI / 4)} y1={100 + 95 * Math.sin(s.index * Math.PI / 4)} x2={100 + 100 * Math.cos(s.index * Math.PI / 4)} y2={100 + 100 * Math.sin(s.index * Math.PI / 4)} />)}
+            <circle class="sweep" cx="100" cy="100" r="95" pathLength="360" />
+            {semesters.filter(s => s.state === 'now').map(s => {
+              const a = (s.index * 45 + 2 + 41 * s.fill) * Math.PI / 180;
+              return <g class="seg-tip" style={`--i:${s.index}`}><circle class="halo" cx={100 + 82 * Math.cos(a)} cy={100 + 82 * Math.sin(a)} r="9" /><circle cx={100 + 82 * Math.cos(a)} cy={100 + 82 * Math.sin(a)} r="4.5" /></g>;
+            })}
             <circle class="core-ring" cx="100" cy="100" r="62" />
           </svg>
-          <figcaption><b>{(pct * 100).toFixed(1)}%</b><span>of the degree</span><em>{semesters[current].label}</em></figcaption>
+          <figcaption><b data-gauge-pct={(pct * 100).toFixed(1)}>{(pct * 100).toFixed(1)}%</b><span>of the degree</span><em>{semesters[current].label}</em></figcaption>
         </figure>
         <div class="stairs">
       <div class="sem-track" id="semTrack" role="group" aria-label="Semesters">

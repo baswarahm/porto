@@ -15,10 +15,14 @@ export interface Room {
   el: HTMLElement; canvas: HTMLCanvasElement; dark: boolean;
   /** called every frame with seconds since open and the frame's dt */
   onFrame?: (t: number, dt: number) => void;
+  /** Esc: return true to handle it yourself (e.g. deselect) instead of closing the room */
+  onEscape?: () => boolean;
+  /** other keys while the room is open */
+  onKey?: (e: KeyboardEvent) => void;
   close: () => void;
 }
 
-export function openRoom(opts: { title: string; sub: string; label: string; legend?: string }): Room {
+export function openRoom(opts: { title: string; sub: string; label: string; legend?: string; hint?: string }): Room {
   const lastFocus = document.activeElement as HTMLElement | null;
   const el = document.createElement('div');
   el.className = 'room'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', opts.label);
@@ -28,7 +32,7 @@ export function openRoom(opts: { title: string; sub: string; label: string; lege
     ${opts.legend ?? ''}
     <aside class="room-card" hidden aria-live="polite"></aside>
     <p class="room-tip" aria-hidden="true"></p>
-    <p class="room-hint">drag to orbit · scroll to zoom · click to inspect</p>`;
+    <p class="room-hint">${opts.hint ?? 'drag to orbit · scroll to zoom · click to inspect'}</p>`;
   document.body.append(el);
   document.documentElement.classList.add('room-open');
   emit('worldpause', true);
@@ -73,7 +77,10 @@ export function openRoom(opts: { title: string; sub: string; label: string; lege
     emit('worldpause', false);
     lastFocus?.focus?.({ preventScroll: true });
   };
-  const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); if (!room.onEscape?.()) close(); return; }
+    room.onKey?.(e);
+  };
   addEventListener('keydown', onKey, true);
   el.querySelector('.room-x')!.addEventListener('click', close);
   setTimeout(() => el.querySelector<HTMLButtonElement>('.room-x')?.focus({ preventScroll: true }), 30);

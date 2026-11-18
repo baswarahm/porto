@@ -144,3 +144,17 @@ Not done on purpose: glTF models (mentor said "later"); the existing nav + menu 
 | Multiplayer ghosts | `ghosts.ts`: other visitors as glowing packets travelling the network with trails, orbiting the section they're reading, HUD "N online". Only a random per-tab id + section is shared. Works now between tabs of one browser; across visitors it needs a free Supabase project's URL + anon key in `src/data/realtime.ts` | needs keys |
 
 Performance in the preview (this machine): 60 fps on the network, ~40 fps during a portal dive and on the firewall, 144 fps on the phone preset (low quality).
+
+## Round 10: the network comes alive (committed locally, not pushed)
+| Feature | What it does | Status |
+|---|---|---|
+| Host idle | Every host idles in its own way: the progress pillar breathes like it's charging, the courses knot tumbles, the goals ring spins like a coin on its edge, the journey tetrahedron ticks round one face at a time, the contact antenna sways, the padlock turns warily. Each host has a small satellite circling it and a slow glow pulse | ok |
+| Host arrival | When the camera settles on a host: it pops on a bouncy spring, spins one extra turn, its wire shell bursts out and settles, white lock-on brackets close in from wide and rotate square (they stay on the host you're at, faintly on hover), a column of light shoots through it, and sparks fly off | ok |
+| Data flow | Stream packets are soft glowing points with tails instead of squares; requests go out in the signal colour, replies come back in a cooler tint, packets bunch into bursts like real traffic; the stream to your host runs hot. On every arrival a train of packets arcs from the host you left to the one you reached | ok |
+| Progress rings (page) | Degree gauge: the percentage counts up as the rings fill, a glint of light runs along every filled semester, a radar sweep circles the outside, semester ticks light up, a bead pulses at the end of this semester's fill; pointing at a semester lights its segment | ok |
+| Progress rings (3D) | The degree rings under the network: a sonar wave rolls from the first semester to the last and swells each course it passes, this semester's bead drags a comet tail, and pointing at a semester on the page lights its ring in 3D | ok |
+| Locked projects host | The host itself is now a padlock. Around it: a red hex force field with a scan line, a rotating text band ("locked · coming soon · access denied · 443/tcp filtered"), and a tilted debris belt of particles instead of the solid cube. Arriving, clicking the host, or hovering the vault card triggers a denial: the shackle lifts and slams shut, the padlock shakes, a ripple runs across the field from your side, the cages jolt | ok |
+| Skill tree interaction | Hover a course: its whole path down to the trunk lights up and sap runs along it while the rest dims. Click: the camera flies to it, a halo locks on, the card shows the path (clickable) and buttons for earlier / later on the track and the next course that semester. Arrow keys walk the tree, Enter opens, Esc steps back then closes. The legend filters by track; semester labels (Y1 · S1 ...) sit beside the trunk; click empty space to fly back out | ok |
+
+Fixed while testing: Enter after the arrow keys used to hit the focused close key and shut the tree; the long hint overlapped the legend.
+Performance in the preview: ~71 fps on the goals host at desktop width. Reduced motion: no arrival spring, brackets, column, sparks or handoff; the gauge glint, sweep and count-up are off.

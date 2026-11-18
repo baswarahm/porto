@@ -219,6 +219,43 @@ export async function initWorld(){
   const prg = at('projects');
   const cage = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.9, 1.9, 1.9)), alertLine); prg.add(cage);
   const cage2 = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.2, 1.2, 1.2)), alertLine); prg.add(cage2);
+  // ...inside a red hex force field. A scan line sweeps it, and when you try to get in (arrive, or click the host)
+  // a ripple runs across it from your side and it flares
+  const fieldU = { uTime: { value: 0 }, uColor: { value: new THREE.Color() }, uHit: { value: 9 }, uHitDir: { value: V(0, 0, 1) }, uAlpha: { value: 1 } };
+  const field = new THREE.Mesh(new THREE.SphereGeometry(1.75, 48, 32), new THREE.ShaderMaterial({
+    uniforms: fieldU, transparent: true, depthWrite: false, side: THREE.DoubleSide,
+    vertexShader: `varying vec3 vP, vN, vV; void main(){ vP = position; vN = normalize(normalMatrix * normal);
+      vec4 mv = modelViewMatrix * vec4(position, 1.); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`,
+    fragmentShader: `uniform float uTime, uHit, uAlpha; uniform vec3 uColor, uHitDir; varying vec3 vP, vN, vV;
+      vec2 hexCell(vec2 uv){ vec2 r = vec2(1., 1.732), h = r * .5; vec2 a = mod(uv, r) - h, b = mod(uv - h, r) - h; return dot(a, a) < dot(b, b) ? a : b; }
+      float hexD(vec2 p){ p = abs(p); return max(dot(p, vec2(.5, .866)), p.x); }
+      void main(){
+        vec3 n = normalize(vP);
+        vec2 g = hexCell(vec2(atan(n.z, n.x) * 3.2 + uTime * .05, n.y * 5.5));
+        float edge = smoothstep(.4, .5, hexD(g));
+        float fres = pow(1. - abs(dot(normalize(vN), vV)), 2.2);
+        float scan = smoothstep(.07, 0., abs(n.y - (fract(uTime * .3) * 2.6 - 1.3)));
+        float ang = acos(clamp(dot(n, uHitDir), -1., 1.));
+        float ring = uHit < 1.4 ? smoothstep(.28, 0., abs(ang - uHit * 2.6)) * (1. - uHit / 1.4) : 0.;
+        float flare = uHit < .5 ? (1. - uHit / .5) * .35 : 0.;
+        float a = fres * .5 + edge * (.08 + fres * .3 + ring * 2.) + scan * (.18 + edge * .4) + ring * .8 + flare;
+        gl_FragColor = vec4(uColor * (1. + ring * .8), clamp(a, 0., 1.) * uAlpha);
+      }`,
+  }));
+  prg.add(field);
+  // and a band of text circling it, round and round
+  const bandTex = (() => {
+    const c = document.createElement('canvas'); c.width = 2048; c.height = 64;
+    const g = c.getContext('2d')!; g.font = '600 34px ui-monospace, Menlo, Consolas, monospace'; g.textBaseline = 'middle'; g.fillStyle = '#fff';
+    const s = 'LOCKED  ·  COMING SOON  ·  ACCESS DENIED  ·  443/TCP FILTERED  ·  ';
+    let x = 0; while (x < c.width){ g.fillText(s, x, 34); x += g.measureText(s).width; }
+    const tx = new THREE.CanvasTexture(c); tx.wrapS = THREE.RepeatWrapping; tx.repeat.x = 2; tx.anisotropy = 4; return tx;
+  })();
+  const bandMat = new THREE.MeshBasicMaterial({ map: bandTex, transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false });
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, .24, 96, 1, true), bandMat); band.rotation.z = .12; prg.add(band);
+  let lockHit = -1e9;
+  const tryLock = () => { lockHit = performance.now(); net.deny(); };
+  addEventListener('vaulttry', tryLock);
   // journey: my life as a 3D git graph. main (school -> degree) runs up the middle,
   // each experience branch forks off in its own direction and merges back into the degree;
   // HEAD rides main as you scroll the section, small packets run along the branches
@@ -287,6 +324,9 @@ export async function initWorld(){
     paintStack();
     lime.color.set(cssVar('--lime')); lime.emissive.set(cssVar('--lime')); lime.emissiveIntensity = dark ? .55 : .15;
     ghost.color.copy(P.ink3); lineM.color.copy(P.ink); alertLine.color.copy(P.alert);
+    fieldU.uColor.value.copy(P.alert); fieldU.uAlpha.value = dark ? 1 : .8;
+    (field.material as THREE.ShaderMaterial).blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; (field.material as THREE.ShaderMaterial).needsUpdate = true;
+    bandMat.color.copy(P.alert); bandMat.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; bandMat.needsUpdate = true;
     laneMats.forEach((m, i) => { m.color.set(cssVar(`--b${i + 1}`)); m.emissive.set(cssVar(`--b${i + 1}`)); });
     pulses.forEach(p => (p.material as THREE.MeshBasicMaterial).color.set(cssVar('--lime')));
     net.paint(P);
@@ -301,7 +341,7 @@ export async function initWorld(){
   /* ---- layout, input ------------------------------------------------------------------------------------------------- */
   let w = 1, h = 1, tops: number[] = [];
   const measure = () => { tops = zones.map(z => z.getBoundingClientRect().top + scrollY); };
-  const resize = () => { w = innerWidth; h = innerHeight; renderer.setSize(w, h, false); fx.setSize(w, h, renderer.getPixelRatio()); camera.aspect = w / h; measure(); };
+  const resize = () => { w = innerWidth; h = innerHeight; renderer.setSize(w, h, false); fx.setSize(w, h, renderer.getPixelRatio()); camera.aspect = w / h; net.setViewHeight(h * renderer.getPixelRatio()); measure(); };
   resize(); addEventListener('resize', resize); addEventListener('load', measure);
   new ResizeObserver(measure).observe(document.body);
   const mouse = new THREE.Vector2(9, 9), lean = { x: 0, y: 0 };
@@ -333,6 +373,7 @@ export async function initWorld(){
   let hoverHost = '', hoverOther = '';
   addEventListener('click', e => {
     if (dragged || !hoverHost || (e.target as Element).closest?.(UI)) return;
+    if (hoverHost === 'projects') tryLock();
     zones.find(z => z.dataset.stage === hoverHost)?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
   });
   const ray = new THREE.Raycaster(), wallPlane = new THREE.Plane(V(0, 0, 1), -(WALL_Z + DEPTH / 2)), hit = V();
@@ -483,9 +524,10 @@ export async function initWorld(){
     }),
     targets: shape((n, o) => { const p = at3('targets'), kk = n % 3, r = (1.25 + kk * .45) * 1.3 + (rnd() - .5) * .1, a = rnd() * 6.283; o.set(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, p.z + (rnd() - .5) * .25); }),
     projects: shape((n, o) => {
-      const p = at3('projects'), S = 1.6, f = n % 6, u = (rnd() * 2 - 1) * S, w2 = (rnd() * 2 - 1) * S, sg = f & 1 ? 1 : -1, ax = f >> 1;
-      const c3 = ax === 0 ? [sg * S, u, w2] : ax === 1 ? [u, sg * S, w2] : [u, w2, sg * S];
-      o.set(p.x + c3[0], p.y + c3[1], p.z + c3[2]);
+      // a tilted belt of debris circling the locked vault, leaving the padlock and its field clear
+      const p = at3('projects'), a = rnd() * 6.283, r = 2.5 + Math.pow(rnd(), 1.8) * 1.4 + (n % 3) * .05, yy = (rnd() - .5) * .22 * (r - 2.2);
+      const tl = .38, x = Math.cos(a) * r, z = Math.sin(a) * r;
+      o.set(p.x + x, p.y + yy * Math.cos(tl) - z * Math.sin(tl), p.z + yy * Math.sin(tl) + z * Math.cos(tl));
     }),
     journey: shape((_, o) => { const u = rnd(), a = u * 6.283 * 5 + rnd() * .4, r = 2.25 + (rnd() - .5) * .25; o.set(Math.cos(a) * r, -2.6 + u * 5.2, Math.sin(a) * r).add(at3('journey')); }),
     contact: shape((n, o) => { const p = at3('contact'), kk = n % 5, r = .7 + kk * .62 + (rnd() - .5) * .08, a = rnd() * 6.283; o.set(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, p.z + (rnd() - .5) * .3); }),
@@ -655,14 +697,14 @@ export async function initWorld(){
   };
   let nowArc: THREE.Line | null = null, arcFill = 0, nowIdx = 0;
   const ringLines: THREE.Line[] = [];
-  const courseList: { code: string; name: string; state: string; pos: THREE.Vector3 }[] = [];
+  const courseList: { code: string; name: string; state: string; pos: THREE.Vector3; sem: number }[] = [];
   plan.forEach((sem, i) => {
     const R = 4.6 + i * 1.55;
     const full = new THREE.Line(ringArc(R, 0, Math.PI * 2), sem.state === 'done' ? ringDone : ringGhost); degRings.add(full); ringLines.push(full);
     if (sem.state === 'now'){ nowIdx = i; nowArc = new THREE.Line(ringArc(R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(.02, sem.fill)), ringDone); degRings.add(nowArc); }
     sem.courses.forEach((c, k) => {
       const a = (k + .5) / sem.courses.length * Math.PI * 2 + i * .45;
-      courseList.push({ ...c, state: sem.state, pos: V(Math.cos(a) * R, 0, Math.sin(a) * R) });
+      courseList.push({ ...c, state: sem.state, pos: V(Math.cos(a) * R, 0, Math.sin(a) * R), sem: i });
     });
   });
   // a bright bead rides the end of this semester's arc
@@ -672,6 +714,18 @@ export async function initWorld(){
   courseMesh.count = courseList.length; degRings.add(courseMesh);
   const ringTip = Object.assign(document.createElement('p'), { className: 'skill-tip' }); ringTip.setAttribute('aria-hidden', 'true'); document.body.append(ringTip);
   let hoverCourse = -1;
+  // a sonar wave rolls out from the first semester to the last, lighting every course it passes;
+  // the bead on this semester's arc drags a comet tail; pointing at a semester on the page lights its ring here
+  const waveMat = new THREE.LineBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+  const wave = new THREE.Line(ringArc(1, 0, Math.PI * 2), waveMat); degRings.add(wave);
+  const focusMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, toneMapped: false });
+  const focusRing = new THREE.Mesh(new THREE.TorusGeometry(1, .05, 6, 160), focusMat); focusRing.rotation.x = Math.PI / 2; degRings.add(focusRing);
+  let semFocus = -1, focusR = 4.6;
+  addEventListener('semfocus', e => { semFocus = (e as CustomEvent<number>).detail; });
+  const TAIL = 18, tailPos = new Float32Array(TAIL * 3), tailCol = new Float32Array(TAIL * 3);
+  const tailMat = new THREE.PointsMaterial({ map: dotTex, size: .5, transparent: true, depthWrite: false, opacity: .9, vertexColors: true });
+  const tail = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(tailPos, 3)).setAttribute('color', new THREE.BufferAttribute(tailCol, 3)), tailMat);
+  tail.frustumCulled = false; degRings.add(tail);
 
   /* ---- live Penang weather: rain when it rains there, storms flash, the light follows Penang's clock ---------------- */
   let wx: Weather | null = null;
@@ -774,6 +828,8 @@ export async function initWorld(){
     if (k > .5) arrived = '';
     else if (k < .02 && stageNow !== arrived && cam.distanceTo(camPos) < .4){
       arrived = stageNow; arriveAt = now; net.ping(stageNow); emit(WORLD.arrive, zones[i]?.id);
+      if (!reducedMotion) net.arrive(stageNow);
+      if (stageNow === 'projects') lockHit = now;
       if (HOSTS[stageNow] && !reducedMotion){ shock.position.fromArray(HOSTS[stageNow]); shock.visible = true; }
     }
     camera.lookAt(look!);
@@ -943,7 +999,28 @@ export async function initWorld(){
       const R = 4.6 + nowIdx * 1.55, a = -Math.PI / 2 + Math.PI * 2 * Math.max(.02, nowPlan.fill) * nf;
       arcTip.position.set(Math.cos(a) * R, 0, Math.sin(a) * R); arcTip.scale.setScalar(1 + Math.sin(t * 5) * .25);
       (arcTip.material as THREE.MeshBasicMaterial).color.copy(P.signal);
+      // the comet tail: points trailing back along the arc, shimmering
+      for (let n = 0; n < TAIL; n++){
+        const an = a - (n + 1) * .028 - Math.sin(t * 6 + n) * .004;
+        tailPos[n * 3] = Math.cos(an) * R; tailPos[n * 3 + 1] = Math.sin(t * 7 + n * .8) * .04; tailPos[n * 3 + 2] = Math.sin(an) * R;
+        tmpC.copy(P.signal).multiplyScalar(Math.pow(1 - n / TAIL, 1.6) * (dayFog ? .8 : 1.2));
+        tailCol[n * 3] = tmpC.r; tailCol[n * 3 + 1] = tmpC.g; tailCol[n * 3 + 2] = tmpC.b;
+      }
+      tail.geometry.attributes.position.needsUpdate = true; tail.geometry.attributes.color.needsUpdate = true;
     }
+    tail.visible = arcTip.visible && !reducedMotion;
+    tailMat.blending = dayFog ? THREE.NormalBlending : THREE.AdditiveBlending;
+    // the sonar wave, inner ring to outer, every few seconds while the degree is on screen
+    const RMAX = 4.6 + Math.max(0, plan.length - 1) * 1.55;
+    const wu = (t * .22) % 1, waveR = 3.6 + wu * (RMAX - 3.6 + 1.5);
+    wave.visible = arcFill > .9 && !reducedMotion;
+    if (wave.visible){ wave.scale.setScalar(waveR); waveMat.opacity = Math.sin(wu * Math.PI) * .85; waveMat.color.copy(P.signal); }
+    // a ring for the semester you point at on the page
+    const fOn = semFocus >= 0 && arcFill > .3;
+    if (fOn) focusR = 4.6 + semFocus * 1.55;
+    focusMat.opacity += ((fOn ? .9 : 0) - focusMat.opacity) * .15; focusMat.color.copy(P.signal);
+    focusRing.visible = focusMat.opacity > .01;
+    focusRing.scale.setScalar(focusRing.scale.x + (focusR - focusRing.scale.x) * .2 + (fOn ? Math.sin(t * 6) * .004 : 0));
     // the semester pillars grow up from the floor when you reach progress
     pillarGrow = reducedMotion ? 1 : clamp(pillarGrow + (active === 'progress' ? dt * .9 : -dt * 2));
     pillars.forEach((pl, n) => { pl.m.scale.y = Math.max(.001, pl.h * smooth(clamp(pillarGrow * 1.7 - n * .09))); });
@@ -952,7 +1029,8 @@ export async function initWorld(){
     degRings.rotation.y = t * .02;
     courseList.forEach((c, n) => {
       const pulse = c.state === 'now' ? 1.25 + Math.sin(t * 4 + n) * .35 : c.state === 'done' ? 1.1 : .75;
-      const s3 = n === hoverCourse ? 2 : pulse;
+      const swell = wave.visible ? Math.max(0, 1 - Math.abs(waveR - c.pos.length()) / 1.1) * waveMat.opacity * (c.state === 'future' ? .5 : 1) : 0;
+      const s3 = n === hoverCourse ? 2 : pulse * (1 + swell * .9) * (fOn && c.sem === semFocus ? 1.6 : 1);
       courseMesh.setMatrixAt(n, m4.compose(c.pos, q.identity(), sc.set(s3, s3, s3)));
     });
     courseMesh.instanceMatrix.needsUpdate = true;
@@ -1022,6 +1100,18 @@ export async function initWorld(){
     });
     rings.forEach((r, n) => { r.rotation.x = t * (.3 + n * .15); r.rotation.y = t * (.2 - n * .1); });
     cage.rotation.set(t * .4, t * .5, 0); cage2.rotation.set(-t * .6, -t * .3, 0);
+    // the locked vault: the field ripples from your side when you try it, the cages jolt, the whole thing shudders
+    if (props.projects.visible){
+      const lh = (now - lockHit) / 1000;
+      fieldU.uTime.value = t; fieldU.uHit.value = reducedMotion ? 9 : lh;
+      fieldU.uHitDir.value.copy(camera.position).sub(props.projects.position).normalize();
+      band.rotation.y = -t * .35;
+      bandMat.opacity = .6 + (Math.sin(t * 13) > .9 ? -.4 : 0) + (lh > 0 && lh < .6 ? .4 : 0);
+      const jolt = !reducedMotion && lh > 0 && lh < .6 ? Math.sin(lh * 60) * (.6 - lh) * .14 : 0;
+      props.projects.position.x = HOSTS.projects[0] + jolt;
+      const cj = !reducedMotion && lh > 0 && lh < .4 ? Math.sin(lh / .4 * Math.PI) * .18 : 0;
+      cage.scale.setScalar(1 + cj); cage2.scale.setScalar(1 - cj * .6);
+    }
     alertLine.opacity = .6 + Math.sin(t * 9) * .2 * (Math.sin(t * 1.3) > .6 ? 1 : 0) + .2;
     jHeadS += (jHead - jHeadS) * .12;
     globe.rotation.y = .55 + Math.sin(t * .22) * .45;

@@ -39,6 +39,37 @@ export function initProgress(map: { open: (code: string) => void; focusSem: (i: 
   });
   if (buttons[p.current]) select(buttons[p.current]);
 
+  // the gauge: pointing at a semester lights its segment here and its ring in the 3D world
+  const gauge = $('.gauge');
+  const hot = (i: number) => {
+    gauge?.querySelectorAll<SVGElement>('[data-seg]').forEach(c => c.classList.toggle('hot', Number(c.dataset.seg) === i));
+    dispatchEvent(new CustomEvent('semfocus', { detail: i }));
+  };
+  buttons.forEach((el, i) => {
+    el.addEventListener('pointerenter', () => hot(i)); el.addEventListener('pointerleave', () => hot(-1));
+    el.addEventListener('focus', () => hot(i)); el.addEventListener('blur', () => hot(-1));
+  });
+  // ...and its percentage counts up as the rings fill in
+  const pctEl = gauge?.querySelector<HTMLElement>('[data-gauge-pct]');
+  if (gauge && pctEl && !reducedMotion){
+    const goal = p.pct * 100;
+    const run = () => {
+      const t0 = performance.now();
+      const step = (n: number) => {
+        const u = Math.min(1, Math.max(0, (n - t0 - 300) / 1500)), e = 1 - Math.pow(1 - u, 4);
+        pctEl.textContent = (goal * e).toFixed(1) + '%';
+        if (u < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
+    if (gauge.classList.contains('on3d')) run();
+    else {
+      pctEl.textContent = '0.0%';
+      const mo = new MutationObserver(() => { if (gauge.classList.contains('on3d')){ mo.disconnect(); run(); } });
+      mo.observe(gauge, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
+
 
   const pct = (p.pct * 100).toFixed(1) + '%';
   const bar = $('[data-degree-bar]');

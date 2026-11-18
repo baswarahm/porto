@@ -277,6 +277,26 @@ body[data-page="home"] main{ padding-top:0; }
 .gauge:not(.on3d) .seg-fill, .gauge:not(.on3d) .seg.done{ stroke-dasharray:0 360; }
 .gauge .seg-fill, .gauge .seg{ transition:stroke-dasharray 1.2s calc(.3s + var(--i) * 80ms) cubic-bezier(.2,.8,.2,1); }
 .gauge .core-ring{ stroke:var(--rule); stroke-width:1; stroke-dasharray:2 5; animation:spinr 30s linear infinite; transform-origin:100px 100px; }
+/* the rings are alive: a glint of light runs along every filled semester, a radar sweep circles the outside,
+   ticks light up as the fill passes them, and a bead pulses on the end of this semester's fill */
+.gauge .seg-glint{ stroke:#fff; stroke-width:14; stroke-linecap:round; stroke-dasharray:3 357; stroke-dashoffset:var(--o); opacity:0; mix-blend-mode:overlay; }
+.gauge.on3d .seg-glint{ animation:glint 2.6s calc(1.6s + var(--i) * .22s) cubic-bezier(.5,0,.5,1) infinite; }
+@keyframes glint{ 0%{ stroke-dashoffset:var(--o); opacity:0; } 15%{ opacity:.95; } 85%{ opacity:.95; } 100%{ stroke-dashoffset:calc(var(--o) - var(--len) + 3); opacity:0; } }
+.gauge .sweep{ stroke:var(--lime); stroke-width:1.5; stroke-dasharray:28 332; opacity:.0; transform-origin:100px 100px; transition:opacity .6s 1.4s; filter:drop-shadow(0 0 4px var(--lime)); }
+.gauge.on3d .sweep{ opacity:.7; animation:spinr 4.5s linear infinite; }
+.gauge .tick{ stroke:var(--rule); stroke-width:2; transition:stroke .4s calc(.5s + var(--i, 0) * 80ms); }
+.gauge.on3d .tick.done, .gauge.on3d .tick.now{ stroke:var(--lime); }
+.gauge .seg-tip{ fill:var(--lime); opacity:0; transition:opacity .4s calc(1.5s + var(--i) * 80ms); }
+.gauge .seg-tip .halo{ fill:none; stroke:var(--lime); stroke-width:1.5; transform-box:fill-box; transform-origin:center; }
+.gauge.on3d .seg-tip{ opacity:1; }
+.gauge.on3d .seg-tip .halo{ animation:tipPing 1.6s ease-out infinite; }
+@keyframes tipPing{ from{ transform:scale(.5); opacity:1; } to{ transform:scale(2.2); opacity:0; } }
+.gauge .seg-fill, .gauge .seg{ transition-property:stroke-dasharray, stroke-width, filter; }
+.gauge .seg.hot, .gauge .seg-fill.hot{ stroke-width:20; }
+.gauge .seg-fill.hot{ filter:drop-shadow(0 0 14px var(--lime)); }
+.gauge .seg.future.hot{ stroke:var(--ink-3); }
+html.rm .gauge .seg-glint, html.rm .gauge .sweep, html.rm .gauge .seg-tip .halo{ animation:none; }
+html.rm .gauge .sweep{ opacity:0; }
 @keyframes spinr{ to{ transform:rotate(360deg); } }
 .gauge figcaption{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; gap:2px; font:11px var(--mono); color:var(--ink-3); text-transform:uppercase; letter-spacing:.12em; }
 .gauge figcaption b{ font:600 clamp(2.2rem, 4vw, 3.2rem)/1 var(--sans); letter-spacing:-.04em; color:var(--ink); text-transform:none; }
@@ -422,7 +442,7 @@ body[data-page="home"] main{ padding-top:0; }
   .vault{ width:min(220px, 60vw); margin:0 auto; }
 }
 @media (prefers-reduced-motion:reduce){
-  .gauge, .gauge .core-ring, .v-dial, .v-light, .cyl-in{ animation:none; }
+  .gauge, .gauge .core-ring, .v-dial, .v-light, .cyl-in, .gauge .seg-glint, .gauge .sweep, .gauge .seg-tip .halo{ animation:none; }
 }
 
 /* course map, collapsed: this semester's courses laid out in a row of tiles,
@@ -709,6 +729,20 @@ html.root body{ box-shadow:inset 0 0 120px rgba(255,40,30,.35); }
 .room-card{ position:absolute; right:24px; top:96px; width:min(320px, calc(100% - 48px)); padding:16px 18px; display:grid; gap:8px; font:14px/1.5 var(--sans); color:var(--ink-2);
   background:color-mix(in srgb, var(--paper-2) 88%, transparent); border:1px solid var(--lime); box-shadow:0 0 30px -14px var(--lime); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); animation:drop .3s ease-out; }
 .room-card[hidden]{ display:none; }
+.room:focus{ outline:none; }
+.room-legend .leg-btn{ all:unset; cursor:pointer; padding:2px 6px; margin:-2px -6px; border:1px solid transparent; }
+.room-legend .leg-btn:hover, .room-legend .leg-btn:focus-visible{ border-color:var(--c); color:var(--ink); }
+.room-legend .leg-btn[aria-pressed="true"]{ border-color:var(--c); color:var(--ink); background:color-mix(in srgb, var(--c) 14%, transparent); }
+.room-card .tree-track{ color:var(--c); }
+.room-card .tree-path{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; font:12px var(--mono); color:var(--ink-3); }
+.room-card .tree-path b{ color:var(--lime); font-weight:600; }
+.room-card .tree-path i{ font-style:normal; opacity:.6; }
+.room-card .tree-path .chip-link{ font:12px var(--mono); background:none; border:0; border-bottom:1px dashed var(--ink-3); color:var(--ink); cursor:pointer; padding:0; }
+.room-card .tree-path .chip-link:hover, .room-card .tree-path .chip-link:focus-visible{ color:var(--signal); border-color:var(--signal); }
+/* the hint sits above the legend so the two never collide */
+.room:has(.room-legend) .room-hint{ left:24px; right:auto; bottom:52px; }
+.room-card .tree-steps{ display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+.room-card .tree-steps .key{ margin-top:0; }
 .room-card h3{ margin:0; font:600 1.2rem/1.2 var(--sans); color:var(--ink); }
 .room-card p{ margin:0; }
 .room-card .st{ font:12px var(--mono); } .room-card .st.done{ color:var(--signal); } .room-card .st.now{ color:var(--lime); } .room-card .st.future{ color:var(--ink-3); }
