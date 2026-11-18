@@ -32,6 +32,7 @@ import { createPhotoUI } from './photo';
 import { createMelt } from './melt';
 import { createBanner } from './banner';
 import { createDefense } from './defend';
+import { createSchoolLogos } from './schoollogos';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GHOST_EVENT, type Ghost } from './ghosts';
 import { HOSTS, createNetwork, readPalette, type Palette } from './network';
@@ -308,6 +309,17 @@ export async function initWorld(){
     d.position.copy(nodeAt(i)); globe.add(d);
     d.userData.tip = `${r.hash} · ${r.item.title} · ${r.item.date}`; jNodes.push(d);
   });
+  // hologram school crests beside the education commits: SMP and SMA Al-Azhar Syifa Budi Solo, and USM (schoollogos.ts)
+  const SCHOOL: Record<string, { src: string; caption: string; at: THREE.Vector3 }> = {
+    'junior high': { src: '/images/logos/al-azhar-syifa-budi.png', caption: 'SMP', at: V(-2.15, 1.05, .55) },
+    'high school': { src: '/images/logos/al-azhar-syifa-budi.png', caption: 'SMA', at: V(2.2, .4, .8) },
+    degree: { src: '/images/usm-crest.svg', caption: 'USM', at: V(-2.2, -.95, .45) },
+  };
+  const schoolLogos = createSchoolLogos(globe, graph.flatMap((r, i) => {
+    const s = SCHOOL[r.item.tag ?? '']; if (!s) return [];
+    const node = nodeAt(i);
+    return [{ src: s.src, caption: s.caption, sub: r.item.date.replace(/\s+/g, ''), node, at: node.clone().add(s.at), frac: graph.length > 1 ? i / (graph.length - 1) : 1, tip: `${r.item.org} · ${r.item.date}` }];
+  }));
   const headRing = new THREE.Mesh(new THREE.TorusGeometry(.36, .018, 8, 64), lime); headRing.position.copy(nodeAt(graph.length - 1)); globe.add(headRing);
   const flyer = new THREE.Mesh(new THREE.OctahedronGeometry(.13), new THREE.MeshBasicMaterial({ color: 0xffffff })); globe.add(flyer);
   let jHead = 0, jHeadS = 0;
@@ -353,6 +365,7 @@ export async function initWorld(){
     (field.material as THREE.ShaderMaterial).blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; (field.material as THREE.ShaderMaterial).needsUpdate = true;
     bandMat.color.copy(P.alert); bandMat.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; bandMat.needsUpdate = true;
     laneMats.forEach((m, i) => { m.color.set(cssVar(`--b${i + 1}`)); m.emissive.set(cssVar(`--b${i + 1}`)); });
+    schoolLogos.paint(dark, new THREE.Color(dark ? cssVar('--lime') : cssVar('--signal')));
     pulses.forEach(p => (p.material as THREE.MeshBasicMaterial).color.set(cssVar('--lime')));
     net.paint(P);
     fx.setTheme(dark);
@@ -1120,7 +1133,7 @@ export async function initWorld(){
       hh = (ray.intersectObjects(net.hitTargets, false)[0]?.object.userData.host as string | undefined) ?? '';
       if (!hh){
         // section objects (semester pillars, journey commits), then the little relay nodes
-        const pool = [...[...ghosts.values()].map(g => g.m), ...(props.progress.visible ? pillars.map(p => p.m) : []), ...(props.journey.visible ? jNodes : [])];
+        const pool = [...[...ghosts.values()].map(g => g.m), ...(props.progress.visible ? pillars.map(p => p.m) : []), ...(props.journey.visible ? [...jNodes, ...schoolLogos.meshes()] : [])];
         const o = pool.length ? ray.intersectObjects(pool, false)[0]?.object : undefined;
         if (o) other = o.userData.tip;
         else {
@@ -1289,6 +1302,7 @@ export async function initWorld(){
     flyer.position.set(0, RY(0) + jHeadS * (RY(graph.length - 1) - RY(0)), 0); flyer.rotation.set(t * 2, t * 3, 0);
     bCurves.forEach(b => b.m.position.copy(b.c.getPoint((t * .16 + b.o) % 1)));
     headRing.rotation.set(t * .9, t * .6, 0);
+    if (props.journey.visible) schoolLogos.update(now / 1000, dt, jHeadS, camera, reducedMotion);
     pulses.forEach((p, n) => {
       const f = ((t * .45 + n / pulses.length) % 1);
       p.scale.setScalar(.4 + f * 2.4); (p.material as THREE.MeshBasicMaterial).opacity = (1 - f) * .9;
