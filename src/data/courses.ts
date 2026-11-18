@@ -82,7 +82,7 @@ export const courses: Course[] = [
   {
     code: 'SELF', name: 'Self-study: web + blockchain', lane: 4,
     learned: ['Rebuilt this site in Astro + TypeScript', 'three.js and WebGL for the 3D world', 'Git branching'],
-    doing: ['Avalanche Fundamentals (Avalanche Builder Hub): consensus, multi-chain architecture, VMs', 'Keeping this site up to date every semester'],
+    doing: ['Blockchain fundamentals: consensus, multi-chain architecture, VMs', 'Keeping this site up to date every semester'],
     next: ['Then a build track: L1 development, interoperability, VM customization or applications'],
   },
 ];
