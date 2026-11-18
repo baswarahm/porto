@@ -1007,3 +1007,5 @@ section.zone::before, section.deck::before{ content:none; }
 .dp-foot{ margin:6px 2px 0; font:10px/1.5 var(--mono); color:#6f6f6f; }
 @media (max-width:640px){ .deck-panel{ left:8px; bottom:calc(100% - 2px); max-height:58vh; } }
 html.rm .deck-panel{ animation:none; }
+a.deck-pv{ text-decoration:none; pointer-events:auto; transition:color .15s, border-color .15s; }
+a.deck-pv:hover, a.deck-pv:focus-visible{ color:var(--lime); border-color:var(--lime); }

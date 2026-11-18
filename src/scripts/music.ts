@@ -19,7 +19,7 @@ type Track = { title: string; artist: string; src: string; cover: string; previe
 const HOME: Track = { title: 'Hannah Montana', artist: 'Rex Orange County', src: '/music/hannah-montana.mp3', cover: '/music/hannah-montana-cover.jpg' };
 /** same vibe as Hannah Montana: warm, jazzy bedroom pop / indie soul */
 const VIBES: [string, string][] = [
-  ['Pluto Projector', 'Rex Orange County'], ['Dark Red', 'Steve Lacy'], ['Bad Habit', 'Steve Lacy'],
+  ['What If I Call', 'Alex Crichton'], ['Pluto Projector', 'Rex Orange County'], ['Dark Red', 'Steve Lacy'], ['Bad Habit', 'Steve Lacy'],
   ['3 Nights', 'Dominic Fike'], ['Everytime', 'boy pablo'], ['Sofia', 'Clairo'], ['Rearrange My World', 'Daniel Caesar'],
 ];
 const ITUNES = 'https://itunes.apple.com/search?media=music&entity=song';
@@ -34,6 +34,8 @@ const lookup = async (term: string, limit: number): Promise<ItunesSong[]> => {
   if (!r.ok) throw new Error(String(r.status));
   return (await r.json()).results ?? [];
 };
+/** previews are 30 seconds (that's all Apple's public search shares); the full song is one click away on Spotify */
+const fullUrl = (t: { title: string; artist: string }) => `https://open.spotify.com/search/${encodeURIComponent(`${t.title} ${t.artist}`)}`;
 const esc = (t: string) => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 export const MUSIC_EVENT = 'music';
 
@@ -99,7 +101,7 @@ export function initMusic(){
     <ul class="dp-list dp-results" aria-live="polite"></ul>
     <p class="dp-h">up next · hannah montana vibes</p>
     <ol class="dp-list dp-queue"></ol>
-    <p class="dp-foot">search + 30-second previews from Apple iTunes · Hannah Montana plays in full</p>
+    <p class="dp-foot">search by Apple iTunes, which only shares 30-second previews · Hannah Montana plays in full · ↗ opens the full song</p>
   </div>
   <audio preload="metadata" crossorigin="anonymous" src="${TRACK.src}"></audio>`;
   document.body.append(el);
@@ -134,7 +136,7 @@ export function initMusic(){
   let queue: Track[] = [HOME], at = 0, cur: Track = HOME, shuffle = false, vibesLoaded = false;
   const meta = $<HTMLElement>('.deck-meta'), covers = el.querySelectorAll<HTMLImageElement>('.deck-art img');
   const paintMeta = () => {
-    meta.innerHTML = `<p class="deck-t">${esc(cur.title)}</p><p class="deck-a">${esc(cur.artist)}${cur.preview ? ' <span class="deck-pv">30s preview</span>' : ''}</p>`;
+    meta.innerHTML = `<p class="deck-t">${esc(cur.title)}</p><p class="deck-a">${esc(cur.artist)}${cur.preview ? ` <a class="deck-pv" href="${esc(fullUrl(cur))}" target="_blank" rel="noopener" title="Apple only shares 30-second previews; this opens the full song on Spotify">30s · full on Spotify ↗</a>` : ''}</p>`;
     covers.forEach(i => { i.src = cur.cover; });
     liked = likes.has(keyOf(cur)); like.setAttribute('aria-pressed', String(liked)); like.innerHTML = svg(liked ? I.check : I.plus);
     like.setAttribute('aria-label', liked ? 'Remove from your liked songs' : 'Save to your liked songs');
@@ -155,7 +157,7 @@ export function initMusic(){
   const loadVibes = async () => {
     if (vibesLoaded) return; vibesLoaded = true;
     let found: Track[] = [];
-    try { found = JSON.parse(sessionStorage.getItem('bhm-vibes-3') ?? '[]'); } catch { /* fine */ }
+    try { found = JSON.parse(sessionStorage.getItem('bhm-vibes-4') ?? '[]'); } catch { /* fine */ }
     if (!found.length){
       const res = await Promise.all(VIBES.map(async ([t, a]) => {
         try {
@@ -167,7 +169,7 @@ export function initMusic(){
         } catch { return null; }
       }));
       found = res.filter((x): x is Track => !!x);
-      try { if (found.length) sessionStorage.setItem('bhm-vibes-3', JSON.stringify(found)); } catch { /* fine */ }
+      try { if (found.length) sessionStorage.setItem('bhm-vibes-4', JSON.stringify(found)); } catch { /* fine */ }
     }
     const have = new Set(queue.map(keyOf));
     queue.push(...found.filter(t => !have.has(keyOf(t))));
@@ -198,7 +200,7 @@ export function initMusic(){
   let found: Track[] = [];
   const row = (t: Track, i: number, kind: 'q' | 'r') => `<li><button type="button" class="dp-row${kind === 'q' && i === at ? ' on' : ''}" data-${kind}="${i}">
     <img src="${esc(t.cover.replace('600x600bb', '100x100bb'))}" alt="" loading="lazy"><span class="dp-tt"><b>${esc(t.title)}</b><i>${esc(t.artist)}</i></span>
-    <em>${kind === 'q' && i === at ? (audio.paused ? 'paused' : 'playing') : t.preview ? '30s' : 'full'}</em></button>${t.link ? `<a class="dp-out" href="${esc(t.link)}" target="_blank" rel="noopener" aria-label="${esc(t.title)} on Apple Music">↗</a>` : ''}</li>`;
+    <em>${kind === 'q' && i === at ? (audio.paused ? 'paused' : 'playing') : t.preview ? '30s' : 'full'}</em></button>${t.preview ? `<a class="dp-out" href="${esc(t.link ?? fullUrl(t))}" target="_blank" rel="noopener" aria-label="${esc(t.title)}, full song on ${t.link ? 'Apple Music' : 'Spotify'}" title="full song on ${t.link ? 'Apple Music' : 'Spotify'}">↗</a>` : ''}</li>`;
   function paintQueue(){ qList.innerHTML = queue.map((t, i) => row(t, i, 'q')).join('') || ''; }
   const open = (on: boolean) => {
     panel.hidden = !on; qBtn.setAttribute('aria-expanded', String(on)); el.classList.toggle('panel-on', on);
