@@ -158,3 +158,21 @@ Performance in the preview (this machine): 60 fps on the network, ~40 fps during
 
 Fixed while testing: Enter after the arrow keys used to hit the focused close key and shut the tree; the long hint overlapped the legend.
 Performance in the preview: ~71 fps on the goals host at desktop width. Reduced motion: no arrival spring, brackets, column, sparks or handoff; the gauge glint, sweep and count-up are off.
+
+## Round 11: music, sea, time, drone, photo, melt, banner, game (committed locally, not pushed)
+| Feature | What it does | Status |
+|---|---|---|
+| Now-playing bar | `music.ts`: "Hannah Montana" by Rex Orange County from `public/music/` (the mp3 and cover supplied by me). A black slab docked to the bottom like a real player: cover lifted off the slab with the record sliding out and spinning while it plays, title + artist, like (+), shuffle, back, play/pause (a physical button that presses down), next, repeat, seek bar, mute + volume, and 3D bars driven by the real audio (Web Audio analyser). The slab leans toward the cursor. Plays only when pressed. OS media keys / lock screen show the song and cover. Phones: a compact bar | ok |
+| Music in the 3D world | The same analysis drives the world: an equalizer ring stands up around the hologram's pad and the core, the pad thumps on each beat, the core swells with the bass, every host bumps on the beat | ok |
+| Ocean | `ocean.ts`: Gerstner waves on the GPU under the network; the water reflects the same sky the dome draws (shared uniforms), real sun and moon glints, small ripples, crest foam, the network's glow shimmering under it; wave height follows the live wind | ok |
+| Clouds | A cloud deck of drifting fbm noise high above the network; cover = Penang's live cloud cover, drift = live wind speed and direction (Open-Meteo, now also fetching wind) | ok |
+| Time machine | `timemachine.ts`: a rail from 2020 to graduation with my journey and degree dates marked. Any day re-computes degree progress (gauge, stairs, bar), the 3D degree rings and semester pillars, HEAD on the journey rail, and the real sun / moon / stars for that date; shows the monsoon season; "play the years" runs a year every 2.5 s; the world takes a film tint while away from today. fx panel → modes, or `time` | ok |
+| Drone | `drone.ts`: WASD + mouse look (pointer lock), space / C, shift boost; phones: joystick + look drag + climb / sink buttons. Banks into turns, warp kicks in with speed, bounces off hosts and the sea, flying slowly into a host docks you on that section. `fly` | ok |
+| Photo mode | `photo.ts`: freezes time, orbit / zoom / pan, click to focus, real depth of field (BokehPass), grades noir / film / neon, thirds grid, H hides the panel, S saves a 2x PNG poster with a small caption (verified: 1420x1260, real content). `photo` | ok |
+| Panels melt | `melt.ts`: scrolling away, a panel breaks into particles sampled from its own text lines (in their colours) and outline and streams into its host; arriving, particles stream out of the host and assemble the next panel, which then fades in | ok |
+| Cloth banner | `banner.ts`: a Verlet cloth with my name flies over the network like a flag planted after the breach, in Penang's live wind with gusts; click to tear it, over-stretched threads snap on their own, it stitches itself back after a while. (In the hero there was only a ~190 px gap beside the black silhouette, so it lives over the network where it reads) | ok |
+| Defend the firewall | `defend.ts`: an original mini-game: malware packets (worms, fast pings, 3-hit trojans) attack the core in waves; click to shoot; the six hosts are turrets; integrity bar, waves heal a little, best score kept in this browser. `defend` | ok |
+
+Also: terminal `time`, `fly`, `photo`, `defend`, `play`; fx panel has a "modes" row.
+Performance in the preview: ~52 fps on the network view with the ocean, clouds, banner and everything else running.
+Note: the song file is a commercial recording; publishing it on the public site is a copyright question for me to decide before pushing.

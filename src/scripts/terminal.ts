@@ -75,6 +75,7 @@ export function initTerminal(){
         'whoami            who I am', 'ls                list my files', 'cat <file>        read one, e.g. cat goals.txt',
         'open <section>    fly there: progress, now, goals, projects, journey, contact', 'date              the time in Penang',
         'nmap              scan my network (watch the 3D world)', 'tree              my curriculum as a 3D skill tree', 'city              my GitHub repos as a 3D city', 'sky               where the sun and moon are over Penang right now', 'ping <host>       send a burst of data to a host, e.g. ping journey', 'breach            blow the network apart and fly in',
+        'time              the time machine: send the whole site to any date', 'fly               fly a drone through the network', 'photo             photo mode: frame a shot and save a poster', 'defend            defend the firewall (a mini-game)', 'play              play the song',
         'theme             switch day / night', 'matrix            binary rain on / off', 'tour              replay the quick tour',
         'sudo su           ...', 'clear · exit']);
       case 'whoami': return print([profile.name, 'first-year CS student · Intelligent Computing · Universiti Sains Malaysia', 'from Solo, Indonesia · now in Penang, Malaysia']);
@@ -118,6 +119,11 @@ export function initTerminal(){
       }
       case 'breach': print(['breaching the firewall ...'], 'ok'); emit(WORLD.breach); return go('network');
       case 'tour': close(); emit('tour'); return;
+      case 'time': print(['spinning up the time machine ...'], 'ok'); close(); emit('timemachine'); return;
+      case 'fly': case 'drone': print(['launching the drone · WASD to fly, shift to boost, esc to land'], 'ok'); close(); emit('dronemode'); return;
+      case 'photo': print(['photo mode · drag to frame, scroll to zoom, S to save'], 'ok'); close(); emit('photomode'); return;
+      case 'defend': print(['!incoming packets · defend the firewall'], 'ok'); close(); emit('defend'); return;
+      case 'play': document.querySelector<HTMLButtonElement>('.deck-play')?.click(); return print(['now playing: Hannah Montana · Rex Orange County'], 'ok');
       case 'date': return print([new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kuala_Lumpur', dateStyle: 'full', timeStyle: 'short' }).format(new Date()) + ' · Penang']);
       case 'theme': document.querySelector<HTMLElement>('[data-theme-toggle]')?.click(); return print(['theme switched'], 'ok');
       case 'matrix': document.getElementById('bgBtn')?.click(); return print(['binary rain toggled'], 'ok');

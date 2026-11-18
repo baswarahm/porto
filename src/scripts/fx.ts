@@ -12,6 +12,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 
 const CRT = {
   uniforms: {
@@ -19,11 +20,11 @@ const CRT = {
     uScan: { value: .05 }, uGrain: { value: .045 }, uVig: { value: .45 }, uRes: { value: new THREE.Vector2(1, 1) },
     tPortal: { value: null }, uPortalOn: { value: 0 }, uPortalC: { value: new THREE.Vector2(.5, .5) }, uPortalR: { value: 0 }, uAspect: { value: 1 },
     uRim: { value: new THREE.Color('#c6ff3d') }, uExposure: { value: 1 },
-    uSun: { value: new THREE.Vector3(.5, .5, 0) }, uSunCol: { value: new THREE.Color('#ffe2b0') },
+    uSun: { value: new THREE.Vector3(.5, .5, 0) }, uSunCol: { value: new THREE.Color('#ffe2b0') }, uGrade: { value: 0 },
   },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
   fragmentShader: `
-uniform sampler2D tDiffuse, tPortal; uniform float uTime, uAberr, uGlitch, uScan, uGrain, uVig, uPortalOn, uPortalR, uAspect, uExposure;
+uniform sampler2D tDiffuse, tPortal; uniform float uTime, uAberr, uGlitch, uScan, uGrain, uVig, uPortalOn, uPortalR, uAspect, uExposure, uGrade;
 uniform vec2 uRes, uPortalC; uniform vec3 uRim, uSun, uSunCol; varying vec2 vUv;
 float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898, 78.233))) * 43758.5453); }
 // the portal view is a raw (linear, HDR) render: tone map + sRGB it like the output pass does
@@ -59,6 +60,11 @@ void main(){
     for (int i = 0; i < 32; i++){ su -= dl; vec3 sm = texture2D(tDiffuse, su).rgb; acc += max(0., dot(sm, vec3(.299, .587, .114)) - .8) * dec; dec *= .955; }
     c += uSunCol * acc * uSun.z * .35;
   }
+  // photo mode colour grades: 1 noir, 2 film, 3 neon
+  float lum = dot(c, vec3(.299, .587, .114));
+  if (uGrade > .5 && uGrade < 1.5) c = vec3(smoothstep(.02, .95, lum));
+  else if (uGrade > 1.5 && uGrade < 2.5) c = mix(vec3(lum), c, .7) * vec3(1.08, 1., .86) + vec3(.03, .02, 0.);
+  else if (uGrade > 2.5) c = pow(c, vec3(.85)) * vec3(.9, 1.05, 1.15) + vec3(.05, 0., .08) * (1. - lum);
   // scanlines (about every 3 device pixels), grain, vignette
   c *= 1.0 - uScan * (.5 + .5 * sin(vUv.y * uRes.y * 2.094));
   c += (rand(vUv * uRes + fract(uTime * 7.31)) - .5) * uGrain;
@@ -70,6 +76,9 @@ void main(){
 export function createFx(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera){
   const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType }));
   composer.addPass(new RenderPass(scene, camera));
+  // photo mode: real depth of field (off the rest of the time)
+  const bokeh = new BokehPass(scene, camera, { focus: 20, aperture: .0004, maxblur: .008 }); bokeh.enabled = false;
+  composer.addPass(bokeh);
   const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), .45, .35, .86);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
@@ -105,6 +114,15 @@ export function createFx(renderer: THREE.WebGLRenderer, scene: THREE.Scene, came
     },
     /** where the sun is on screen (0..1) and how strong its rays are (0 = none) */
     setSun(x: number, y: number, strength: number){ crt.uniforms.uSun.value.set(x, y, strength); },
+    /** photo mode: depth of field (focus distance, blur 0..1) and a colour grade (0 none, 1 noir, 2 film, 3 neon) */
+    setPhoto(o: { on: boolean; focus?: number; blur?: number; grade?: number }){
+      bokeh.enabled = o.on && (o.blur ?? 0) > .01;
+      const u = bokeh.uniforms as Record<string, THREE.IUniform>;
+      if (o.focus !== undefined) u.focus.value = o.focus;
+      if (o.blur !== undefined){ u.aperture.value = .00002 + o.blur * .0012; u.maxblur.value = .002 + o.blur * .014; }
+      crt.uniforms.uGrade.value = o.on ? (o.grade ?? 0) : 0;
+    },
+    get enabled(){ return on; },
     /** a glitch spike, 0..1; it fades by itself */
     kick(v: number){ glitch = Math.max(glitch, v); },
     render(t: number, dt: number, extraGlitch = 0){

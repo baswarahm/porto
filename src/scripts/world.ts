@@ -23,6 +23,16 @@ import { createFluid } from './fluid';
 import { createPhysics } from './physics';
 import { createSky } from './sky';
 import { createTitles } from './titles';
+import { music } from './music';
+import { createOcean } from './ocean';
+import { TIME_EVENT, journeyHeadAt } from './timemachine';
+import { degreeProgress } from '../lib/degree';
+import { createDrone } from './drone';
+import { createPhotoUI } from './photo';
+import { createMelt } from './melt';
+import { createBanner } from './banner';
+import { createDefense } from './defend';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GHOST_EVENT, type Ghost } from './ghosts';
 import { HOSTS, createNetwork, readPalette, type Palette } from './network';
 import { penangWeather, penangHour, type Weather } from './weather';
@@ -94,6 +104,8 @@ export async function initWorld(){
   const kick = (v: number) => { if (!reducedMotion) fx.kick(v); };
   // the real sky over Penang (sky.ts)
   const sky = createSky(); scene.add(sky.group);
+  // the sea under the network and Penang's real clouds over it
+  const ocean = createOcean(sky.uniforms, phone); scene.add(ocean.group);
   const sunFar = new THREE.Vector3();
 
   /* ---- background: particle field + grid floor ------------------------------------------------- */
@@ -144,6 +156,19 @@ export async function initWorld(){
   const padMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: .9 });
   const pad = new THREE.Mesh(new THREE.TorusGeometry(1.5, .025, 8, 96), padMat); pad.rotation.x = Math.PI / 2; holo.add(pad);
   const pad2 = new THREE.Mesh(new THREE.TorusGeometry(1.2, .012, 8, 96), padMat); pad2.rotation.x = Math.PI / 2; pad2.position.y = .05; holo.add(pad2);
+  // my name on a cloth banner flying over the network like a flag planted after the breach, blowing in Penang's real wind;
+  // click it to tear it (banner.ts)
+  const banner = createBanner({ width: 10, height: 3.5, name: 'BASWARA HAFIZH MUTTAQIN', sub: 'CS · INTELLIGENT COMPUTING · USM PENANG', lime: cssVar('--lime') || '#c6ff3d', dark: true });
+  banner.group.position.set(0, 8.4, 0); banner.group.rotation.y = -.24; scene.add(banner.group);
+  penangWeather().then(x => { if (x) banner.setWind(x.wind, x.windDir); });
+  // when the song plays: a ring of equalizer bars stands up around the pad (and around the core), driven by the real audio
+  const EQN = music.bands.length, eqGeo = new THREE.BoxGeometry(.075, 1, .075).translate(0, .5, 0);
+  const eqMat = new THREE.MeshBasicMaterial({ toneMapped: false, transparent: true, opacity: .9 });
+  const eqRing = (r: number, parent: THREE.Object3D, y: number) => {
+    const m = new THREE.InstancedMesh(eqGeo, eqMat, EQN); m.position.y = y; m.frustumCulled = false; m.visible = false; parent.add(m);
+    return { m, r, h: new Float32Array(EQN) };
+  };
+  const eqRings = [eqRing(1.9, holo, 0), eqRing(2.6, scene, -1.1)];
 
   /* ---- my stack: logos orbiting the hologram on a tilted ring ------------------------------------------- */
   const stack = new THREE.Group(); stack.position.y = 2.2; stack.rotation.set(.3, 0, -.12); holo.add(stack);
@@ -332,6 +357,7 @@ export async function initWorld(){
     net.paint(P);
     fx.setTheme(dark);
     sky.paint(dark, P.bg);
+    ocean.paint(dark, P.bg, new THREE.Color(dark ? cssVar('--lime') : cssVar('--signal')));
     titles.paint(dark ? new THREE.Color(cssVar('--lime')) : P.ink.clone(), dark ? P.signal.clone().multiplyScalar(.35) : P.signal.clone(), dark);
     dayFog = !dark;
   };
@@ -347,6 +373,88 @@ export async function initWorld(){
   const mouse = new THREE.Vector2(9, 9), lean = { x: 0, y: 0 };
   addEventListener('pointermove', e => mouse.set(e.clientX / w * 2 - 1, -(e.clientY / h) * 2 + 1), { passive: true });
 
+  /* ---- drone mode (drone.ts): fly the network yourself; fly into a host to land on its section ---------------------- */
+  const drone = createDrone(Object.keys(HOSTS).map(id => ({ id, label: id === 'you' ? 'baswara' : id === 'targets' ? 'goals' : id, pos: () => V(...HOSTS[id]) })), {
+    floor: -10.5,
+    onDock: id => {
+      const z = zones.find(zz => zz.dataset.stage === (id === 'you' ? 'network' : id));
+      z?.scrollIntoView({ behavior: 'auto', block: 'start' });
+      net.pingBurst(id === 'you' ? 'progress' : id);
+    },
+    // the page camera picks up from wherever the drone was and glides home
+    onExit: () => { cam?.copy(camera.position); look?.copy(camera.position).add(camera.getWorldDirection(V()).multiplyScalar(6)); },
+  });
+  addEventListener('dronemode', () => (drone.active ? drone.stop() : drone.start(camera)));
+  /* ---- photo mode (photo.ts): freeze, frame the shot with an orbit camera, focus by clicking, save a poster ------------ */
+  const pcam = new THREE.PerspectiveCamera(42, 1, .1, 400);
+  let orbit: OrbitControls | null = null, photoT: number | null = null, lastT = 0, fxWasOn = true;
+  const focusables: THREE.Object3D[] = [], pray = new THREE.Raycaster();
+  const savePoster = async () => {
+    const pr = renderer.getPixelRatio(), big = Math.min(3, Math.max(2, pr * 1.5));
+    renderer.setPixelRatio(big); renderer.setSize(w, h, false); fx.setSize(w, h, big);
+    fx.render(lastT, 0);
+    const out = document.createElement('canvas'); out.width = renderer.domElement.width; out.height = renderer.domElement.height;
+    const g = out.getContext('2d')!; g.drawImage(renderer.domElement, 0, 0);
+    renderer.setPixelRatio(pr); renderer.setSize(w, h, false); fx.setSize(w, h, pr);
+    // a small caption, bottom left
+    const u = out.height / 900, when = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kuala_Lumpur' }).format(travelMs ?? Date.now());
+    g.fillStyle = cssVar('--lime') || '#c6ff3d'; g.fillRect(36 * u, out.height - 74 * u, 4 * u, 40 * u);
+    g.font = `600 ${20 * u}px ui-monospace, Menlo, Consolas, monospace`; g.fillStyle = '#ffffff'; g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 8 * u;
+    g.fillText('BASWARA.HM', 52 * u, out.height - 52 * u);
+    g.font = `${13 * u}px ui-monospace, Menlo, Consolas, monospace`; g.fillStyle = 'rgba(255,255,255,.75)';
+    g.fillText(`baswarahm.my.id · ${when} · Penang`, 52 * u, out.height - 32 * u);
+    const blob = await new Promise<Blob | null>(r => out.toBlob(r, 'image/png'));
+    if (!blob) throw new Error('could not encode the image');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `baswara-hm-${new Date().toISOString().slice(0, 10)}.png`;
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  };
+  const photo = createPhotoUI({
+    enter: () => {
+      if (drone.active) drone.stop();
+      pcam.position.copy(camera.position); pcam.quaternion.copy(camera.quaternion); pcam.aspect = w / h; pcam.updateProjectionMatrix();
+      orbit = new OrbitControls(pcam, canvas); orbit.enableDamping = true; orbit.dampingFactor = .08; orbit.maxDistance = 70; orbit.minDistance = 1.5;
+      orbit.target.copy(look ?? V()); orbit.update();
+      photoT = lastT; fxWasOn = fx.enabled; fx.setEnabled(true);
+      focusables.length = 0; scene.traverse(o => { if ((o as THREE.Mesh).isMesh && o.visible) focusables.push(o); });
+    },
+    exit: () => {
+      orbit?.dispose(); orbit = null; photoT = null; fx.setPhoto({ on: false }); fx.setEnabled(fxWasOn);
+      cam?.copy(camera.position); look?.copy(camera.position).add(camera.getWorldDirection(V()).multiplyScalar(6));
+    },
+    change: s => fx.setPhoto({ on: true, focus: s.focus, blur: s.blur, grade: s.grade }),
+    save: savePoster,
+  });
+  addEventListener('photomode', () => (photo.on ? photo.close() : photo.open()));
+  let pDown = { x: 0, y: 0 };
+  canvas.addEventListener('pointerdown', e => { pDown = { x: e.clientX, y: e.clientY }; });
+  canvas.addEventListener('click', e => {
+    if (!orbit || Math.hypot(e.clientX - pDown.x, e.clientY - pDown.y) > 5) return;
+    pray.setFromCamera(new THREE.Vector2(e.clientX / w * 2 - 1, -(e.clientY / h) * 2 + 1), camera);
+    const hitP = pray.intersectObjects(focusables, false)[0];
+    if (hitP) photo.focused(hitP.distance, e.clientX, e.clientY);
+  });
+  /* ---- panels melt into particles (melt.ts): leaving a section, its panel streams into its host; the next one assembles out of its own ---- */
+  const melt = createMelt(), meltState = new Map<number, 'shown' | 'gone'>();
+  const wrapOf = (n: number) => zones[n]?.querySelector<HTMLElement>('.wrap') ?? null;
+  const hostScreen = (n: number) => {
+    const hp = HOSTS[zones[n]?.dataset.stage ?? ''];
+    if (!hp) return { x: w * .7, y: h * .4 };
+    const s = V(...hp).project(camera);
+    return { x: clamp((s.x + 1) / 2, .03, .97) * w, y: clamp((1 - s.y) / 2, .03, .97) * h };
+  };
+  /* ---- defend the firewall (defend.ts): a mini-game in the network; the hosts are turrets ------------------------------- */
+  const defense = createDefense(scene, Object.keys(HOSTS).filter(id => id !== 'you').map(id => V(...HOSTS[id])), fx);
+  addEventListener('defend', () => {
+    if (defense.active) return defense.stop();
+    if (drone.active) drone.stop(); if (photo.on) photo.close();
+    defense.start(() => { cam?.copy(camera.position); look?.set(0, 0, 0); });
+  });
+  const gray = new THREE.Raycaster();
+  addEventListener('click', e => {
+    if (!defense.active || (e.target as Element).closest?.('button, a, .def-bar, .def-over, .deck')) return;
+    gray.setFromCamera(new THREE.Vector2(e.clientX / w * 2 - 1, -(e.clientY / h) * 2 + 1), camera);
+    defense.shoot(gray, V(0, 0, 0));
+  });
   /* ---- free-look: drag empty space (mouse) to look around; it springs back when you let go -------------------------- */
   const UI = '.b-win, .wrap > *, a, button, input, textarea, summary, details, label, dialog, .hud, .term-wrap, .tour, .minimap, .fx-pop, .boot';
   let overUi = true, drag: { x: number; y: number; moved: boolean } | null = null, dragged = false;
@@ -359,7 +467,7 @@ export async function initWorld(){
     if (drag.moved){ freeLook.ty = clamp(-dx / w * 2.6, -.8, .8); freeLook.tp = clamp(dy / h * 1.6, -.4, .4); }
   }, { passive: true });
   addEventListener('pointerdown', e => {
-    if (e.pointerType !== 'mouse' || e.button !== 0 || (e.target as Element).closest?.(UI)) return;
+    if (drone.active || photo.on || defense.active || e.pointerType !== 'mouse' || e.button !== 0 || (e.target as Element).closest?.(UI)) return;
     drag = { x: e.clientX, y: e.clientY, moved: false };
   });
   addEventListener('pointerup', () => {
@@ -372,11 +480,17 @@ export async function initWorld(){
   const HOST_INFO: Record<string, string> = { you: 'me, the core of it all', progress: 'degree progress', now: 'courses this semester', targets: 'goals board', projects: 'locked, coming soon', journey: 'experience & education', contact: 'say hi' };
   let hoverHost = '', hoverOther = '';
   addEventListener('click', e => {
-    if (dragged || !hoverHost || (e.target as Element).closest?.(UI)) return;
+    if (drone.active || photo.on || defense.active || dragged || !hoverHost || (e.target as Element).closest?.(UI)) return;
     if (hoverHost === 'projects') tryLock();
     zones.find(z => z.dataset.stage === hoverHost)?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
   });
-  const ray = new THREE.Raycaster(), wallPlane = new THREE.Plane(V(0, 0, 1), -(WALL_Z + DEPTH / 2)), hit = V();
+  // click the banner to tear it
+  addEventListener('click', e => {
+    if (drone.active || photo.on || defense.active || dragged || !banner.group.visible || (e.target as Element).closest?.(UI)) return;
+    bray.setFromCamera(new THREE.Vector2(e.clientX / w * 2 - 1, -(e.clientY / h) * 2 + 1), camera);
+    banner.tear(bray);
+  });
+  const bray = new THREE.Raycaster();  const ray = new THREE.Raycaster(), wallPlane = new THREE.Plane(V(0, 0, 1), -(WALL_Z + DEPTH / 2)), hit = V();
   const navLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('.hud-nav a, .m3d-list a'));
 
   /* ---- break the firewall yourself: click (or tap) the wall around the dossier --------------------------------- */
@@ -398,7 +512,7 @@ export async function initWorld(){
   };
   addEventListener(WORLD.ready, loadPhysics, { once: true });
   addEventListener('click', e => {
-    if (dragged || scrollY > h * .05) return;
+    if (drone.active || photo.on || defense.active || dragged || scrollY > h * .05) return;
     if ((e.target as Element).closest('.b-win, a, button, input, summary, label, .hud, .m3d')) return;
     const pt = new THREE.Vector2(e.clientX / w * 2 - 1, -(e.clientY / h) * 2 + 1);
     ray.setFromCamera(pt, camera);
@@ -727,9 +841,35 @@ export async function initWorld(){
   const tail = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(tailPos, 3)).setAttribute('color', new THREE.BufferAttribute(tailCol, 3)), tailMat);
   tail.frustumCulled = false; degRings.add(tail);
 
+  /* ---- the time machine: the degree rings, the semester pillars, HEAD on the journey rail and the sky go to that day ---- */
+  let travelMs: number | null = null, travelHead: number | null = null;
+  const applyDegree = (ms: number) => {
+    const dp = degreeProgress(ms);
+    dp.semesters.forEach((s, i) => {
+      if (plan[i]){ plan[i].state = s.state; plan[i].fill = s.fill; }
+      const pl = pillars[i];
+      if (pl){
+        pl.h = 2.4 * (s.state === 'now' ? Math.max(.08, s.fill) : 1); pl.m.material = s.state === 'future' ? ghost : lime;
+        pl.m.userData.tip = `Year ${Math.floor(i / 2) + 1}, semester ${i % 2 + 1} · ${s.state === 'now' ? `in progress, ${(s.fill * 100).toFixed(0)}%` : s.state === 'done' ? 'done' : 'ahead'}`;
+      }
+      if (ringLines[i]) ringLines[i].material = s.state === 'done' ? ringDone : ringGhost;
+    });
+    nowIdx = dp.current;
+    const R = 4.6 + nowIdx * 1.55, f = dp.semesters[nowIdx].fill;
+    if (!nowArc){ nowArc = new THREE.Line(ringArc(R, 0, 1), ringDone); degRings.add(nowArc); }
+    nowArc.geometry.dispose(); nowArc.geometry = ringArc(R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(.02, f));
+    nowArc.visible = dp.pct < 1;
+    courseList.forEach(c => { c.state = plan[c.sem]?.state ?? c.state; });
+    paintMore();
+  };
+  addEventListener(TIME_EVENT, e => {
+    travelMs = (e as CustomEvent<number | null>).detail;
+    applyDegree(travelMs ?? Date.now());
+    travelHead = travelMs === null ? null : journeyHeadAt(travelMs).frac;
+  });
   /* ---- live Penang weather: rain when it rains there, storms flash, the light follows Penang's clock ---------------- */
   let wx: Weather | null = null;
-  penangWeather().then(x => { wx = x; });
+  penangWeather().then(x => { wx = x; if (x) ocean.setWeather(x.cloud, x.wind, x.windDir); });
   const RAIN = phone ? 500 : 1400;
   const rainBase = new Float32Array(RAIN * 3), rainPos = new Float32Array(RAIN * 6);
   for (let n = 0; n < RAIN; n++){ rainBase[n * 3] = (rnd() - .5) * 46; rainBase[n * 3 + 1] = rnd() * 30; rainBase[n * 3 + 2] = (rnd() - .5) * 46; }
@@ -786,7 +926,8 @@ export async function initWorld(){
     requestAnimationFrame(frame);
     if (document.hidden || worldPaused) return;
     // reduced motion: the decorative spin and drift stand still; scrolling still moves the camera
-    const t = reducedMotion ? 0 : now / 1000, y = scrollY;
+    const t = photoT !== null && photo.state.freeze ? photoT : reducedMotion ? 0 : now / 1000, y = scrollY;
+    lastT = t;
     // easing by elapsed time, so a slow machine arrives as fast as a quick one
     const dt = Math.min(.1, prev ? (now - prev) / 1000 : .016); prev = now;
     lean.x += ((mouse.x > 5 ? 0 : mouse.x) - lean.x) * .05; lean.y += ((mouse.y > 5 ? 0 : mouse.y) - lean.y) * .05;
@@ -833,11 +974,20 @@ export async function initWorld(){
       if (HOSTS[stageNow] && !reducedMotion){ shock.position.fromArray(HOSTS[stageNow]); shock.visible = true; }
     }
     camera.lookAt(look!);
+    // the drone, when it's flying, has the camera
+    const flying = drone.update(dt, camera);
+    // photo mode: the orbit camera has it
+    const shooting = !!orbit;
+    if (orbit){ orbit.update(); camera.position.copy(pcam.position); camera.quaternion.copy(pcam.quaternion); }
+    // the game: a high camera slowly circling the core
+    const gaming = defense.active;
+    if (gaming){ const ga = now / 1000 * .05; camera.position.set(Math.sin(ga) * 25, 12.5, Math.cos(ga) * 25); camera.lookAt(0, 0, 0); }
+    defense.update(dt, now / 1000);
     // warp speed: how fast is the camera travelling?
     if (snapped) prevCam = null;
     const speed = prevCam ? camera.position.distanceTo(prevCam) / Math.max(dt, .001) : 0;
     prevCam = (prevCam ?? V()).copy(camera.position);
-    const wT = reducedMotion ? 0 : clamp((speed - 10) / 26);
+    const wT = reducedMotion || shooting || gaming ? 0 : clamp((speed - 10) / 26);
     warp += (wT - warp) * (1 - Math.exp(-dt * (wT > warp ? 7 : 2.5)));
     if (warp > .5) warpPeak = true;
     if (warpPeak && warp < .1){ warpPeak = false; flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go'); }
@@ -852,7 +1002,7 @@ export async function initWorld(){
       (r.material as THREE.MeshBasicMaterial).opacity = warp * (1 - d / 70) * .9;
     });
     streaks.visible = warp > .02; streakMat.opacity = warp * .85; streaks.scale.z = 1 + warp * 16;
-    const targetSide = portalOn ? sideOf(i) : sideOf(i) * (1 - k) + sideOf(next) * k;
+    const targetSide = flying || shooting || gaming ? 0 : portalOn ? sideOf(i) : sideOf(i) * (1 - k) + sideOf(next) * k;
     side = snapped ? targetSide : side + (targetSide - side) * ease;
     if (w >= 900) camera.setViewOffset(w, h, side * w * .25, 0, w, h);   // text on the left → scene shifts right, and back
     else camera.setViewOffset(w, h, 0, h * .2, w, h);   // phones: the object sits in the top half, above the panel
@@ -923,6 +1073,27 @@ export async function initWorld(){
     holoU.uGlitch.value = reducedMotion ? 0 : .08 + near * .9 + (Math.sin(t * 2.3) > .97 ? .6 : 0) + (rootOn ? .6 : 0);
     holo.rotation.y = lean.x * .35;
     pad.rotation.z = t * .6; pad2.rotation.z = -t * .9;
+    // the cloth banner flies over the network once the firewall is down
+    banner.group.visible = brk > .3 && !defense.active;
+    if (banner.group.visible) banner.update(dt, t, reducedMotion);
+    // the music: equalizer rings, the pad thumps on the beat, the network core breathes with the bass
+    const mOn = music.playing || eqRings[0].h[0] > .01;
+    net.setMusic(music.playing ? music.bass : 0, music.beat);
+    pad.scale.setScalar(1 + music.beat * .12); pad2.scale.setScalar(1 + music.beat * .2);
+    eqMat.color.copy(dayFog ? P.ink : P.signal).lerp(new THREE.Color(dayFog ? 0x000000 : 0xffffff), dayFog ? 0 : .15);
+    eqRings.forEach((ring, ri) => {
+      ring.m.visible = mOn && !reducedMotion && (ri === 0 ? holo.visible : net.group.visible);
+      if (!ring.m.visible) return;
+      for (let n = 0; n < EQN; n++){
+        // mirror the spectrum so the ring is symmetric, lows at the front
+        const b = music.bands[n < EQN / 2 ? n * 2 : (EQN - 1 - n) * 2] ?? 0;
+        ring.h[n] += ((music.playing ? b : 0) - ring.h[n]) * (b > ring.h[n] ? .5 : .12);
+        const a = n / EQN * Math.PI * 2 + (ri ? t * .2 : -t * .1), hh = .04 + ring.h[n] * (ri ? 2.6 : 1.8);
+        v.set(Math.sin(a) * ring.r, 0, Math.cos(a) * ring.r);
+        ring.m.setMatrixAt(n, m4.compose(v, q.setFromAxisAngle(up, a), sc.set(1, hh, 1)));
+      }
+      ring.m.instanceMatrix.needsUpdate = true;
+    });
     // the stack ring turns, shrinks away with the hologram, and names the logo under the cursor
     spin.rotation.y = reducedMotion ? 0 : t * .22;
     stack.scale.setScalar(Math.max(.001, 1 - brk * 1.2));
@@ -1113,7 +1284,7 @@ export async function initWorld(){
       cage.scale.setScalar(1 + cj); cage2.scale.setScalar(1 - cj * .6);
     }
     alertLine.opacity = .6 + Math.sin(t * 9) * .2 * (Math.sin(t * 1.3) > .6 ? 1 : 0) + .2;
-    jHeadS += (jHead - jHeadS) * .12;
+    jHeadS += ((travelHead ?? jHead) - jHeadS) * .12;
     globe.rotation.y = .55 + Math.sin(t * .22) * .45;
     flyer.position.set(0, RY(0) + jHeadS * (RY(graph.length - 1) - RY(0)), 0); flyer.rotation.set(t * 2, t * 3, 0);
     bCurves.forEach(b => b.m.position.copy(b.c.getPoint((t * .16 + b.o) % 1)));
@@ -1134,7 +1305,15 @@ export async function initWorld(){
       if (vis) el.style.transform = `translate(${((v.x + 1) / 2 * w).toFixed(1)}px, ${((1 - v.y) / 2 * h).toFixed(1)}px)`;
     });
 
-    // the nav marks the section you're in
+    // panels melt / assemble
+    if (reducedMotion || flying || shooting || gaming){
+      if (meltState.size){ meltState.forEach((_, n) => wrapOf(n) && melt.show(wrapOf(n)!)); meltState.clear(); }
+    } else {
+      const wi = wrapOf(i), wn = next !== i ? wrapOf(next) : null, si = meltState.get(i) ?? 'shown';
+      if (wi && k > .14 && si === 'shown'){ melt.leave(wi, hostScreen(i)); meltState.set(i, 'gone'); }
+      else if (wi && k < .1 && si === 'gone'){ melt.form(wi, hostScreen(i)); meltState.set(i, 'shown'); }
+      if (wn && k > .14 && (meltState.get(next) ?? 'shown') === 'shown'){ melt.hide(wn); meltState.set(next, 'gone'); }
+    }    // the nav marks the section you're in
     const cur = zones[i]?.id ?? '';
     if (cur !== lastActive){
       lastActive = cur;
@@ -1161,7 +1340,8 @@ export async function initWorld(){
     ghostTrailMat.blending = dayFog ? THREE.NormalBlending : THREE.AdditiveBlending;
     titles.update(arrived, camera, look!, now / 1000, dt, h * renderer.getPixelRatio() * .045, reducedMotion);
     // the sky follows the camera; when the sun is on screen it throws god rays
-    sky.update(camera, Date.now());
+    sky.update(camera, travelMs ?? Date.now());
+    ocean.update(now / 1000, camera, reducedMotion);
     sunFar.copy(camera.position).addScaledVector(sky.sunDir, 150).project(camera);
     const sunUp = Math.sin(sky.sun.alt);
     if (sunUp > -.04 && sunFar.z < 1 && Math.abs(sunFar.x) < 1.3 && Math.abs(sunFar.y) < 1.3)

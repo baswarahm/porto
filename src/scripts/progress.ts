@@ -5,15 +5,19 @@
 import { $, reducedMotion } from './env';
 import { degreeProgress, textBar } from '../lib/degree';
 import { curriculum } from '../data/courses';
+import { TIME_EVENT } from './timemachine';
 
 /* ---- degree track: live values + clickable semesters ---------------------- */
+// renders for today, and again for any day the time machine travels to
 export function initProgress(map: { open: (code: string) => void; focusSem: (i: number) => void }){
-  const p = degreeProgress();
+  let p = degreeProgress();
   const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('#semTrack .sem'));
   const detail = $('#semDetail');
+  const gauge = $('.gauge');
+  const pctEl = gauge?.querySelector<HTMLElement>('[data-gauge-pct]');
 
   // a semester shows its courses; each one jumps to its tile on the course map
-  const select = (btn: HTMLButtonElement) => {
+  const select = (btn: HTMLButtonElement, focusMap = true) => {
     buttons.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
     const i = +btn.dataset.sem!, s = p.semesters[i];
     const state = s.state === 'done' ? 'done' : s.state === 'now' ? `in progress · ${Math.round(s.fill * 100)}%` : 'planned';
@@ -26,21 +30,49 @@ export function initProgress(map: { open: (code: string) => void; focusSem: (i: 
       b.addEventListener('click', () => map.open(c.code));
       list.append(b);
     }
-    map.focusSem(i);
+    if (focusMap) map.focusSem(i);
   };
+  buttons.forEach(el => el.addEventListener('click', () => select(el)));
 
-  buttons.forEach((el, i) => {
-    const s = p.semesters[i];
-    el.classList.remove('done', 'now', 'future');
-    el.classList.add(s.state);
-    el.querySelector('.lbl')!.textContent = s.state === 'now' ? '● now' : `sem ${i + 1}`;
-    el.querySelector<HTMLElement>('.fill')!.style.width = (s.fill * 100).toFixed(1) + '%';
-    el.addEventListener('click', () => select(el));
-  });
-  if (buttons[p.current]) select(buttons[p.current]);
+  const render = (ms?: number, first = false) => {
+    p = degreeProgress(ms);
+    const setState = (el: Element, st: string) => { el.classList.remove('done', 'now', 'future'); el.classList.add(st); };
+    buttons.forEach((el, i) => {
+      const s = p.semesters[i]; setState(el, s.state);
+      el.querySelector('.lbl')!.textContent = s.state === 'now' ? '● now' : `sem ${i + 1}`;
+      el.querySelector<HTMLElement>('.fill')!.style.width = (s.fill * 100).toFixed(1) + '%';
+    });
+    if (buttons[p.current]) select(buttons[p.current], first);
+    // the gauge: segment states, fill lengths, the glints, the ticks and the bead on the end of this semester
+    gauge?.querySelectorAll<SVGElement>('.seg').forEach((c, i) => setState(c, p.semesters[i].state));
+    gauge?.querySelectorAll<SVGElement>('.tick').forEach((c, i) => setState(c, p.semesters[i].state));
+    gauge?.querySelectorAll<SVGElement>('.seg-fill, .seg-glint').forEach(c => {
+      const s = p.semesters[Number(c.dataset.seg ?? c.dataset.glint)], len = 41 * s.fill;
+      c.style.setProperty('--len', len.toFixed(2));
+      if (c.classList.contains('seg-glint')) c.style.display = len > 2 ? '' : 'none';
+    });
+    const tip = gauge?.querySelector<SVGGElement>('.seg-tip');
+    if (tip){
+      const s = p.semesters[p.current], a = (p.current * 45 + 2 + 41 * s.fill) * Math.PI / 180;
+      tip.querySelectorAll('circle').forEach(c => { c.setAttribute('cx', (100 + 82 * Math.cos(a)).toFixed(2)); c.setAttribute('cy', (100 + 82 * Math.sin(a)).toFixed(2)); });
+      tip.style.display = p.pct >= 1 ? 'none' : '';
+    }
+    const em = gauge?.querySelector('figcaption em'); if (em) em.textContent = p.semesters[p.current].label;
+    const pct = (p.pct * 100).toFixed(1) + '%';
+    if (pctEl && !first) pctEl.textContent = pct;
+    const bar = $('[data-degree-bar]');
+    if (bar) bar.innerHTML = `<span class="mono">${textBar(p.pct)}</span> <b>${pct}</b>`;
+    const fact = $('[data-degree-pct]');
+    if (fact) fact.textContent = `${pct} done`;
+    const sem = $('[data-sem-label]');
+    if (sem) sem.textContent = `year ${p.year}, semester ${p.sem}`;
+    document.querySelectorAll<HTMLElement>('[data-degree-fill]').forEach(el => { el.style.width = pct; });
+    document.querySelectorAll<HTMLElement>('[data-degree-pct-short]').forEach(el => { el.textContent = pct; });
+  };
+  render(undefined, true);
+  addEventListener(TIME_EVENT, e => render((e as CustomEvent<number | null>).detail ?? undefined));
 
-  // the gauge: pointing at a semester lights its segment here and its ring in the 3D world
-  const gauge = $('.gauge');
+  // pointing at a semester lights its segment here and its ring in the 3D world
   const hot = (i: number) => {
     gauge?.querySelectorAll<SVGElement>('[data-seg]').forEach(c => c.classList.toggle('hot', Number(c.dataset.seg) === i));
     dispatchEvent(new CustomEvent('semfocus', { detail: i }));
@@ -50,38 +82,28 @@ export function initProgress(map: { open: (code: string) => void; focusSem: (i: 
     el.addEventListener('focus', () => hot(i)); el.addEventListener('blur', () => hot(-1));
   });
   // ...and its percentage counts up as the rings fill in
-  const pctEl = gauge?.querySelector<HTMLElement>('[data-gauge-pct]');
-  if (gauge && pctEl && !reducedMotion){
+  if (gauge && pctEl){
     const goal = p.pct * 100;
-    const run = () => {
-      const t0 = performance.now();
-      const step = (n: number) => {
-        const u = Math.min(1, Math.max(0, (n - t0 - 300) / 1500)), e = 1 - Math.pow(1 - u, 4);
-        pctEl.textContent = (goal * e).toFixed(1) + '%';
-        if (u < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    };
-    if (gauge.classList.contains('on3d')) run();
+    if (reducedMotion) pctEl.textContent = goal.toFixed(1) + '%';
     else {
-      pctEl.textContent = '0.0%';
-      const mo = new MutationObserver(() => { if (gauge.classList.contains('on3d')){ mo.disconnect(); run(); } });
-      mo.observe(gauge, { attributes: true, attributeFilter: ['class'] });
+      const run = () => {
+        const t0 = performance.now();
+        const step = (n: number) => {
+          const u = Math.min(1, Math.max(0, (n - t0 - 300) / 1500)), e = 1 - Math.pow(1 - u, 4);
+          pctEl.textContent = (goal * e).toFixed(1) + '%';
+          if (u < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      };
+      if (gauge.classList.contains('on3d')) run();
+      else {
+        pctEl.textContent = '0.0%';
+        const mo = new MutationObserver(() => { if (gauge.classList.contains('on3d')){ mo.disconnect(); run(); } });
+        mo.observe(gauge, { attributes: true, attributeFilter: ['class'] });
+      }
     }
   }
-
-
-  const pct = (p.pct * 100).toFixed(1) + '%';
-  const bar = $('[data-degree-bar]');
-  if (bar) bar.innerHTML = `<span class="mono">${textBar(p.pct)}</span> <b>${pct}</b>`;
-  const fact = $('[data-degree-pct]');
-  if (fact) fact.textContent = `${pct} done`;
-  const sem = $('[data-sem-label]');
-  if (sem) sem.textContent = `year ${p.year}, semester ${p.sem}`;
-  document.querySelectorAll<HTMLElement>('[data-degree-fill]').forEach(el => { el.style.width = pct; });
-  document.querySelectorAll<HTMLElement>('[data-degree-pct-short]').forEach(el => { el.textContent = pct; });
 }
-
 /* ---- git log -------------------------------------------------------------- */
 export function initGitLog(){
   const log = $('#gitlog'), tools = $('#glTools');

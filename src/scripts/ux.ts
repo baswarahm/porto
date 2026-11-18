@@ -126,7 +126,10 @@ export function initUx(){
     <p class="fx-meter" aria-live="off"><span>render</span><b data-fps>-- fps</b><i><em data-fpsbar></em></i></p>
     <div class="fx-row"><span>motion</span><div role="group" aria-label="Motion"><button type="button" class="chip" data-m="full">full</button><button type="button" class="chip" data-m="reduced">reduced</button></div></div>
     <div class="fx-row"><span>panels</span><div role="group" aria-label="Panels"><button type="button" class="chip" data-p="glass">glass</button><button type="button" class="chip" data-p="solid">solid</button></div></div>
-    <div class="fx-row"><span>tour</span><button type="button" class="chip" data-tour>replay</button></div>`;
+    <div class="fx-row"><span>tour</span><button type="button" class="chip" data-tour>replay</button></div>
+    ${document.getElementById('world') ? `<div class="fx-row fx-modes"><span>modes</span><div role="group" aria-label="Modes">
+      <button type="button" class="chip" data-mode="timemachine">time machine</button><button type="button" class="chip" data-mode="dronemode">fly a drone</button>
+      <button type="button" class="chip" data-mode="photomode">photo mode</button><button type="button" class="chip" data-mode="defend">defend the firewall</button></div></div>` : ''}`;
   document.body.append(pop);
   // panels: see-through glass (default) or solid, for easier reading over the 3D world
   const setPanels = (v: string) => { html.classList.toggle('solid-panels', v === 'solid'); store.set('bhm-panels', v); sync(); };
@@ -156,6 +159,7 @@ export function initUx(){
   });
   pop.querySelectorAll<HTMLButtonElement>('[data-m]').forEach(b => b.addEventListener('click', () => setReducedMotion(b.dataset.m === 'reduced')));
   pop.querySelector('[data-tour]')!.addEventListener('click', () => { closePop(); window.scrollTo({ top: 0, behavior: 'auto' }); openTour(); });
+  pop.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach(b => b.addEventListener('click', () => { closePop(); emit(b.dataset.mode!); }));
   let opener: HTMLElement | null = null;
   const closePop = () => { if (pop.hidden) return; pop.hidden = true; document.querySelectorAll('[data-fx]').forEach(b => b.setAttribute('aria-expanded', 'false')); opener?.focus({ preventScroll: true }); };
   document.querySelectorAll<HTMLElement>('[data-fx]').forEach(b => b.addEventListener('click', e => {

@@ -294,7 +294,10 @@ export async function createNetwork(){
     if (camera){ core.updateWorldMatrix(true, false); coreU.uCam.value.copy(camera.position); core.worldToLocal(coreU.uCam.value); }
     if (active !== lastActive){ lastActive = active; morphKick = 1; }
     morphKick = Math.max(0, morphKick - .012);
-    morph += ((hovered === 'you' ? 1 : 0) + morphKick * .8 - morph) * .06;
+    morph += ((hovered === 'you' ? 1 : 0) + morphKick * .8 + mBass * 1.1 - morph) * (mBass > morph ? .3 : .06);
+    // the beat kicks every host's spring
+    if (mBeat > .95 && !beatHeld){ beatHeld = true; hosts.forEach(h => { h.sv += 3.2; }); }
+    if (mBeat < .5) beatHeld = false;
     coreU.uTime.value = t; coreU.uMorph.value = morph;
     if (!P) return;
     const now = performance.now();
@@ -435,6 +438,9 @@ export async function createNetwork(){
   const setCalm = (on: boolean) => { packets.visible = !on; streams.visible = !on; };
   /** the canvas height in device pixels, so packets keep their size on any screen */
   const setViewHeight = (px: number) => { streamU.uViewH.value = px; };
+  /** the song playing on the page: bass makes the core swell, each beat bumps the hosts */
+  let mBass = 0, mBeat = 0, beatHeld = false;
+  const setMusic = (bass: number, beat: number) => { mBass = bass; mBeat = beat; };
 
-  return { group, paint, update, ping, pingBurst, shatter, hover, hitTargets, minorMesh, setCalm, arrive, deny, setViewHeight };
+  return { group, paint, update, ping, pingBurst, shatter, hover, hitTargets, minorMesh, setCalm, arrive, deny, setViewHeight, setMusic };
 }

@@ -109,6 +109,8 @@ export function createSky(){
 
   return {
     group,
+    /** shared with the ocean, so the water reflects this exact sky */
+    uniforms: u,
     get sun(){ return sun; }, get moon(){ return moon; }, sunDir,
     paint(isDark: boolean, bg: THREE.Color){
       dark = isDark; u.uDark.value = isDark ? 1 : 0; u.uBg.value.copy(bg);
@@ -117,7 +119,7 @@ export function createSky(){
     },
     update(camera: THREE.Camera, t: number){
       group.position.copy(camera.position);
-      if (t - last > 20000){ last = t; recompute(t); }
+      if (Math.abs(t - last) > 20000){ last = t; recompute(t); }   // also jumps when the time machine moves
       // stars come out after dusk (and barely in day mode)
       starMat.opacity = (dark ? .85 : .25) * (1 - THREE.MathUtils.smoothstep(Math.sin(sun.alt), -.2, .02));
       stars.visible = starMat.opacity > .01;
